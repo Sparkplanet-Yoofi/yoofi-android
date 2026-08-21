@@ -1,0 +1,56 @@
+[versions]
+agp = "9.0.1"
+coreKtx = "1.10.1"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+# lifecycle 2.11.0 要求 compileSdk >= 37 且 AGP >= 9.1.0，与当前 AGP 9.0.1 / compileSdk 36 不兼容，
+# 因此锁定在兼容 compileSdk 36 的 2.9.4
+lifecycleRuntimeKtx = "2.9.4"
+activityCompose = "1.8.0"
+# AGP 9.0 对 KGP 2.2.10 有运行时依赖（内置 Kotlin 支持），低于此版本会被自动抬到 2.2.10。
+# 这里的 kotlin 版本只用于 compose 编译器插件，必须与内置 KGP 对齐，
+# 否则 KSP 会因版本错配拒绝工作。停留在 2.0.21 则 Hilt/Room 无法接入。
+kotlin = "2.2.10"
+# 2025 年内最后一档稳定 BOM（2025.12.01）。
+# 不要升到 2026.08.00：对应 Compose 1.12，要求 compileSdk 37 且 AGP ≥ 9.2.0，
+# 会与当前 AGP 9.0.1 / compileSdk 36 冲突（同类问题见 lifecycle 2.11.0 踩坑）。
+composeBom = "2025.12.01"
+# KSP 版本号在 2.3.0 之前是 <kotlin 版本>-<ksp 版本> 格式，
+# 必须与 AGP 内置的 KGP 2.2.10 匹配，用 2.2.20-x 会报
+# "KSP is not compatible with AGP's built-in Kotlin"
+ksp = "2.2.10-2.0.2"
+# Hilt 2.58 是最后支持 AGP 8 的版本；2.59 起改为要求 AGP 9，两者无重叠区间。
+# 本工程在 AGP 9.0.1，因此只能用 2.59+
+hilt = "2.59"
+# 架构守卫（兼容性验证用）
+dependencyAnalysis = "3.18.0"
+moduleGraphAssert = "2.9.1"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+# 不声明 org.jetbrains.kotlin.android：AGP 9 内置 Kotlin，且该插件与新 DSL 不兼容
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
+module-graph-assert = { id = "com.jraska.module.graph.assertion", version.ref = "moduleGraphAssert" }
+
