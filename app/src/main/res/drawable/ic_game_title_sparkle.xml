@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 982:14778：设计框 7.5×8.4，描边溢出后叶子尺寸 10.5×11.4 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="10.5dp"
+    android:height="11.4dp"
+    android:viewportWidth="10.5002"
+    android:viewportHeight="11.4003">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M1.50023,6.30027C2.10023,6.40027 3.60023,6.90027 4.20023,9.60027"
+        android:strokeWidth="3"
+        android:strokeColor="#B3A1FD"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M3.00023,1.50027C4.33357,1.75482 9.00023,3.90027 9.00023,9.90027"
+        android:strokeWidth="3"
+        android:strokeColor="#B3A1FD"
+        android:strokeLineCap="round" />
+</vector>
