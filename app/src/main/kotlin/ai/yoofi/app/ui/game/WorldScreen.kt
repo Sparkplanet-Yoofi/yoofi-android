@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -88,22 +87,26 @@ fun GameHomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 12.dp, bottom = 120.dp),
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 12.dp, bottom = 120.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 GameSectionHeader(
                     title = stringResource(R.string.section_played),
                     onMoreClick = onPlayedMore,
-                    modifier = Modifier.width(350.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                PlayedCoverFlow(onItemClick = onPlayedItemClick)
+                PlayedCoverFlow(
+                    onItemClick = onPlayedItemClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 GameSectionHeader(
                     title = stringResource(R.string.section_stories),
                     onMoreClick = onStoriesMore,
-                    modifier = Modifier.width(350.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                StoryCollectionRow()
-                StoryCollectionRow()
+                StoryCollectionRow(modifier = Modifier.fillMaxWidth())
+                StoryCollectionRow(modifier = Modifier.fillMaxWidth())
             }
         }
     }
@@ -135,7 +138,6 @@ internal fun GameSectionHeader(
                 .clickable(role = Role.Button, onClick = onMoreClick),
             contentScale = ContentScale.Fit,
         )
-        Spacer(Modifier.width(10.dp))
     }
 }
 

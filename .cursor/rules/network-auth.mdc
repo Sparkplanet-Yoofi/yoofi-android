@@ -1,0 +1,26 @@
+---
+description: 网络层环境切换与登录会话；含输入框页不要在这里改 IME
+globs: app/src/main/kotlin/ai/yoofi/app/{core/network,data/auth,di,domain/auth}/**/*.kt
+alwaysApply: false
+---
+
+# 网络与登录会话
+
+新接口分层见 `.cursor/rules/remote-datasource.mdc`。
+
+## 环境
+
+- URL 只写在 `AppEnvironment`（`ai.yoofi.app.core.network`）
+- debug → `staging`（`http://test-cn.your-api-server.com/`）
+- release → `production`（`http://cn.your-api-server.com/`）
+- 覆盖：`./gradlew assembleDebug -Pyoofi.api.env=production`
+- 禁止在业务代码里写死 Base URL；禁止改 Manifest `windowSoftInputMode` 来切环境
+
+## 登录
+
+- `POST /customer/auth/login`：`AuthApi` 只给 `RetrofitAuthRemoteDataSource`
+- ViewModel 只调 `VerifyEmailCodeUseCase`；Repository 不 catch HTTP
+- 成功后 `UserSessionStore` 保存 `AuthSession`（含 User 与 token）
+- 读当前用户：`GetCurrentUserUseCase`，不要直接碰 Retrofit
+- 导航：`isNewUser == true` → 资料填写；否则进首页（仍在 `MainActivity`）
+- `profileCompleted` 一并写入会话，不要和 `isNewUser` 混用语义

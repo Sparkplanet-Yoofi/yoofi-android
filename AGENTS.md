@@ -20,8 +20,9 @@ UGC-AI 互动故事游戏客户端，Google Play 海外发行，严格 GDPR 合�
 **当前是单模块脚手架**，尚未按目标架构拆分：
 
 - 只有 `:app` 一个模块，源码在 `app/src/main/kotlin/`（**不是** `src/main/java/`，新文件请放 kotlin 目录）
-- 依赖仅有 Compose BOM + core-ktx + lifecycle + activity-compose
-- **尚未引入** Hilt、Room、Retrofit、kotlinx.serialization、Navigation
+- 依赖：Compose BOM + core-ktx + lifecycle + activity-compose + **Hilt** + **OkHttp/Retrofit** + **kotlinx.serialization**
+- 网络新接口走 `RemoteDataSource` + `ApiCaller`（见 `.cursor/rules/remote-datasource.mdc`）
+- **尚未引入** Room、Navigation
 - 目标架构（`core:*` + `feature:x:api/impl`）见 `.ai/architecure.md` 第三章，按其第十二章落地清单推进
 
 引入新依赖前先在 `gradle/libs.versions.toml` 声明版本，禁止在 build 脚本里硬编码版本号。

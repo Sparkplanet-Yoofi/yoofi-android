@@ -1,8 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+}
+
+// debug 默认测试环境，release 默认线上。本地可覆盖：
+//   ./gradlew assembleDebug -Pyoofi.api.env=production
+fun resolveApiEnv(default: String): String {
+    val override = project.findProperty("yoofi.api.env") as String?
+    return when (override) {
+        "staging", "production" -> override
+        else -> default
+    }
 }
 
 // release 签名凭据全部来自环境变量，由 Jenkins Credentials 在构建时注入，
@@ -52,6 +63,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "API_ENV",
+                "\"${resolveApiEnv(default = "staging")}\"",
+            )
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -63,6 +81,11 @@ android {
             if (hasReleaseKeystore) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            buildConfigField(
+                "String",
+                "API_ENV",
+                "\"${resolveApiEnv(default = "production")}\"",
+            )
         }
     }
     compileOptions {
@@ -71,6 +94,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -89,6 +113,11 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

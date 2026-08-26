@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     // Hilt：依赖注入，2.59+ 才支持 AGP 9
     alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
     // 架构守卫：依赖声明卫生检查（./gradlew buildHealth）
     alias(libs.plugins.dependency.analysis)
     // 架构守卫：模块依赖图断言（./gradlew assertModuleGraph）

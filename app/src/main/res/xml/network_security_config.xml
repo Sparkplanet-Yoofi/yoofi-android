@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 当前测试/线上 Base URL 均为 http，仅对这些 host 放行明文。 -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">test-cn.your-api-server.com</domain>
+        <domain includeSubdomains="true">cn.your-api-server.com</domain>
+    </domain-config>
+</network-security-config>

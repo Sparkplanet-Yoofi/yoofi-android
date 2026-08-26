@@ -1,6 +1,8 @@
 package ai.yoofi.app.domain.auth
 
-/** 校验邮箱验证码，并带回是否已完善资料。 */
+/**
+ * 校验邮箱验证码并登录；成功后会话由 Repository 写入内存
+ */
 class VerifyEmailCodeUseCase(
     private val authRepository: AuthRepository,
 ) {

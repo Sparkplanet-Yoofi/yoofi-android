@@ -135,7 +135,7 @@ internal fun AuthNextButton(
     }
     Box(
         modifier = modifier
-            .width(AuthPageWidth)
+            .fillMaxWidth()
             .height(46.dp)
             .clip(shape)
             .then(background)

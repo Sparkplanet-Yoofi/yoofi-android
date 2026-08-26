@@ -12,10 +12,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -76,44 +76,52 @@ internal fun EmailSignUpScreen(
         AuthBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             AuthSignUpHeader(onBack = onBack)
-            Text(
-                text = stringResource(R.string.auth_enter_email),
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 20.dp, top = 28.dp),
-            )
-            Text(
-                text = stringResource(R.string.auth_email_subtitle),
-                color = Color.White.copy(alpha = 0.5f),
-                fontSize = 12.sp,
+            // 左右各 20，对齐 Figma `1761:10014`；宽屏铺满，避免只 pad start 偏左
+            Column(
                 modifier = Modifier
-                    .padding(start = 20.dp, top = 8.dp)
-                    .width(AuthPageWidth),
-            )
-            EmailField(
-                value = email,
-                onValueChange = onEmailChange,
-                showError = showError,
-                focused = focused,
-                onFocusChange = { focused = it },
-                onNext = {
-                    if (valid) {
-                        dismissIme(focusManager, keyboard)
-                        onNext()
-                    }
-                },
-                modifier = Modifier
-                    .padding(start = 20.dp, top = 42.dp)
-                    .focusRequester(focusRequester),
-            )
-            if (showError) {
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+            ) {
                 Text(
-                    text = stringResource(R.string.auth_email_error),
-                    color = YoofiAuthError,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 20.dp, top = 8.dp),
+                    text = stringResource(R.string.auth_enter_email),
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 28.dp),
                 )
+                Text(
+                    text = stringResource(R.string.auth_email_subtitle),
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
+                )
+                EmailField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    showError = showError,
+                    focused = focused,
+                    onFocusChange = { focused = it },
+                    onNext = {
+                        if (valid) {
+                            dismissIme(focusManager, keyboard)
+                            onNext()
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(top = 42.dp)
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                )
+                if (showError) {
+                    Text(
+                        text = stringResource(R.string.auth_email_error),
+                        color = YoofiAuthError,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
             }
         }
         AuthNextButton(
@@ -121,6 +129,8 @@ internal fun EmailSignUpScreen(
             onClick = onNext,
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .offset(y = 438.dp),
         )
     }
@@ -154,7 +164,7 @@ private fun EmailField(
         ),
         keyboardActions = KeyboardActions(onNext = { onNext() }),
         modifier = modifier
-            .width(AuthPageWidth)
+            .fillMaxWidth()
             .height(46.dp)
             .onFocusChanged { onFocusChange(it.isFocused) },
         decorationBox = { inner ->

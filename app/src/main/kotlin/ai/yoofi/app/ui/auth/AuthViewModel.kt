@@ -59,10 +59,10 @@ internal class AuthViewModel @Inject constructor(
                 }
                 is VerifyEmailCodeResult.Success -> {
                     _uiState.update { it.copy(isVerifying = false) }
-                    val effect = if (result.hasUserProfile) {
-                        AuthSideEffect.OpenHome
-                    } else {
+                    val effect = if (result.isNewUser) {
                         AuthSideEffect.OpenProfileSetup
+                    } else {
+                        AuthSideEffect.OpenHome
                     }
                     _sideEffect.send(effect)
                 }

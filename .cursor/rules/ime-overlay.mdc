@@ -1,0 +1,26 @@
+---
+description: Compose 含输入框的全屏页默认键盘覆盖，布局不顶起，点非输入区收起
+globs: app/src/main/kotlin/ai/yoofi/app/ui/**/*.kt
+alwaysApply: false
+---
+
+# 键盘覆盖（IME Overlay）
+
+含输入框的全屏页，键盘弹出后 **UI 位置不变、不被顶起**；点击非输入框组件收起键盘。
+
+## 必须用的 API
+
+包：`ai.yoofi.app.ui.ime`
+
+1. 页面根用 `ImeOverlayBox { ... }`（内部已含 `ADJUST_NOTHING` + 点空白收键盘）
+2. 按钮 / 芯片 / 返回 / Skip / 重发 用 `Modifier.clickableDismissingIme { }`
+3. IME Action（Done/Next）里调 `dismissIme(focusManager, keyboard)`
+4. **禁止**对根布局或主按钮写 `imePadding()`，禁止按 `WindowInsets.ime` 把按钮改成 `BottomCenter`
+
+参考实现：`EmailSignUpScreen`、`VerificationCodeScreen`、`ProfileSetupScreen`。
+
+## 例外
+
+仅当产品**书面明确**要求「主按钮贴着键盘上沿」时才用 `imePadding()`，且 **不要**叠 `ImeOverlayBox` / `ImeOverlayEffect`。登录注册三页均已覆盖，当前无例外页。
+
+不要改 `AndroidManifest` 的 `windowSoftInputMode` 来实现单页行为。

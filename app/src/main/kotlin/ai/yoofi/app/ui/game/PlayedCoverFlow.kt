@@ -11,12 +11,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,14 +68,13 @@ data class PlayedCover(
     @param:StringRes val titleRes: Int,
 )
 
-private val CoverFlowWidth = 350.dp
 private val CoverFlowHeight = 182.dp
 private val CardWidth = 138.dp
 private val CardHeight = 182.dp
 private val CardRadius = 20.dp
-/** Figma 中心卡左缘 106，视觉中心 175 */
-private val FocusedCenterX = 175.dp
-/** 邻卡相对中心的位移 / 缩放，对齐 `982:14810` */
+/**
+ * 邻卡相对中心的位移 / 缩放，对齐 `982:14810`
+ */
 private val SideShift = 64.66.dp
 private val FarShift = 122.08.dp
 private val ExitShift = 179.5.dp
@@ -112,7 +112,7 @@ fun PlayedCoverFlow(
     onItemClick: (PlayedCover) -> Unit = {},
 ) {
     if (items.isEmpty()) {
-        Box(modifier.width(CoverFlowWidth).height(CoverFlowHeight))
+        Box(modifier.fillMaxWidth().height(CoverFlowHeight))
         return
     }
     val lastIndex = items.lastIndex
@@ -155,60 +155,67 @@ fun PlayedCoverFlow(
         }
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
-            .width(CoverFlowWidth)
-            .height(CoverFlowHeight)
-            .coverFlowGestures(
-                lastIndex = lastIndex,
-                focused = { focus },
-                onDragStart = { cancelMotion() },
-                onDragTo = { value -> focus = value },
-                onSettle = { velocityPx, stepPx ->
-                    val target = snapTarget(
-                        current = focus,
-                        velocityPx = velocityPx,
-                        stepPx = stepPx,
-                        lastIndex = lastIndex,
-                    )
-                    animateFocusTo(
-                        target = target.toFloat(),
-                        velocity = -velocityPx / stepPx,
-                    )
-                },
-                onTapIndex = { index -> openOrFocus(index) },
-            ),
+            .fillMaxWidth()
+            .height(CoverFlowHeight),
     ) {
-        val drawOrder = items.indices
-            .filter { abs(it - focus) < MaxVisibleDelta }
-            .sortedByDescending { abs(it - focus) }
-        drawOrder.forEach { index ->
-            val item = items[index]
-            val delta = index - focus
-            val slot = coverSlot(delta)
-            val title = stringResource(item.titleRes)
-            PlayedCard(
-                coverRes = item.coverRes,
-                title = title,
-                scale = slot.scale,
-                elevation = slot.elevation,
-                alpha = slot.alpha,
-                modifier = Modifier
-                    .zIndex(MaxVisibleDelta - abs(delta))
-                    .offset {
-                        val x = (
-                            slot.centerX.toPx() - CardWidth.toPx() / 2f
-                            ).roundToInt()
-                        IntOffset(x, 0)
-                    }
-                    .semantics {
-                        contentDescription = title
-                        onClick {
-                            openOrFocus(index)
-                            true
-                        }
+        val focusedCenterX = maxWidth / 2
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .coverFlowGestures(
+                    lastIndex = lastIndex,
+                    focused = { focus },
+                    focusedCenterX = focusedCenterX,
+                    onDragStart = { cancelMotion() },
+                    onDragTo = { value -> focus = value },
+                    onSettle = { velocityPx, stepPx ->
+                        val target = snapTarget(
+                            current = focus,
+                            velocityPx = velocityPx,
+                            stepPx = stepPx,
+                            lastIndex = lastIndex,
+                        )
+                        animateFocusTo(
+                            target = target.toFloat(),
+                            velocity = -velocityPx / stepPx,
+                        )
                     },
-            )
+                    onTapIndex = { index -> openOrFocus(index) },
+                ),
+        ) {
+            val drawOrder = items.indices
+                .filter { abs(it - focus) < MaxVisibleDelta }
+                .sortedByDescending { abs(it - focus) }
+            drawOrder.forEach { index ->
+                val item = items[index]
+                val delta = index - focus
+                val slot = coverSlot(delta = delta, focusedCenterX = focusedCenterX)
+                val title = stringResource(item.titleRes)
+                PlayedCard(
+                    coverRes = item.coverRes,
+                    title = title,
+                    scale = slot.scale,
+                    elevation = slot.elevation,
+                    alpha = slot.alpha,
+                    modifier = Modifier
+                        .zIndex(MaxVisibleDelta - abs(delta))
+                        .offset {
+                            val x = (
+                                slot.centerX.toPx() - CardWidth.toPx() / 2f
+                                ).roundToInt()
+                            IntOffset(x, 0)
+                        }
+                        .semantics {
+                            contentDescription = title
+                            onClick {
+                                openOrFocus(index)
+                                true
+                            }
+                        },
+                )
+            }
         }
     }
 }
@@ -216,12 +223,13 @@ fun PlayedCoverFlow(
 private fun Modifier.coverFlowGestures(
     lastIndex: Int,
     focused: () -> Float,
+    focusedCenterX: Dp,
     onDragStart: () -> Unit,
     onDragTo: (Float) -> Unit,
     onSettle: (velocityPx: Float, stepPx: Float) -> Unit,
     onTapIndex: (Int) -> Unit,
 ): Modifier = this.then(
-    Modifier.pointerInput(lastIndex) {
+    Modifier.pointerInput(lastIndex, focusedCenterX) {
         val stepPx = SideShift.toPx().coerceAtLeast(1f)
         val slop = viewConfiguration.touchSlop
         val minFling = viewConfiguration.minimumFlingVelocity
@@ -247,6 +255,7 @@ private fun Modifier.coverFlowGestures(
                             position = down.position,
                             focused = focused(),
                             itemCount = lastIndex + 1,
+                            focusedCenterX = focusedCenterX,
                         )?.let(onTapIndex)
                     }
                     break
@@ -284,7 +293,7 @@ private data class CoverSlot(
  * 以 Figma 三档（中 / 邻 / 远）为锚点，余弦缓动插值。
  * 缩放绕卡片中心，邻卡/远卡的下沉由缩放自然产生，对应 y=11 / y=21。
  */
-private fun coverSlot(delta: Float): CoverSlot {
+private fun coverSlot(delta: Float, focusedCenterX: Dp): CoverSlot {
     val sign = if (delta >= 0f) 1f else -1f
     val ad = abs(delta)
     val scale: Float
@@ -313,7 +322,7 @@ private fun coverSlot(delta: Float): CoverSlot {
         lerp(1f, 0f, ((ad - 2f) / 0.55f).coerceIn(0f, 1f))
     }
     return CoverSlot(
-        centerX = FocusedCenterX + shift * sign,
+        centerX = focusedCenterX + shift * sign,
         scale = scale,
         elevation = 4.dp * elevationFactor,
         alpha = alpha,
@@ -353,12 +362,13 @@ private fun androidx.compose.ui.unit.Density.hitCoverIndex(
     position: Offset,
     focused: Float,
     itemCount: Int,
+    focusedCenterX: Dp,
 ): Int? {
     return (0 until itemCount)
         .filter { abs(it - focused) < MaxVisibleDelta }
         .sortedBy { abs(it - focused) }
         .firstOrNull { index ->
-            val slot = coverSlot(index - focused)
+            val slot = coverSlot(index - focused, focusedCenterX)
             val width = CardWidth.toPx() * slot.scale
             val height = CardHeight.toPx() * slot.scale
             val cx = slot.centerX.toPx()

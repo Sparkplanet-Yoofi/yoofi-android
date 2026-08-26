@@ -211,49 +211,59 @@ private fun ProfileSetupContent(
                 onCameraClick = onCameraClick,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
-            Text(
-                text = stringResource(R.string.auth_display_name),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(start = 20.dp, top = 40.dp),
-            )
-            DisplayNameField(
-                value = name,
-                onValueChange = onNameChange,
-                showError = nameTaken,
-                focused = focused,
-                enabled = !saving,
-                onFocusChange = { focused = it },
-                onDone = {
-                    dismissIme(focusManager, keyboard)
-                    onContinue()
-                },
-                modifier = Modifier.padding(start = 20.dp, top = 12.dp),
-            )
-            Box(modifier = Modifier.height(40.dp)) {
-                if (nameTaken) {
-                    Text(
-                        text = stringResource(R.string.auth_display_name_taken),
-                        color = YoofiAuthError,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 20.dp, top = 8.dp),
-                    )
+            // 左右各 20，对齐 Figma `1761:10292`；宽屏铺满，避免只 pad start 偏左
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.auth_display_name),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(top = 40.dp),
+                )
+                DisplayNameField(
+                    value = name,
+                    onValueChange = onNameChange,
+                    showError = nameTaken,
+                    focused = focused,
+                    enabled = !saving,
+                    onFocusChange = { focused = it },
+                    onDone = {
+                        dismissIme(focusManager, keyboard)
+                        onContinue()
+                    },
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .fillMaxWidth(),
+                )
+                Box(modifier = Modifier.height(40.dp)) {
+                    if (nameTaken) {
+                        Text(
+                            text = stringResource(R.string.auth_display_name_taken),
+                            color = YoofiAuthError,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
                 }
+                Text(
+                    text = stringResource(R.string.auth_gender_optional),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+                GenderGrid(
+                    selected = gender,
+                    enabled = !saving,
+                    onSelect = onGenderChange,
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .fillMaxWidth(),
+                )
             }
-            Text(
-                text = stringResource(R.string.auth_gender_optional),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(start = 20.dp),
-            )
-            GenderGrid(
-                selected = gender,
-                enabled = !saving,
-                onSelect = onGenderChange,
-                modifier = Modifier.padding(start = 20.dp, top = 12.dp),
-            )
         }
         if (saving || saveFailed) {
             ProfileStatusToast(
@@ -268,6 +278,8 @@ private fun ProfileSetupContent(
             onClick = onContinue,
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .offset(y = 734.dp),
         )
         if (showAvatarSheet) {
@@ -414,7 +426,7 @@ private fun DisplayNameField(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onDone() }),
         modifier = modifier
-            .width(AuthPageWidth)
+            .fillMaxWidth()
             .height(46.dp)
             .onFocusChanged { onFocusChange(it.isFocused) },
         decorationBox = { inner ->
@@ -464,35 +476,45 @@ private fun GenderGrid(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             GenderChip(
                 option = GenderOption.Male,
                 selected = selected == GenderOption.Male,
                 enabled = enabled,
                 onClick = { onSelect(GenderOption.Male) },
+                modifier = Modifier.weight(1f),
             )
             GenderChip(
                 option = GenderOption.Female,
                 selected = selected == GenderOption.Female,
                 enabled = enabled,
                 onClick = { onSelect(GenderOption.Female) },
+                modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             GenderChip(
                 option = GenderOption.NonBinary,
                 selected = selected == GenderOption.NonBinary,
                 enabled = enabled,
                 onClick = { onSelect(GenderOption.NonBinary) },
+                modifier = Modifier.weight(1f),
             )
             GenderChip(
                 option = GenderOption.Hide,
                 selected = selected == GenderOption.Hide,
                 enabled = enabled,
                 onClick = { onSelect(GenderOption.Hide) },
+                modifier = Modifier.weight(1f),
             )
         }
     }
@@ -510,7 +532,7 @@ private fun GenderChip(
     val labelColor = if (selected) YoofiGenderSelected else YoofiChipText
     Row(
         modifier = modifier
-            .width(169.dp)
+            .fillMaxWidth()
             .height(44.dp)
             .clip(GenderChipShape)
             .background(YoofiAuthFieldFill)
@@ -544,7 +566,7 @@ private fun ProfileContinueButton(
 ) {
     Box(
         modifier = modifier
-            .width(AuthPageWidth)
+            .fillMaxWidth()
             .height(46.dp)
             .graphicsLayer { alpha = if (saving) 0.5f else 1f }
             .clip(AuthPillShape)

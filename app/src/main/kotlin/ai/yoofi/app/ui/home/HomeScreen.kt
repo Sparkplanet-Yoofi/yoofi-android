@@ -52,7 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val ListedCardSize = 138.dp to 182.dp
-private val LibraryCardSize = 173.dp to 154.dp
+/** Figma `982:14637`：两卡间距 4dp、高度 154，宽度平分剩余空间。 */
+private val LibraryCardHeight = 154.dp
 /** Figma `982:14594`：Hero 背景图高度，只画在底层，不把 Listed Works 往下推。 */
 private val HeroHeight = 518.dp
 /** Figma 画布高度；全屏渐变色标按此计算，不能压成 518 否则中段会提前变黑。 */
@@ -163,7 +164,9 @@ private fun HomeHeroWithFeed(
             }
             Spacer(Modifier.height(HeroToListedGap))
             Column(
-                modifier = Modifier.padding(start = 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp),
             ) {
                 ListedWorksRow()
@@ -350,11 +353,16 @@ private fun HeroDots(
 
 @Composable
 private fun ListedWorksRow() {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         GameSectionHeader(
             title = stringResource(R.string.section_listed_works),
             onMoreClick = {},
-            modifier = Modifier.width(350.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
         )
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -449,11 +457,16 @@ private fun ListedCard(
 
 @Composable
 private fun GameLibraryBlock() {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         GameSectionHeader(
             title = stringResource(R.string.section_game_library),
             onMoreClick = {},
-            modifier = Modifier.width(350.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
         )
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -474,12 +487,18 @@ private fun GameLibraryBlock() {
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Image(
                 painter = painterResource(R.drawable.img_home_library_1),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(LibraryCardSize.first, LibraryCardSize.second)
+                    .weight(1f)
+                    .height(LibraryCardHeight)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop,
             )
@@ -487,7 +506,8 @@ private fun GameLibraryBlock() {
                 painter = painterResource(R.drawable.img_home_library_2),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(LibraryCardSize.first, LibraryCardSize.second)
+                    .weight(1f)
+                    .height(LibraryCardHeight)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop,
             )

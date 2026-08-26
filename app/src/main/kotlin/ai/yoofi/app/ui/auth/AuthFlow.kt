@@ -21,7 +21,7 @@ private enum class AuthStep {
 
 /**
  * 登录流本地状态机，不引入 Navigation。
- * 验证码 Next 请求 UseCase：未填资料进 Profile，已填回调 [onEnterHome] 进 Home Tab。
+ * 验证码 Next 请求登录接口：isNewUser 进 Profile，否则回调 [onEnterHome] 进 Home Tab。
  */
 @Composable
 fun AuthFlow(

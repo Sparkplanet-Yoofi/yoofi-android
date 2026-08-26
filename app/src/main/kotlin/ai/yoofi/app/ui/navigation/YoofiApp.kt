@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 
 /**
  * 先走登录 UI，成功后再进四 Tab 壳。
- * 验证码接口返回已填资料时落在 Home Tab；资料填写完成仍默认 World。
+ * 验证码登录成功：isNewUser 走资料填写；否则落在 Home Tab。资料填写完成仍默认 World。
  */
 @Composable
 fun YoofiApp(modifier: Modifier = Modifier) {

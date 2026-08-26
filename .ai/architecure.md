@@ -402,7 +402,9 @@ android.useAndroidX=true
 2. **序列化选 kotlinx.serialization，不选 Moshi**——这是本次修订中最重要的选型变更。Moshi 本身质量很好，但它是 JVM/Android 专用，**不支持 KMP**。一旦 DTO 与解析逻辑遍布 Data 层再想迁移，改造面是全量的。kotlinx.serialization 功能等价、官方维护、Retrofit 有官方 converter，现在选它的额外成本几乎为零，却保住了迁移路径。这是典型的"用零成本换未来可选项"。
 3. **Room 2.7+ / DataStore 均已支持 KMP**，选版本时确认支持面。
 
-按此约束，未来迁移的实际工作量为：`core:model`、`core:common`、各业务 `domain` 可直接复用；`core:network` 需把 Retrofit 换成 Ktor（接口不变，仅实现替换）；UI 层按需用 CMP 重写或各平台原生实现。
+按此约束，未来迁移的实际工作量为：`core:model`、`core:common`、各业务 `domain` 可直接复用；`core:network` 需把 Retrofit 换成 Ktor（**`ApiCaller` 与 `XxxRemoteDataSource` 接口不变**，只替换 `RetrofitApiCaller` / `RetrofitXxxRemoteDataSource`）；UI 层按需用 CMP 重写或各平台原生实现。
+
+当前 Android 阶段仍用 Retrofit。新接口禁止在 Repository 里 catch `HttpException`，必须走 `RemoteDataSource` + `ApiCaller`，规范见 `.cursor/rules/remote-datasource.mdc`。
 
 ### 7.2 DI 框架的可迁移性
 

@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -93,38 +91,46 @@ internal fun VerificationCodeScreen(
         AuthBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             AuthSignUpHeader(onBack = onBack)
-            Text(
-                text = stringResource(R.string.auth_enter_code),
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 20.dp, top = 28.dp),
-            )
-            Text(
-                text = stringResource(R.string.auth_code_subtitle, email),
-                color = Color.White.copy(alpha = 0.5f),
-                fontSize = 12.sp,
+            // 左右各 20，对齐 Figma `1761:10121`；宽屏铺满，避免只 pad start 偏左
+            Column(
                 modifier = Modifier
-                    .padding(start = 20.dp, top = 8.dp)
-                    .width(AuthPageWidth),
-            )
-            OtpRow(
-                code = code,
-                showError = showError,
-                focused = focused,
-                onCodeChange = onCodeChange,
-                modifier = Modifier
-                    .padding(start = 20.dp, top = 25.dp)
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focused = it.isFocused },
-            )
-            if (showError) {
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+            ) {
                 Text(
-                    text = stringResource(R.string.auth_code_error),
-                    color = YoofiAuthError,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 20.dp, top = 8.dp),
+                    text = stringResource(R.string.auth_enter_code),
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 28.dp),
                 )
+                Text(
+                    text = stringResource(R.string.auth_code_subtitle, email),
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
+                )
+                OtpRow(
+                    code = code,
+                    showError = showError,
+                    focused = focused,
+                    onCodeChange = onCodeChange,
+                    modifier = Modifier
+                        .padding(top = 25.dp)
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focused = it.isFocused },
+                )
+                if (showError) {
+                    Text(
+                        text = stringResource(R.string.auth_code_error),
+                        color = YoofiAuthError,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
             }
         }
         if (remain > 0) {
@@ -154,6 +160,8 @@ internal fun VerificationCodeScreen(
             onClick = onNext,
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .offset(y = 478.dp),
         )
     }
@@ -176,7 +184,9 @@ private fun OtpRow(
         textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
         cursorBrush = SolidColor(Color.Transparent),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = modifier.width(AuthPageWidth).height(56.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
         decorationBox = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -193,6 +203,7 @@ private fun OtpRow(
                             focused = focused,
                         ),
                         error = showError,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -221,6 +232,7 @@ private fun OtpCell(
     digit: Char?,
     highlighted: Boolean,
     error: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val fill = if (digit != null || highlighted) {
         YoofiAuthFieldFill
@@ -233,8 +245,8 @@ private fun OtpCell(
         else -> Color.Transparent
     }
     Box(
-        modifier = Modifier
-            .size(45.dp, 56.dp)
+        modifier = modifier
+            .height(56.dp)
             .clip(AuthFieldShape)
             .background(fill)
             .then(

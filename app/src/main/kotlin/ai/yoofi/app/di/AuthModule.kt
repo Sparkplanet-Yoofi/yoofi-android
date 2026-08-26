@@ -1,7 +1,12 @@
 package ai.yoofi.app.di
 
-import ai.yoofi.app.data.auth.MockAuthRepository
+import ai.yoofi.app.data.auth.AuthRemoteDataSource
+import ai.yoofi.app.data.auth.InMemoryUserSession
+import ai.yoofi.app.data.auth.RemoteAuthRepository
+import ai.yoofi.app.data.auth.RetrofitAuthRemoteDataSource
 import ai.yoofi.app.domain.auth.AuthRepository
+import ai.yoofi.app.domain.auth.GetCurrentUserUseCase
+import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
 import dagger.Binds
 import dagger.Module
@@ -15,7 +20,17 @@ import javax.inject.Singleton
 abstract class AuthBindModule {
     @Binds
     @Singleton
-    abstract fun bindAuthRepository(impl: MockAuthRepository): AuthRepository
+    abstract fun bindAuthRepository(impl: RemoteAuthRepository): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRemoteDataSource(
+        impl: RetrofitAuthRemoteDataSource,
+    ): AuthRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindUserSessionStore(impl: InMemoryUserSession): UserSessionStore
 }
 
 @Module
@@ -25,4 +40,9 @@ object AuthProvideModule {
     fun provideVerifyEmailCodeUseCase(
         authRepository: AuthRepository,
     ): VerifyEmailCodeUseCase = VerifyEmailCodeUseCase(authRepository)
+
+    @Provides
+    fun provideGetCurrentUserUseCase(
+        userSessionStore: UserSessionStore,
+    ): GetCurrentUserUseCase = GetCurrentUserUseCase(userSessionStore)
 }

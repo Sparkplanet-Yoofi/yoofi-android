@@ -21,32 +21,39 @@ class VerifyEmailCodeUseCaseTest {
     }
 
     @Test
-    fun `合法码且未填资料返回 Success false`() = runBlocking {
+    fun `合法码且新用户返回 isNewUser true`() = runBlocking {
         val useCase = VerifyEmailCodeUseCase(
-            FakeAuthRepository(hasUserProfile = false),
+            FakeAuthRepository(isNewUser = true, profileCompleted = false),
         )
         val result = useCase(email = "test@gmail.com", code = "654321")
         assertEquals(
-            VerifyEmailCodeResult.Success(hasUserProfile = false),
+            VerifyEmailCodeResult.Success(
+                isNewUser = true,
+                profileCompleted = false,
+            ),
             result,
         )
     }
 
     @Test
-    fun `合法码且已填资料返回 Success true`() = runBlocking {
+    fun `合法码且老用户返回 isNewUser false`() = runBlocking {
         val useCase = VerifyEmailCodeUseCase(
-            FakeAuthRepository(hasUserProfile = true),
+            FakeAuthRepository(isNewUser = false, profileCompleted = true),
         )
         val result = useCase(email = "test@gmail.com", code = "654321")
         assertEquals(
-            VerifyEmailCodeResult.Success(hasUserProfile = true),
+            VerifyEmailCodeResult.Success(
+                isNewUser = false,
+                profileCompleted = true,
+            ),
             result,
         )
     }
 }
 
 private class FakeAuthRepository(
-    private val hasUserProfile: Boolean = false,
+    private val isNewUser: Boolean = false,
+    private val profileCompleted: Boolean = false,
 ) : AuthRepository {
     override suspend fun verifyEmailCode(
         email: String,
@@ -55,6 +62,9 @@ private class FakeAuthRepository(
         if (code == DemoInvalidEmailOtp) {
             return VerifyEmailCodeResult.InvalidCode
         }
-        return VerifyEmailCodeResult.Success(hasUserProfile = hasUserProfile)
+        return VerifyEmailCodeResult.Success(
+            isNewUser = isNewUser,
+            profileCompleted = profileCompleted,
+        )
     }
 }

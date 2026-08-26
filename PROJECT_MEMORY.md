@@ -4,7 +4,7 @@
 > **维护纪律**：每个需求收尾花 5 分钟更新踩坑与技术债。写得及时比写得全更重要。
 > 过期的禁区清单比没有清单更危险——发现失效条目请立即删除或更正。
 >
-> 最近更新：2026-08-26
+> 最近更新：2026-08-27
 
 ---
 
@@ -36,6 +36,12 @@
 - **含输入框的全屏页键盘覆盖、不顶布局**：根用 `ImeOverlayBox`（`ai.yoofi.app.ui.ime`），
   非输入点击用 `clickableDismissingIme`。禁止用 `imePadding` / 改 Manifest
   `windowSoftInputMode` 做单页差异。登录注册三页均已覆盖，无「贴键盘」例外。
+- **网络环境写在 `AppEnvironment`，构建只注入环境名**：debug→staging，release→production；
+  覆盖 `-Pyoofi.api.env=production|staging`。禁止业务代码写死 Base URL。
+- **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
+  `profileCompleted` 只存会话。Token 尚未落盘。
+- **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；
+  全项目只允许 `RetrofitApiCaller` catch HTTP。拆 KMP 时换 `ApiCaller` 实现，不换 Ktor 于现在。
 
 ---
 
@@ -95,6 +101,12 @@
    stdin 非 TTY，脚本立刻 EOF 退出，不能做人工复核，却多一轮工具调用。
    闸门只允许人在终端跑。另：一次读完 `.ai/`、默认拉 Figma 全量、默认开
    kotlin-reviewer subagent、同一任务多次 `assembleDebug`，都会把几行 UI 改成分钟级。
+
+10. **Figma 390 画板的 350 宽不要写死成 `350.dp`**：World / Stories 行锁 350
+    后，宽屏只剩左侧对齐、右侧大块空白。内容区用 `fillMaxWidth` + 左右 20，
+    三列用 `weight(1f)`；封面流焦点中心用 `maxWidth / 2`，不要用 175.dp。
+    `Modifier.padding` 没有 `(horizontal, top, bottom)` 重载，要拆成两次
+    `padding` 或写齐 `start/top/end/bottom`。
 
 ---
 

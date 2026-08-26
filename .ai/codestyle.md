@@ -142,6 +142,9 @@ sealed interface Outcome<out T> {
 ```
 
 不要把 Retrofit / `IOException` 漏到 UI。Data 层映射成 Domain 能懂的 `AppError`。
+统一入口：`ApiCaller.fetch` → `Outcome`（`ai.yoofi.app.core.common`）。
+Repository 只消费 `Outcome`，禁止自己 catch HTTP。见
+`.cursor/rules/remote-datasource.mdc`。
 
 ---
 
@@ -153,7 +156,7 @@ sealed interface Outcome<out T> {
 |---|---|---|
 | `ui` | UseCase、UiState、Compose、ViewModel | Retrofit、DAO、SDK 实现类 |
 | `domain` | 纯 Kotlin、Repository **接口**、`core:model`/`core:common` | `android.*`、Hilt 注解、DTO、OkHttp |
-| `data` | Domain 接口、Retrofit、Room、DataStore | Compose、ViewModel |
+| `data` | Domain 接口、RemoteDataSource、Retrofit 适配器 | Compose、ViewModel；**禁止 Repository catch HttpException** |
 | `di` | Hilt 绑定 | 业务规则 |
 
 MVI 五件套命名与类型：
@@ -197,6 +200,11 @@ Compose：
   API 在 `ai.yoofi.app.ui.ime`。仅当产品书面要求「按钮贴键盘」才用 `imePadding`，
   且不要叠 Overlay。登录注册三页（邮箱 / 验证码 / 资料填写）均已覆盖。
   详见 `.cursor/rules/ime-overlay.mdc`。
+- **网络**：OkHttp + Retrofit + kotlinx.serialization；Base URL 只来自
+  `AppEnvironment`。新接口必须 `RemoteDataSource` + `ApiCaller.fetch`，
+  全项目只允许 `RetrofitApiCaller` catch HTTP。登录成功把 User 写入
+  `UserSessionStore`，读取走 `GetCurrentUserUseCase`。
+  详见 `.cursor/rules/remote-datasource.mdc`、`.cursor/rules/network-auth.mdc`。
 
 ---
 
