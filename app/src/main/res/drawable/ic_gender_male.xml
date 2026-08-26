@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="17.5dp"
+    android:height="17.5dp"
+    android:viewportWidth="17.5"
+    android:viewportHeight="17.5">
+    <path
+        android:pathData="M7.25087 10.4564L4.42418 13.2839M7.25268 10.4557C8.81478 12.0178 11.3475 12.0178 12.9096 10.4557C14.4717 8.89355 14.4717 6.36088 12.9096 4.79878C11.3475 3.23668 8.81484 3.2367 7.25272 4.79882C6.71948 5.33205 6.36827 5.97838 6.19907 6.66058M6.91194 13.6562L4.41194 13.6562C4.2147 13.6562 4.0548 13.4963 4.0548 13.2991L4.0548 10.7994"
+        android:fillColor="#00000000"
+        android:strokeColor="#4DCEE2"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round" />
+</vector>

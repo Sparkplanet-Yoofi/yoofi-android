@@ -61,4 +61,24 @@
     <string name="cd_auth_google">Google</string>
     <string name="cd_auth_apple">Apple</string>
     <string name="cd_auth_logo">Yoofi</string>
+    <string name="auth_profile_title">Complete your profile</string>
+    <string name="auth_profile_subtitle">You can update it later in settings</string>
+    <string name="auth_profile_skip">Skip</string>
+    <string name="auth_display_name">Display name</string>
+    <string name="auth_display_name_placeholder">Enter your display name</string>
+    <string name="auth_display_name_counter">%1$d/24</string>
+    <string name="auth_display_name_taken">This display name is not available. Try another.</string>
+    <string name="auth_gender_optional">Gender (optional)</string>
+    <string name="auth_gender_male">Male</string>
+    <string name="auth_gender_female">Female</string>
+    <string name="auth_gender_nonbinary">Non-binary</string>
+    <string name="auth_gender_hide">Prefer not to say</string>
+    <string name="auth_continue_yoofi">Continue to Yoofi</string>
+    <string name="auth_profile_saving">Saving…</string>
+    <string name="auth_profile_save_failed">Couldn\'t save. Please try again.</string>
+    <string name="auth_change_avatar">Change Avatar</string>
+    <string name="auth_choose_gallery">Choose from gallery</string>
+    <string name="auth_take_photo">Take photo</string>
+    <string name="auth_cancel">Cancel</string>
+    <string name="cd_auth_camera">Camera</string>
 </resources>

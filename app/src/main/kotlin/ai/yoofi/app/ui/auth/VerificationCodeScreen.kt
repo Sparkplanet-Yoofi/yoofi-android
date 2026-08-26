@@ -1,6 +1,9 @@
 package ai.yoofi.app.ui.auth
 
 import ai.yoofi.app.R
+import ai.yoofi.app.domain.auth.DemoInvalidEmailOtp
+import ai.yoofi.app.ui.ime.ImeOverlayBox
+import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.theme.YoofiAccent
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiAuthError
@@ -9,17 +12,13 @@ import ai.yoofi.app.ui.theme.YoofiAuthFocusStroke
 import ai.yoofi.app.ui.theme.YoofiAuthOtpEmpty
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,9 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
-/** Figma 错误态示例码；其余 6 位在无后端时视为通过。 */
-internal const val DemoInvalidOtp = "121111"
+/** Figma 错误态示例码；其余 6 位交由 UseCase 请求 mock 接口。 */
+internal const val DemoInvalidOtp = DemoInvalidEmailOtp
 
 private const val OtpLength = 6
 private const val ResendSeconds = 59
@@ -63,7 +60,7 @@ private const val ResendSeconds = 59
 /**
  * 验证码页，覆盖 Figma 初始 / 输入 / 完成 / 错误：
  * `1761:10121` `1761:10158` `1761:10199` `1761:10245`。
- * 使用系统数字键盘，不画 iOS keypad。
+ * 使用系统数字键盘，不画 iOS keypad。键盘走 [ImeOverlayBox]，不顶起 Next。
  */
 @Composable
 internal fun VerificationCodeScreen(
@@ -73,15 +70,14 @@ internal fun VerificationCodeScreen(
     onCodeChange: (String) -> Unit,
     onBack: () -> Unit,
     onNext: () -> Unit,
+    isVerifying: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val complete = code.length == OtpLength
-    val nextEnabled = complete && !showError
+    val nextEnabled = complete && !showError && !isVerifying
     var focused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     var remain by remember { mutableIntStateOf(ResendSeconds) }
-    val density = LocalDensity.current
-    val imeOpen = WindowInsets.ime.getBottom(density) > 0
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -93,7 +89,7 @@ internal fun VerificationCodeScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    ImeOverlayBox(modifier = modifier) {
         AuthBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             AuthSignUpHeader(onBack = onBack)
@@ -148,7 +144,7 @@ internal fun VerificationCodeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offset(y = 442.dp)
-                    .clickable(role = Role.Button) {
+                    .clickableDismissingIme {
                         remain = ResendSeconds
                     },
             )
@@ -156,16 +152,9 @@ internal fun VerificationCodeScreen(
         AuthNextButton(
             enabled = nextEnabled,
             onClick = onNext,
-            modifier = if (imeOpen) {
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
-                    .padding(bottom = 12.dp)
-            } else {
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = 478.dp)
-            },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = 478.dp),
         )
     }
 }
@@ -275,7 +264,7 @@ private fun VerificationCodeScreenPreview() {
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         VerificationCodeScreen(
             email = "test@gmail.com",
-            code = "121111",
+            code = DemoInvalidOtp,
             showError = true,
             onCodeChange = {},
             onBack = {},

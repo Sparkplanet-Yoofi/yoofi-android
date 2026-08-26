@@ -70,3 +70,21 @@ val YoofiAuthCaretFrom = Color(0xFFCE52FF)
 
 /** 光标渐变底 #7945FF */
 val YoofiAuthCaretTo = Color(0xFF7945FF)
+
+/** 资料输入框空闲描边 rgba(100,129,208,0.2) */
+val YoofiAuthIdleStroke = Color(0x336481D0)
+
+/** 性别选中文案 #B594FF */
+val YoofiGenderSelected = Color(0xFFB594FF)
+
+/** 改头像相机钮渐变终点 #906AEF */
+val YoofiCameraTo = Color(0xFF906AEF)
+
+/** 改头像弹层遮罩 rgba(0,0,0,0.8) */
+val YoofiDialogScrim = Color(0xCC000000)
+
+/** 改头像弹层底 #181A1B */
+val YoofiDialogBg = Color(0xFF181A1B)
+
+/** 改头像弹层按钮 #35383F */
+val YoofiDialogButton = Color(0xFF35383F)

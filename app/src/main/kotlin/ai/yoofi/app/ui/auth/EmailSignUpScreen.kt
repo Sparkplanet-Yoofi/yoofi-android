@@ -1,6 +1,8 @@
 package ai.yoofi.app.ui.auth
 
 import ai.yoofi.app.R
+import ai.yoofi.app.ui.ime.ImeOverlayBox
+import ai.yoofi.app.ui.ime.dismissIme
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiAuthCaretFrom
 import ai.yoofi.app.ui.theme.YoofiAuthCaretTo
@@ -9,11 +11,8 @@ import ai.yoofi.app.ui.theme.YoofiAuthFieldFill
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -34,8 +33,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +50,7 @@ internal fun isValidEmail(value: String): Boolean = EmailRegex.matches(value.tri
 
 /**
  * 邮箱注册，覆盖 Figma 初始 / 输入 / 错误三态：`1761:10014` `1761:10049` `1761:10084`。
+ * 键盘走 [ImeOverlayBox]，不顶起 Next。
  */
 @Composable
 internal fun EmailSignUpScreen(
@@ -66,14 +66,13 @@ internal fun EmailSignUpScreen(
     var focused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    val density = LocalDensity.current
-    val imeOpen = WindowInsets.ime.getBottom(density) > 0
+    val keyboard = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    ImeOverlayBox(modifier = modifier) {
         AuthBackground()
         Column(modifier = Modifier.fillMaxSize()) {
             AuthSignUpHeader(onBack = onBack)
@@ -100,7 +99,7 @@ internal fun EmailSignUpScreen(
                 onFocusChange = { focused = it },
                 onNext = {
                     if (valid) {
-                        focusManager.clearFocus()
+                        dismissIme(focusManager, keyboard)
                         onNext()
                     }
                 },
@@ -120,16 +119,9 @@ internal fun EmailSignUpScreen(
         AuthNextButton(
             enabled = valid,
             onClick = onNext,
-            modifier = if (imeOpen) {
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
-                    .padding(bottom = 12.dp)
-            } else {
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = 438.dp)
-            },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = 438.dp),
         )
     }
 }

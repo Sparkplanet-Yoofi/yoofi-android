@@ -16,16 +16,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
- * 先走登录 UI，成功后再进四 Tab 壳。默认 Tab 仍是 World。
+ * 先走登录 UI，成功后再进四 Tab 壳。
+ * 验证码接口返回已填资料时落在 Home Tab；资料填写完成仍默认 World。
  */
 @Composable
 fun YoofiApp(modifier: Modifier = Modifier) {
     var loggedIn by remember { mutableStateOf(false) }
+    var startTab by remember { mutableStateOf(YoofiTab.World) }
     if (!loggedIn) {
-        AuthFlow(onLoggedIn = { loggedIn = true }, modifier = modifier)
+        AuthFlow(
+            onLoggedIn = { loggedIn = true },
+            onEnterHome = {
+                startTab = YoofiTab.Home
+                loggedIn = true
+            },
+            modifier = modifier,
+        )
         return
     }
-    var tab by remember { mutableStateOf(YoofiTab.World) }
+    var tab by remember { mutableStateOf(startTab) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {
             YoofiTab.Home -> HomeExploreScreen()

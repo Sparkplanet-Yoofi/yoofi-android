@@ -1,6 +1,7 @@
 package ai.yoofi.app.ui.auth
 
 import ai.yoofi.app.R
+import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.theme.YoofiAuthBgTop
 import ai.yoofi.app.ui.theme.YoofiAuthError
 import ai.yoofi.app.ui.theme.YoofiAuthFocusStroke
@@ -11,7 +12,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -105,7 +104,7 @@ internal fun AuthSignUpHeader(
                 .align(Alignment.CenterStart)
                 .padding(start = 20.dp)
                 .size(24.dp)
-                .clickable(role = Role.Button, onClick = onBack),
+                .clickableDismissingIme(onClick = onBack),
         )
         Text(
             text = stringResource(R.string.auth_sign_up_title),
@@ -140,7 +139,7 @@ internal fun AuthNextButton(
             .height(46.dp)
             .clip(shape)
             .then(background)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+            .clickableDismissingIme(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -166,7 +165,7 @@ internal fun AuthSocialButton(
             .height(46.dp)
             .clip(AuthPillShape)
             .background(YoofiAuthIdleButton)
-            .clickable(role = Role.Button, onClick = onClick),
+            .clickableDismissingIme(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

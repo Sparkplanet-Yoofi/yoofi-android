@@ -11,7 +11,7 @@ UGC-AI 互动故事游戏客户端，Google Play 海外发行，严格 GDPR 合�
 |---|---|---|
 | `PROJECT_MEMORY.md` | 架构决策、**禁区清单**、历史踩坑、技术债 | **每次动手前必读禁区清单** |
 | `.ai/architecure.md` | 目标架构方案（模块结构第三章、架构守卫第四章） | 涉及模块划分、分层、技术选型时 |
-| `.ai/codestyle.md` | Kotlin / Compose / KMP 预留代码规范 | **写或改 Kotlin 代码时必读** |
+| `.ai/codestyle.md` | Kotlin / Compose / KMP 预留代码规范 | **写或改 Kotlin 代码时必读**（含键盘覆盖 `ImeOverlayBox`） |
 | `.ai/harness.md` | AI 协作方法论与工作流 | 需要了解协作规范时 |
 | `.jack/context/current-task.md` | Jack 个人任务现场（不入库） | 仅本机新会话恢复上下文 |
 
