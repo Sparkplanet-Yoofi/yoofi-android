@@ -7,7 +7,7 @@
     <string name="tab_world">World</string>
     <string name="tab_create">Create</string>
     <string name="tab_me">Me</string>
-    <string name="section_played">played</string>
+    <string name="section_played">Played</string>
     <string name="section_stories">Stories</string>
     <string name="section_listed_works">Listed Works</string>
     <string name="section_game_library">Game Library</string>
@@ -29,8 +29,14 @@
     <string name="me_get_vip">Get VIP</string>
     <string name="me_tab_lorebook">Lorebook</string>
     <string name="me_tab_creations">Creations</string>
+    <string name="me_filter_story_game">Story Game</string>
+    <string name="me_filter_story">Story</string>
+    <string name="me_badge_drafts">Drafts</string>
+    <string name="me_lorebook_empty">Nothing here yet</string>
+    <string name="me_views_sample">120</string>
     <string name="create_placeholder">Create</string>
     <string name="cd_section_more">See all</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_copy_id">Copy ID</string>
+    <string name="me_id_copied">已复制</string>
 </resources>

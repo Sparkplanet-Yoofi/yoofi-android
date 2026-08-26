@@ -2,7 +2,7 @@ package ai.yoofi.app.ui.navigation
 
 import ai.yoofi.app.R
 import ai.yoofi.app.ui.theme.YoofiAccent
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -218,7 +218,7 @@ private fun CreateTabIcon() {
 @Preview(widthDp = 390, heightDp = 120, showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 private fun YoofiBottomBarPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         YoofiBottomBar(selected = YoofiTab.World, onTabSelected = {})
     }
 }

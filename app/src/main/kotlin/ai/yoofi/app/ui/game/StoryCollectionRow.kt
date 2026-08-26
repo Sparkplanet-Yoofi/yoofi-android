@@ -1,7 +1,7 @@
 package ai.yoofi.app.ui.game
 
 import ai.yoofi.app.R
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val RowWidth = 350.dp
-private val RowHeight = 184.dp
+private val RowHeight = 200.dp
 private val CoverW = 101.dp
 private val CoverH = 134.dp
 private val CoverGap = 10.dp
@@ -64,15 +64,7 @@ fun StoryCollectionRow(modifier: Modifier = Modifier) {
         ) {
             repeat(3) { index ->
                 if (index > 0) Spacer(Modifier.width(CoverGap))
-                Image(
-                    painter = painterResource(R.drawable.img_game_cover_d),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(CoverW, CoverH)
-                        .shadow(4.dp, RoundedCornerShape(8.dp))
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop,
-                )
+                StoryCollectionItem()
             }
         }
         Box(
@@ -88,24 +80,34 @@ fun StoryCollectionRow(modifier: Modifier = Modifier) {
             CornerDot(Modifier.offset(x = 338.dp, y = 6.dp))
             CornerDot(Modifier.offset(x = 338.dp, y = 30.dp))
         }
-        Caption(x = 18.dp)
-        Caption(x = 129.dp)
-        Caption(x = 240.dp)
     }
 }
 
+/** 封面与文案绑成一列，避免文案脱离卡片被兄弟列盖住。 */
 @Composable
-private fun Caption(x: androidx.compose.ui.unit.Dp) {
+private fun StoryCollectionItem() {
     Column(
-        modifier = Modifier.offset(x = x, y = 148.dp),
+        modifier = Modifier.width(CoverW),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Image(
+            painter = painterResource(R.drawable.img_game_cover_d),
+            contentDescription = null,
+            modifier = Modifier
+                .size(CoverW, CoverH)
+                .shadow(4.dp, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop,
+        )
+        Spacer(Modifier.height(14.dp))
         Text(
             text = stringResource(R.string.collection_name),
             color = Color.White,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(2.dp))
         Text(
@@ -113,6 +115,7 @@ private fun Caption(x: androidx.compose.ui.unit.Dp) {
             color = Color.White.copy(alpha = 0.5f),
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
+            maxLines = 1,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -134,7 +137,7 @@ private fun CornerDot(modifier: Modifier = Modifier) {
 @Preview(widthDp = 350, heightDp = 184, showBackground = true, backgroundColor = 0xFF131126)
 @Composable
 private fun StoryCollectionRowPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         StoryCollectionRow()
     }
 }

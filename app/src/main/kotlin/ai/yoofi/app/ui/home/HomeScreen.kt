@@ -7,7 +7,8 @@ import ai.yoofi.app.ui.theme.YoofiDisplaySerif
 import ai.yoofi.app.ui.theme.YoofiStartGameFrom
 import ai.yoofi.app.ui.theme.YoofiStartGameTo
 import ai.yoofi.app.ui.theme.YoofiTitleGradientEnd
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,22 +21,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -47,6 +53,27 @@ import androidx.compose.ui.unit.sp
 
 private val ListedCardSize = 138.dp to 182.dp
 private val LibraryCardSize = 173.dp to 154.dp
+/** Figma `982:14594`：Hero 背景图高度，只画在底层，不把 Listed Works 往下推。 */
+private val HeroHeight = 518.dp
+/** Figma 画布高度；全屏渐变色标按此计算，不能压成 518 否则中段会提前变黑。 */
+private val FigmaCanvasHeight = 844.dp
+/** Figma `982:14596`：顶部压暗，让状态栏文字可读。 */
+private val HeroTopVignetteHeight = 332.dp
+/** Figma：Start Game 底约 308，Listed Works 顶 354。 */
+private val HeroToListedGap = 46.dp
+
+/** Hero 轮播页。循环用虚页数，真实下标取模。 */
+private data class HeroBanner(
+    val id: String,
+    @param:DrawableRes val coverRes: Int,
+)
+
+private val DemoHeroBanners = listOf(
+    HeroBanner("hero-1", R.drawable.img_home_hero),
+    HeroBanner("hero-2", R.drawable.img_home_listed_1),
+    HeroBanner("hero-3", R.drawable.img_game_cover_e),
+    HeroBanner("hero-4", R.drawable.img_home_library_1),
+)
 
 /**
  * 首页/探索，对齐 Figma `982:14591`。
@@ -62,40 +89,79 @@ fun HomeExploreScreen(
             .fillMaxSize()
             .background(Color.Black),
     ) {
-        Image(
-            painter = painterResource(R.drawable.img_home_hero),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(518.dp),
-            contentScale = ContentScale.Crop,
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0.049763f to Color.Black.copy(alpha = 0.5f),
-                        0.12085f to Color.Transparent,
-                        0.21209f to Color.Transparent,
-                        0.36019f to Color(0xFF150B33),
-                        0.52488f to Color(0xFF070514),
-                    ),
-                ),
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp),
         ) {
-            HomeTopBar(onSearchClick = onSearchClick)
-            Spacer(Modifier.height(90.dp))
-            HeroCopy(onStartGame = onStartGame)
-            Spacer(Modifier.height(16.dp))
-            HeroDots(modifier = Modifier.align(Alignment.End).padding(end = 31.dp))
-            Spacer(Modifier.height(24.dp))
+            HomeHeroWithFeed(
+                banners = DemoHeroBanners,
+                onSearchClick = onSearchClick,
+                onStartGame = onStartGame,
+            )
+        }
+    }
+}
+
+/**
+ * Hero 背景 518dp 叠在底层；文案 / 指示点按内容撑开，Listed Works 从按钮下方
+ * 46dp 处叠上（Figma `982:14603` top=354），避免 518 把列表整块顶下去。
+ * 轮播虚页数为 [Int.MAX_VALUE]，真实页 = page % size。
+ */
+@Composable
+private fun HomeHeroWithFeed(
+    banners: List<HeroBanner>,
+    onSearchClick: () -> Unit,
+    onStartGame: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cycle = banners.size.coerceAtLeast(1)
+    val looping = banners.size > 1
+    val startPage = remember(cycle, looping) {
+        if (!looping) {
+            0
+        } else {
+            val mid = Int.MAX_VALUE / 2
+            mid - mid % cycle
+        }
+    }
+    val pagerState = rememberPagerState(
+        initialPage = startPage,
+        pageCount = { if (looping) Int.MAX_VALUE else cycle },
+    )
+    val realIndex = if (banners.isEmpty()) 0 else pagerState.currentPage.mod(cycle)
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        HeroBackdrop(
+            banners = banners,
+            pagerState = pagerState,
+            cycle = cycle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HeroHeight)
+                .align(Alignment.TopCenter),
+        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.statusBarsPadding()) {
+                HomeTopBar(onSearchClick = onSearchClick)
+                Spacer(Modifier.height(90.dp))
+                // Figma：Start Game 与 4 个指示点同一行
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 31.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    HeroCopy(onStartGame = onStartGame)
+                    HeroDots(
+                        count = banners.size,
+                        selected = realIndex,
+                    )
+                }
+            }
+            Spacer(Modifier.height(HeroToListedGap))
             Column(
                 modifier = Modifier.padding(start = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp),
@@ -108,6 +174,90 @@ fun HomeExploreScreen(
 }
 
 @Composable
+private fun HeroBackdrop(
+    banners: List<HeroBanner>,
+    pagerState: PagerState,
+    cycle: Int,
+    modifier: Modifier = Modifier,
+) {
+    val density = LocalDensity.current
+    // 色标按 844 画布绝对高度，Last pick（约 198dp）仍落在透明段，图能铺满。
+    val canvasEndY = with(density) { FigmaCanvasHeight.toPx() }
+    val vignetteEndY = with(density) { HeroTopVignetteHeight.toPx() }
+
+    Box(modifier = modifier) {
+        if (banners.isNotEmpty()) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                beyondViewportPageCount = 1,
+                key = { page -> page },
+            ) { page ->
+                val banner = banners[page.mod(cycle)]
+                Image(
+                    painter = painterResource(banner.coverRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    // Figma 图顶对齐并放大裁切，避免居中裁切露出上下黑边
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.TopCenter,
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.049763f to Color.Black.copy(alpha = 0.5f),
+                            0.12085f to Color.Transparent,
+                            0.21209f to Color.Transparent,
+                            0.36019f to Color(0xFF150B33),
+                            0.52488f to Color(0xFF070514),
+                            1f to Color(0xFF070514),
+                        ),
+                        startY = 0f,
+                        endY = canvasEndY,
+                    ),
+                ),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HeroTopVignetteHeight)
+                .alpha(0.8f)
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0f to Color.Black,
+                            0.31928f to Color.Transparent,
+                        ),
+                        startY = 0f,
+                        endY = vignetteEndY,
+                    ),
+                ),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HeroTopVignetteHeight)
+                .alpha(0.8f)
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.20482f to Color(0xFF151025),
+                            0.41566f to Color.Transparent,
+                        ),
+                        startY = 0f,
+                        endY = vignetteEndY,
+                    ),
+                ),
+        )
+    }
+}
+
+@Composable
 private fun HomeTopBar(onSearchClick: () -> Unit) {
     Box(
         modifier = Modifier
@@ -115,15 +265,7 @@ private fun HomeTopBar(onSearchClick: () -> Unit) {
             .height(60.dp),
     ) {
         Image(
-            painter = painterResource(R.drawable.img_home_logo_glow),
-            contentDescription = null,
-            modifier = Modifier
-                .offset(x = 2.dp, y = 0.5.dp)
-                .size(125.dp, 58.dp),
-            contentScale = ContentScale.FillBounds,
-        )
-        Image(
-            painter = painterResource(R.drawable.img_yoofi_logo),
+            painter = painterResource(R.drawable.img_home_logo),
             contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .padding(start = 20.dp, top = 18.dp)
@@ -187,14 +329,20 @@ private fun HeroCopy(onStartGame: () -> Unit) {
 }
 
 @Composable
-private fun HeroDots(modifier: Modifier = Modifier) {
+private fun HeroDots(
+    count: Int,
+    selected: Int,
+    modifier: Modifier = Modifier,
+) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(4) { index ->
+        repeat(count) { index ->
             Box(
                 modifier = Modifier
                     .size(10.dp, 4.dp)
                     .clip(RoundedCornerShape(100.dp))
-                    .background(Color(0xFFD9D9D9).copy(alpha = if (index == 0) 1f else 0.3f)),
+                    .background(
+                        Color(0xFFD9D9D9).copy(alpha = if (index == selected) 1f else 0.3f),
+                    ),
             )
         }
     }
@@ -350,7 +498,7 @@ private fun GameLibraryBlock() {
 @Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 private fun HomeExploreScreenPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         HomeExploreScreen()
     }
 }

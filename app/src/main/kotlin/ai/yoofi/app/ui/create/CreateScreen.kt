@@ -6,7 +6,7 @@ import ai.yoofi.app.ui.theme.YoofiGameBg0
 import ai.yoofi.app.ui.theme.YoofiGameBg1
 import ai.yoofi.app.ui.theme.YoofiTitleGradientEnd
 import ai.yoofi.app.ui.theme.YoofiTitleGradientStart
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,7 +50,7 @@ fun CreateScreen(modifier: Modifier = Modifier) {
 @Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF131126)
 @Composable
 private fun CreateScreenPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         CreateScreen()
     }
 }

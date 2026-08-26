@@ -5,7 +5,7 @@ import ai.yoofi.app.ui.theme.PaytoneOne
 import ai.yoofi.app.ui.theme.YoofiGameSurface
 import ai.yoofi.app.ui.theme.YoofiTitleGradientEnd
 import ai.yoofi.app.ui.theme.YoofiTitleGradientStart
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -201,7 +201,7 @@ private fun cssAngleLinearGradient(
 @Preview(widthDp = 390, heightDp = 60, showBackground = true, backgroundColor = 0xFF2B2B2B)
 @Composable
 private fun GameTopBarPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         GameTopBar(onSearchClick = {}, onNotificationClick = {})
     }
 }

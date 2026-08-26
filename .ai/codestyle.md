@@ -188,6 +188,10 @@ Compose：
 - 禁止在 `@Composable` 里直接调挂起函数（用 `LaunchedEffect` / ViewModel）。  
 - 禁止 Composable 持有 `Activity` Context；需要 Context 用 `LocalContext` 做短生命周期读取。  
 - `impl` 内 Screen 为 `internal`。
+- **二级 Tab / 嵌套页必须无限循环左右滑**：用 `ai.yoofi.app.ui.pager` 的
+  `loopingPageCount` / `loopingStartPage` / `realPageIndex` / `animateToRealPage`，
+  不要用 `when` 切页替代可滑动 Pager。划过最左再到最后一页，划过最右再到第一页。
+  内层竖滑列表不得吞掉外层横滑。详见 `.cursor/rules/nested-loop-pager.mdc`。
 
 ---
 

@@ -445,12 +445,15 @@ Agent 的自我修正循环能否闭合，取决于反馈够不够快：
 5. 执行       调用对应 Skill 辅助编码；Agent 自跑 L1/L2 检查
 6. 观测       git diff 人工审查，优先看模块依赖与分层越界
 7. 评估       L3 完整验证：编译 + 单测 + buildHealth + 模拟器跑通业务流程
-8. 复核闸门   执行 final_review_gate.py，人工逐条确认后放行
+8. 复核闸门   **人**在本机终端运行 `python3 ./final_review_gate.py` 并逐条确认。
+              **Agent 禁止在对话里执行该脚本**（Cursor 注入的 stdin 立即 EOF，
+              闸门瞬间退出，只会多一轮工具调用，不能做人工复核）。
 9. 沉淀       更新 current-task.md；完成则产出收尾文档并回写 PROJECT_MEMORY.md
 10. 提交      走 MR Code Review；有问题 git reset 丢弃全部改动
 ```
 
-第 8 步的 `final_review_gate.py` 是本项目已有的人工复核闸门，作用是**在 Agent 宣称完成后强制插入一次人工确认**，防止"编译通过就等于做对了"的误判。
+第 8 步的 `final_review_gate.py` 是**给人用的**人工复核闸门，防止「编译通过就等于做对了」。
+它必须跑在真实 TTY 里。Agent 回合里跑它既无法交互，也会明显拖慢任务。
 
 ---
 

@@ -6,7 +6,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import ai.yoofi.app.ui.navigation.YoofiApp
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         setContent {
-            YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+            YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
                 YoofiApp()
             }
         }

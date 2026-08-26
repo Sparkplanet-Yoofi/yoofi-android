@@ -5,7 +5,7 @@ import ai.yoofi.app.ui.theme.YoofiGameBg0
 import ai.yoofi.app.ui.theme.YoofiGameBg1
 import ai.yoofi.app.ui.theme.YoofiGameBg2
 import ai.yoofi.app.ui.theme.YoofiGameBg3
-import ai.yoofi.app.ui.theme.YoofiandroidTheme
+import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +57,7 @@ fun GameHomeScreen(
     onNotificationClick: () -> Unit = {},
     onPlayedMore: () -> Unit = {},
     onStoriesMore: () -> Unit = {},
+    onPlayedItemClick: (PlayedCover) -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -95,7 +96,7 @@ fun GameHomeScreen(
                     onMoreClick = onPlayedMore,
                     modifier = Modifier.width(350.dp),
                 )
-                PlayedCoverFlow()
+                PlayedCoverFlow(onItemClick = onPlayedItemClick)
                 GameSectionHeader(
                     title = stringResource(R.string.section_stories),
                     onMoreClick = onStoriesMore,
@@ -134,13 +135,14 @@ internal fun GameSectionHeader(
                 .clickable(role = Role.Button, onClick = onMoreClick),
             contentScale = ContentScale.Fit,
         )
+        Spacer(Modifier.width(10.dp))
     }
 }
 
 @Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF131126)
 @Composable
 private fun GameHomeScreenPreview() {
-    YoofiandroidTheme(darkTheme = true, dynamicColor = false) {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         GameHomeScreen()
     }
 }

@@ -69,3 +69,5 @@ UGC 草稿离线同步 / GDPR 采集开关 / Billing 凭证校验 / `build-logic
 5. 涉及用户数据、隐私、支付的改动，额外标注合规风险
 6. 代码注释用中文，UTF-8 编码，注意检查中文乱码
 7. 不确定的地方列出疑问，不要自行假设后直接实现
+8. **禁止在对话里执行 `final_review_gate.py`**（Cursor Agent 的 stdin 立即 EOF，闸门无效且拖慢回合）
+9. 按需读 `.ai/`，禁止一次读完全部文档；小改动不要拉 Figma 全量、不要默认开 subagent

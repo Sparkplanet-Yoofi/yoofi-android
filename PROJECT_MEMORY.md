@@ -88,6 +88,11 @@
    现已统一到 `app/src/main/kotlin/`，且 `build.gradle.kts` 未显式配置 `sourceSets`
    （依赖 Kotlin plugin 的默认识别）。**新文件一律放 `src/main/kotlin/`**。
 
+9. **Agent 在对话里跑 `final_review_gate.py` 会明显变慢且无效**：Cursor Agent 的
+   stdin 非 TTY，脚本立刻 EOF 退出，不能做人工复核，却多一轮工具调用。
+   闸门只允许人在终端跑。另：一次读完 `.ai/`、默认拉 Figma 全量、默认开
+   kotlin-reviewer subagent、同一任务多次 `assembleDebug`，都会把几行 UI 改成分钟级。
+
 ---
 
 ## 四、当前技术债（临时方案，勿扩散模仿）

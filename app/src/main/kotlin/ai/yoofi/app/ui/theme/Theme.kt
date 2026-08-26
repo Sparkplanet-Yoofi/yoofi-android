@@ -13,7 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    // Material3 Snackbar 默认吃 inverseSurface；夜间改成紫黑底+白字
+    inverseSurface = YoofiSnackbarContainer,
+    inverseOnSurface = YoofiSnackbarContent,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -33,7 +36,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun YoofiandroidTheme(
+fun YoofiAndroidTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

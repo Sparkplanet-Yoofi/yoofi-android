@@ -11,7 +11,7 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 /** Game 顶栏所在页底色，采样自 Figma 节点 982:14768 截图 */
-val YoofiGameSurface = Color(0xFF2B2B2B)
+val YoofiGameSurface = Color.Transparent
 
 /** 「Game」标题渐变起点：162.45° 上的 12.35% 处 */
 val YoofiTitleGradientStart = Color(0xFFFFFFFF)
@@ -40,3 +40,9 @@ val YoofiVipText = Color(0xFF231D78)
 
 /** 资料卡描边 */
 val YoofiProfileStroke = Color(0xCC342A41)
+
+/** 夜间 Snackbar：略亮于纯黑底，贴资料卡紫黑 */
+val YoofiSnackbarContainer = Color(0xFF261A42)
+
+/** 夜间 Snackbar 文字 */
+val YoofiSnackbarContent = Color.White
