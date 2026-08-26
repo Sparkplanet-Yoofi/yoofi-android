@@ -46,3 +46,27 @@ val YoofiSnackbarContainer = Color(0xFF261A42)
 
 /** 夜间 Snackbar 文字 */
 val YoofiSnackbarContent = Color.White
+
+/** 登录页垂直渐变顶色 #190441，对齐 Figma `1761:9970` */
+val YoofiAuthBgTop = Color(0xFF190441)
+
+/** 社交按钮 / 禁用 Next 底 #302C55 */
+val YoofiAuthIdleButton = Color(0xFF302C55)
+
+/** 输入框填充 rgba(76,72,133,0.3) */
+val YoofiAuthFieldFill = Color(0x4D4C4885)
+
+/** 验证码空格 rgba(91,86,98,0.6) */
+val YoofiAuthOtpEmpty = Color(0x995B5662)
+
+/** 聚焦描边 #5257FF */
+val YoofiAuthFocusStroke = Color(0xFF5257FF)
+
+/** 错误描边与文案 #FF1D61 */
+val YoofiAuthError = Color(0xFFFF1D61)
+
+/** 光标渐变顶 #CE52FF */
+val YoofiAuthCaretFrom = Color(0xFFCE52FF)
+
+/** 光标渐变底 #7945FF */
+val YoofiAuthCaretTo = Color(0xFF7945FF)

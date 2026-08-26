@@ -39,4 +39,26 @@
     <string name="cd_settings">Settings</string>
     <string name="cd_copy_id">Copy ID</string>
     <string name="me_id_copied">已复制</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_or">Or</string>
+    <string name="auth_sign_up_email">Sign up with Email</string>
+    <string name="auth_legal_prefix">By clicking continue or sign up, you agree to our</string>
+    <string name="auth_terms">Terms of Service</string>
+    <string name="auth_legal_and">and</string>
+    <string name="auth_privacy">Privacy Policy</string>
+    <string name="auth_sign_up_title">Sign Up</string>
+    <string name="auth_enter_email">Enter your Email</string>
+    <string name="auth_email_subtitle">An account will be automatically created if you haven\'t registered yet.</string>
+    <string name="auth_email_placeholder">name@example.com</string>
+    <string name="auth_email_error">Please enter a valid Email address</string>
+    <string name="auth_enter_code">Enter verification Code</string>
+    <string name="auth_code_subtitle">Verification code has been sent to %1$s.</string>
+    <string name="auth_code_error">Verification code is incorrect, please try again.</string>
+    <string name="auth_resend_countdown">Resend code after %1$ds</string>
+    <string name="auth_resend">Resend code</string>
+    <string name="auth_next">Next</string>
+    <string name="cd_auth_back">Back</string>
+    <string name="cd_auth_google">Google</string>
+    <string name="cd_auth_apple">Apple</string>
+    <string name="cd_auth_logo">Yoofi</string>
 </resources>

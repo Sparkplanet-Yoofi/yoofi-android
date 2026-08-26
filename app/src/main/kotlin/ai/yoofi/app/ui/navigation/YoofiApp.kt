@@ -1,5 +1,6 @@
 package ai.yoofi.app.ui.navigation
 
+import ai.yoofi.app.ui.auth.AuthFlow
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.game.GameHomeScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
@@ -15,10 +16,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
- * 四 Tab 壳。默认停在 World，对应本次还原的 Game 首页。
+ * 先走登录 UI，成功后再进四 Tab 壳。默认 Tab 仍是 World。
  */
 @Composable
 fun YoofiApp(modifier: Modifier = Modifier) {
+    var loggedIn by remember { mutableStateOf(false) }
+    if (!loggedIn) {
+        AuthFlow(onLoggedIn = { loggedIn = true }, modifier = modifier)
+        return
+    }
     var tab by remember { mutableStateOf(YoofiTab.World) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {
