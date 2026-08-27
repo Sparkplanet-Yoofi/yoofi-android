@@ -20,13 +20,23 @@ private enum class AuthStep {
 }
 
 /**
+ * 登录成功后的落地页，由登录流自己判定，调用方不必靠回调名字反推。
+ */
+enum class AuthLandingTarget {
+    /** 老用户直接回 Home。 */
+    Home,
+
+    /** 新用户完成或跳过资料填写，落在 World。 */
+    World,
+}
+
+/**
  * 登录流本地状态机，不引入 Navigation。
- * 验证码 Next 请求登录接口：isNewUser 进 Profile，否则回调 [onEnterHome] 进 Home Tab。
+ * 验证码 Next 请求登录接口：isNewUser 进 Profile，否则按 [AuthLandingTarget.Home] 结束。
  */
 @Composable
 fun AuthFlow(
-    onLoggedIn: () -> Unit,
-    onEnterHome: () -> Unit,
+    onAuthenticated: (AuthLandingTarget) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: AuthViewModel = hiltViewModel()
@@ -39,7 +49,7 @@ fun AuthFlow(
         viewModel.sideEffect.collect { effect ->
             when (effect) {
                 AuthSideEffect.OpenProfileSetup -> step = AuthStep.Profile
-                AuthSideEffect.OpenHome -> onEnterHome()
+                AuthSideEffect.OpenHome -> onAuthenticated(AuthLandingTarget.Home)
             }
         }
     }
@@ -85,8 +95,8 @@ fun AuthFlow(
             modifier = modifier,
         )
         AuthStep.Profile -> ProfileSetupScreen(
-            onSkip = onLoggedIn,
-            onCompleted = onLoggedIn,
+            onSkip = { onAuthenticated(AuthLandingTarget.World) },
+            onCompleted = { onAuthenticated(AuthLandingTarget.World) },
             modifier = modifier,
         )
     }

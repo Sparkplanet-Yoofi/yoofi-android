@@ -47,7 +47,7 @@ private val GameBgBrush = Brush.verticalGradient(
 
 /**
  * Game / World 首页，对齐 Figma `982:14757`。
- * 底栏由外层 [ai.yoofi.app.ui.navigation.YoofiApp] 绘制。
+ * 底栏由外层 [ai.yoofi.app.ui.navigation.MainTabShell] 绘制。
  */
 @Composable
 fun GameHomeScreen(

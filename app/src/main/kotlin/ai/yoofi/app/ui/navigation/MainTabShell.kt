@@ -1,6 +1,5 @@
 package ai.yoofi.app.ui.navigation
 
-import ai.yoofi.app.ui.auth.AuthFlow
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.game.GameHomeScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
@@ -16,24 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
- * 先走登录 UI，成功后再进四 Tab 壳。
- * 验证码登录成功：isNewUser 走资料填写；否则落在 Home Tab。资料填写完成仍默认 World。
+ * 登录后的四 Tab 壳：只管当前 Tab 与底栏，不掺登录判断。
+ *
+ * @param startTab 首次进入落地的 Tab，由调用方按登录结果决定。
  */
 @Composable
-fun YoofiApp(modifier: Modifier = Modifier) {
-    var loggedIn by remember { mutableStateOf(false) }
-    var startTab by remember { mutableStateOf(YoofiTab.World) }
-    if (!loggedIn) {
-        AuthFlow(
-            onLoggedIn = { loggedIn = true },
-            onEnterHome = {
-                startTab = YoofiTab.Home
-                loggedIn = true
-            },
-            modifier = modifier,
-        )
-        return
-    }
+internal fun MainTabShell(
+    startTab: YoofiTab,
+    modifier: Modifier = Modifier,
+) {
     var tab by remember { mutableStateOf(startTab) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {

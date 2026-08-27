@@ -1,0 +1,24 @@
+---
+description: 第三方 SDK 必须经接口适配层，业务代码禁止直接 import 第三方包
+alwaysApply: true
+---
+
+# 第三方接口适配层
+
+引入或调用任何第三方库（裁剪、支付、登录、图片加载、统计等）时：
+
+1. **先写我方契约**（接口 + 配置/结果类型），放 `core.*` 或对应能力包。
+2. **适配层单独放** `data.*`（或 `impl`），**只有这里**可以 `import` 第三方包名。
+3. **UI / ViewModel / UseCase / domain 禁止** import 第三方包（例如 `com.canhub`、`com.theartofdev`）。
+4. Hilt `@Binds` 契约 → 适配实现。换库时只改适配层与这一处绑定。
+5. 不要用第三方 Activity/权限模型替代已有产品流程（如相册继续走系统 Photo Picker，不申请 `READ_MEDIA_*`）。
+
+```kotlin
+// ❌ 业务页直接用第三方 View
+import com.canhub.cropper.CropImageView
+
+// ✅ 业务只调契约
+ImageCropHost(renderer = host, sourcePath = path, spec = spec, ...)
+```
+
+参考：`ImageCropHostRenderer` + `CanHubImageCropHostRenderer`。

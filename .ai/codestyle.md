@@ -31,7 +31,8 @@ IDE：Settings → Editor → Code Style → Kotlin → Set from → **Kotlin st
 7. 序列化只用 `kotlinx.serialization`；DI 只用 Hilt，且 Hilt 注解只出现在 `app` 与 `impl`。  
 8. 优先扩展现有函数，禁止无关重构、禁止删除仍在用的业务代码。  
 9. 行宽 100；缩进 4 空格；不用 Tab。  
-10. 不确定就列疑问，不要猜完直接写。
+10. 不确定就列疑问，不要猜完直接写。  
+11. **第三方 SDK 必须经接口适配层**：契约在 `core.*`，`import com.xxx` 只允许出现在适配实现；UI / ViewModel / UseCase 禁止直连第三方。详见 `.cursor/rules/third-party-adapter.mdc`。
 
 ---
 

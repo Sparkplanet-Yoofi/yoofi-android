@@ -13,6 +13,7 @@ UGC-AI 互动故事游戏客户端，Google Play 海外发行，严格 GDPR 合�
 | `.ai/architecure.md` | 目标架构方案（模块结构第三章、架构守卫第四章） | 涉及模块划分、分层、技术选型时 |
 | `.ai/codestyle.md` | Kotlin / Compose / KMP 预留代码规范 | **写或改 Kotlin 代码时必读**（含键盘覆盖 `ImeOverlayBox`） |
 | `.ai/harness.md` | AI 协作方法论与工作流 | 需要了解协作规范时 |
+| `.cursor/rules/third-party-adapter.mdc` | 第三方必须经接口适配层 | 引入或调用第三方库时 |
 | `.jack/context/current-task.md` | Jack 个人任务现场（不入库） | 仅本机新会话恢复上下文 |
 
 ## 工程现状（重要，勿臆测）
@@ -20,7 +21,7 @@ UGC-AI 互动故事游戏客户端，Google Play 海外发行，严格 GDPR 合�
 **当前是单模块脚手架**，尚未按目标架构拆分：
 
 - 只有 `:app` 一个模块，源码在 `app/src/main/kotlin/`（**不是** `src/main/java/`，新文件请放 kotlin 目录）
-- 依赖：Compose BOM + core-ktx + lifecycle + activity-compose + **Hilt** + **OkHttp/Retrofit** + **kotlinx.serialization**
+- 依赖：Compose BOM + core-ktx + lifecycle + activity-compose + **Hilt** + **OkHttp/Retrofit** + **kotlinx.serialization**；图片裁剪 SDK 只允许出现在 `data.image.crop.canhub` 适配层
 - 网络新接口走 `RemoteDataSource` + `ApiCaller`（见 `.cursor/rules/remote-datasource.mdc`）
 - **尚未引入** Room、Navigation
 - 目标架构（`core:*` + `feature:x:api/impl`）见 `.ai/architecure.md` 第三章，按其第十二章落地清单推进
@@ -43,6 +44,7 @@ UGC-AI 互动故事游戏客户端，Google Play 海外发行，严格 GDPR 合�
 4. ViewModel 只能调用 UseCase，禁止直接触碰 Retrofit / Room DAO
 5. 禁止引入 Koin、RxJava、Moshi；DI 用 Hilt，异步用 Coroutine + Flow，序列化用 kotlinx.serialization
 6. 禁止在 build 脚本里硬编码依赖版本，统一走版本目录
+7. **第三方必须有接口适配层**：业务 / UI / UseCase 禁止直接 import 第三方包；只通过我方契约调用，换库只改适配实现
 
 ## 高风险区域（改动前必须先输出影响分析，不要直接改代码）
 

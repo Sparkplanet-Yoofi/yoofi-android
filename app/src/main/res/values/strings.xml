@@ -67,6 +67,7 @@
     <string name="auth_display_name">Display name</string>
     <string name="auth_display_name_placeholder">Enter your display name</string>
     <string name="auth_display_name_counter">%1$d/24</string>
+    <string name="auth_display_name_empty">Please enter a display name.</string>
     <string name="auth_display_name_taken">This display name is not available. Try another.</string>
     <string name="auth_gender_optional">Gender (optional)</string>
     <string name="auth_gender_male">Male</string>
@@ -81,4 +82,10 @@
     <string name="auth_take_photo">Take photo</string>
     <string name="auth_cancel">Cancel</string>
     <string name="cd_auth_camera">Camera</string>
+    <string name="cd_auth_avatar">Profile photo</string>
+    <string name="auth_avatar_pick_failed">Couldn\'t update avatar. Please try again.</string>
+    <string name="auth_crop_title">Crop photo</string>
+    <string name="auth_crop_confirm">Confirm</string>
+    <string name="auth_crop_processing">Processing…</string>
+    <string name="cd_auth_crop_rotate">Rotate</string>
 </resources>

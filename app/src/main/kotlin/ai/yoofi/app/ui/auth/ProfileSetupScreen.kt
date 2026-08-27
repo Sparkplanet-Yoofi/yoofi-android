@@ -1,6 +1,8 @@
 package ai.yoofi.app.ui.auth
 
 import ai.yoofi.app.R
+import ai.yoofi.app.core.image.ImageProcessConfig
+import ai.yoofi.app.ui.image.ImageCropScreen
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.ime.dismissIme
@@ -20,6 +22,8 @@ import ai.yoofi.app.ui.theme.YoofiDialogScrim
 import ai.yoofi.app.ui.theme.YoofiGenderSelected
 import ai.yoofi.app.ui.theme.YoofiStartGameFrom
 import ai.yoofi.app.ui.theme.YoofiStartGameTo
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
@@ -52,7 +56,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -63,6 +69,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -76,8 +84,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Figma 初始态默认昵称。 */
 internal const val DemoDefaultDisplayName = "User5867"
@@ -94,6 +106,14 @@ private val DialogShape = RoundedCornerShape(16.dp)
 private val DialogButtonShape = RoundedCornerShape(20.dp)
 
 private val ToastShape = RoundedCornerShape(8.dp)
+
+/**
+ * 展示名警示
+ */
+private enum class DisplayNameIssue {
+    Empty,
+    Unavailable,
+}
 
 private enum class GenderOption(
     @param:StringRes val labelRes: Int,
@@ -115,62 +135,91 @@ internal fun ProfileSetupScreen(
     onSkip: () -> Unit,
     onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ProfileSetupViewModel = hiltViewModel(),
 ) {
+    val avatarState by viewModel.uiState.collectAsStateWithLifecycle()
     var name by remember { mutableStateOf(DemoDefaultDisplayName) }
     var gender by remember { mutableStateOf<GenderOption?>(null) }
-    var nameTaken by remember { mutableStateOf(false) }
+    var nameIssue by remember { mutableStateOf<DisplayNameIssue?>(null) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var hasFailedOnce by remember { mutableStateOf(false) }
-    var showAvatarSheet by remember { mutableStateOf(false) }
-    var hasCustomAvatar by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    ProfileSetupContent(
-        name = name,
-        onNameChange = { value ->
-            name = value.take(DisplayNameMaxLength)
-            nameTaken = false
-        },
-        gender = gender,
-        onGenderChange = { selected ->
-            gender = if (gender == selected) null else selected
-        },
-        nameTaken = nameTaken,
-        saving = saving,
-        saveFailed = saveFailed,
-        showAvatarSheet = showAvatarSheet,
-        hasCustomAvatar = hasCustomAvatar,
-        onCameraClick = { showAvatarSheet = true },
-        onDismissAvatarSheet = { showAvatarSheet = false },
-        onPickAvatar = {
-            hasCustomAvatar = true
-            showAvatarSheet = false
-        },
-        onSkip = onSkip,
-        onContinue = {
-            if (saving) return@ProfileSetupContent
-            if (name == DemoTakenDisplayName) {
-                nameTaken = true
-                saveFailed = false
-                return@ProfileSetupContent
-            }
-            nameTaken = false
-            saveFailed = false
-            saving = true
-            scope.launch {
-                delay(900)
-                saving = false
-                if (!hasFailedOnce) {
-                    hasFailedOnce = true
-                    saveFailed = true
+    AvatarPickerEffect(viewModel)
+
+    Box(modifier = modifier.fillMaxSize()) {
+        ProfileSetupContent(
+            name = name,
+            onNameChange = { value ->
+                name = value.take(DisplayNameMaxLength)
+                nameIssue = if (value.isBlank() && nameIssue != null) {
+                    DisplayNameIssue.Empty
                 } else {
-                    onCompleted()
+                    null
                 }
-            }
-        },
-        modifier = modifier,
-    )
+            },
+            gender = gender,
+            onGenderChange = { selected ->
+                gender = if (gender == selected) null else selected
+            },
+            nameIssue = nameIssue,
+            saving = saving,
+            saveFailed = saveFailed,
+            avatarError = avatarState.avatarError,
+            showAvatarSheet = avatarState.showAvatarSheet,
+            avatarPath = avatarState.avatarPath,
+            avatarRevision = avatarState.avatarRevision,
+            isPickingAvatar = avatarState.isPicking,
+            onCameraClick = { viewModel.onIntent(ProfileSetupIntent.OpenAvatarSheet) },
+            onDismissAvatarSheet = {
+                viewModel.onIntent(ProfileSetupIntent.DismissAvatarSheet)
+            },
+            onChooseGallery = { viewModel.onIntent(ProfileSetupIntent.ChooseFromGallery) },
+            onTakePhoto = { viewModel.onIntent(ProfileSetupIntent.TakePhoto) },
+            onSkip = onSkip,
+            onContinue = {
+                if (saving) return@ProfileSetupContent
+                if (name.isBlank()) {
+                    nameIssue = DisplayNameIssue.Empty
+                    saveFailed = false
+                    return@ProfileSetupContent
+                }
+                if (name == DemoTakenDisplayName) {
+                    nameIssue = DisplayNameIssue.Unavailable
+                    saveFailed = false
+                    return@ProfileSetupContent
+                }
+                nameIssue = null
+                saveFailed = false
+                saving = true
+                scope.launch {
+                    delay(900)
+                    saving = false
+                    if (!hasFailedOnce) {
+                        hasFailedOnce = true
+                        // 服务端更新失败：输入框红框 + 占用文案。
+                        nameIssue = DisplayNameIssue.Unavailable
+                    } else {
+                        onCompleted()
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+        val cropPath = avatarState.cropSourcePath
+        if (cropPath != null) {
+            ImageCropScreen(
+                sourcePath = cropPath,
+                config = ImageProcessConfig.Avatar,
+                onConfirm = { encoded ->
+                    viewModel.onIntent(ProfileSetupIntent.CropConfirmed(encoded))
+                },
+                onCancel = { viewModel.onIntent(ProfileSetupIntent.CropCancelled) },
+                onFailed = { viewModel.onIntent(ProfileSetupIntent.CropFailed) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -179,14 +228,18 @@ private fun ProfileSetupContent(
     onNameChange: (String) -> Unit,
     gender: GenderOption?,
     onGenderChange: (GenderOption) -> Unit,
-    nameTaken: Boolean,
+    nameIssue: DisplayNameIssue?,
     saving: Boolean,
     saveFailed: Boolean,
+    avatarError: Boolean,
     showAvatarSheet: Boolean,
-    hasCustomAvatar: Boolean,
+    avatarPath: String?,
+    avatarRevision: Long,
+    isPickingAvatar: Boolean,
     onCameraClick: () -> Unit,
     onDismissAvatarSheet: () -> Unit,
-    onPickAvatar: () -> Unit,
+    onChooseGallery: () -> Unit,
+    onTakePhoto: () -> Unit,
     onSkip: () -> Unit,
     onContinue: () -> Unit,
     modifier: Modifier = Modifier,
@@ -206,8 +259,9 @@ private fun ProfileSetupContent(
             )
             Spacer(modifier = Modifier.height(28.dp))
             ProfileAvatar(
-                hasCustomAvatar = hasCustomAvatar,
-                enabled = !saving,
+                avatarPath = avatarPath,
+                avatarRevision = avatarRevision,
+                enabled = !saving && !isPickingAvatar,
                 onCameraClick = onCameraClick,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
@@ -227,7 +281,7 @@ private fun ProfileSetupContent(
                 DisplayNameField(
                     value = name,
                     onValueChange = onNameChange,
-                    showError = nameTaken,
+                    showError = nameIssue != null,
                     focused = focused,
                     enabled = !saving,
                     onFocusChange = { focused = it },
@@ -240,9 +294,19 @@ private fun ProfileSetupContent(
                         .fillMaxWidth(),
                 )
                 Box(modifier = Modifier.height(40.dp)) {
-                    if (nameTaken) {
+                    val issue = nameIssue
+                    if (issue != null) {
                         Text(
-                            text = stringResource(R.string.auth_display_name_taken),
+                            text = stringResource(
+                                when (issue) {
+                                    DisplayNameIssue.Empty -> {
+                                        R.string.auth_display_name_empty
+                                    }
+                                    DisplayNameIssue.Unavailable -> {
+                                        R.string.auth_display_name_taken
+                                    }
+                                },
+                            ),
                             color = YoofiAuthError,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(top = 8.dp),
@@ -265,9 +329,10 @@ private fun ProfileSetupContent(
                 )
             }
         }
-        if (saving || saveFailed) {
+        if (saving || saveFailed || avatarError) {
             ProfileStatusToast(
                 saving = saving,
+                avatarError = avatarError && !saving && !saveFailed,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offset(y = 677.dp),
@@ -284,8 +349,9 @@ private fun ProfileSetupContent(
         )
         if (showAvatarSheet) {
             ChangeAvatarDialog(
-                onGallery = onPickAvatar,
-                onCamera = onPickAvatar,
+                picking = isPickingAvatar,
+                onGallery = onChooseGallery,
+                onCamera = onTakePhoto,
                 onCancel = onDismissAvatarSheet,
             )
         }
@@ -341,12 +407,38 @@ private fun ProfileSetupHeader(
 
 @Composable
 private fun ProfileAvatar(
-    hasCustomAvatar: Boolean,
+    avatarPath: String?,
+    avatarRevision: Long,
     enabled: Boolean,
     onCameraClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.size(96.dp)) {
+    // 头像固定写 profile.jpg，路径不变；必须用 revision 强制重新解码。
+    val avatarBitmap by produceState<ImageBitmap?>(
+        initialValue = null,
+        avatarPath,
+        avatarRevision,
+    ) {
+        if (avatarPath.isNullOrBlank()) {
+            value = null
+            return@produceState
+        }
+        val decoded = withContext(Dispatchers.IO) {
+            val options = BitmapFactory.Options().apply {
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            }
+            BitmapFactory.decodeFile(avatarPath, options)
+        }
+        value = decoded?.asImageBitmap()
+    }
+    Box(
+        modifier = modifier
+            .size(96.dp)
+            .clickableDismissingIme(
+                enabled = enabled,
+                onClick = onCameraClick,
+            ),
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -354,17 +446,20 @@ private fun ProfileAvatar(
                 .background(YoofiAuthFieldFill),
             contentAlignment = Alignment.Center,
         ) {
-            if (hasCustomAvatar) {
-                Image(
-                    painter = painterResource(R.drawable.img_me_avatar),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
+            val loaded = avatarBitmap
+            if (loaded != null) {
+                key(avatarPath, avatarRevision) {
+                    Image(
+                        bitmap = loaded,
+                        contentDescription = stringResource(R.string.cd_auth_avatar),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             } else {
                 Image(
                     painter = painterResource(R.drawable.ic_profile_face),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.cd_auth_avatar),
                     modifier = Modifier.size(width = 48.dp, height = 57.dp),
                 )
             }
@@ -590,6 +685,7 @@ private fun ProfileContinueButton(
 @Composable
 private fun ProfileStatusToast(
     saving: Boolean,
+    avatarError: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val infinite = rememberInfiniteTransition(label = "profile-loader")
@@ -630,7 +726,13 @@ private fun ProfileStatusToast(
                 modifier = Modifier.size(16.dp),
             )
             Text(
-                text = stringResource(R.string.auth_profile_save_failed),
+                text = stringResource(
+                    if (avatarError) {
+                        R.string.auth_avatar_pick_failed
+                    } else {
+                        R.string.auth_profile_save_failed
+                    },
+                ),
                 color = Color.White,
                 fontSize = 12.sp,
                 modifier = Modifier
@@ -641,8 +743,12 @@ private fun ProfileStatusToast(
     }
 }
 
+/**
+ * 显示更改头像对话框
+ */
 @Composable
 private fun ChangeAvatarDialog(
+    picking: Boolean,
     onGallery: () -> Unit,
     onCamera: () -> Unit,
     onCancel: () -> Unit,
@@ -658,7 +764,7 @@ private fun ChangeAvatarDialog(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = 542.dp)
-                .width(300.dp)
+                .fillMaxWidth()
                 .height(238.dp)
                 .clip(DialogShape)
                 .background(YoofiDialogBg),
@@ -670,8 +776,8 @@ private fun ChangeAvatarDialog(
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(top = 24.dp)
-                    .width(252.dp),
+                    .padding(top = 24.dp, start = 24.dp, end = 24.dp)
+                    .fillMaxWidth(),
             )
             Column(
                 modifier = Modifier.padding(top = 22.dp, start = 24.dp, end = 24.dp),
@@ -681,16 +787,19 @@ private fun ChangeAvatarDialog(
                 AvatarDialogButton(
                     label = stringResource(R.string.auth_choose_gallery),
                     textColor = Color.White,
+                    enabled = !picking,
                     onClick = onGallery,
                 )
                 AvatarDialogButton(
                     label = stringResource(R.string.auth_take_photo),
                     textColor = Color.White,
+                    enabled = !picking,
                     onClick = onCamera,
                 )
                 AvatarDialogButton(
                     label = stringResource(R.string.auth_cancel),
                     textColor = YoofiAuthError,
+                    enabled = !picking,
                     onClick = onCancel,
                 )
             }
@@ -704,14 +813,15 @@ private fun AvatarDialogButton(
     textColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
-            .width(252.dp)
+            .fillMaxWidth()
             .height(40.dp)
             .clip(DialogButtonShape)
             .background(YoofiDialogButton)
-            .clickableDismissingIme(onClick = onClick),
+            .clickableDismissingIme(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -727,6 +837,25 @@ private fun AvatarDialogButton(
 @Composable
 private fun ProfileSetupScreenPreview() {
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
-        ProfileSetupScreen(onSkip = {}, onCompleted = {})
+        ProfileSetupContent(
+            name = DemoDefaultDisplayName,
+            onNameChange = {},
+            gender = null,
+            onGenderChange = {},
+            nameIssue = null,
+            saving = false,
+            saveFailed = false,
+            avatarError = false,
+            showAvatarSheet = false,
+            avatarPath = null,
+            avatarRevision = 0L,
+            isPickingAvatar = false,
+            onCameraClick = {},
+            onDismissAvatarSheet = {},
+            onChooseGallery = {},
+            onTakePhoto = {},
+            onSkip = {},
+            onContinue = {},
+        )
     }
 }

@@ -42,6 +42,9 @@
   `profileCompleted` 只存会话。Token 尚未落盘。
 - **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；
   全项目只允许 `RetrofitApiCaller` catch HTTP。拆 KMP 时换 `ApiCaller` 实现，不换 Ktor 于现在。
+- **第三方必须接口适配**：业务只依赖我方契约（如 `ImageCropHostRenderer`），
+  第三方 import 只出现在 `data.*` 适配类。换库不改 UI / UseCase。
+  图片裁剪用 CanHub（ArthurHub 已停更，且其 README 要求存储权限，与 Play 相册策略冲突）。
 
 ---
 
@@ -107,6 +110,15 @@
     三列用 `weight(1f)`；封面流焦点中心用 `maxWidth / 2`，不要用 175.dp。
     `Modifier.padding` 没有 `(horizontal, top, bottom)` 重载，要拆成两次
     `padding` 或写齐 `start/top/end/bottom`。
+
+11. **换头像相册不要申请 READ_MEDIA / 存储权限**：用 `PickVisualMedia` 系统选择器
+    即可读一张图；广域存储权限会被 Play 拒。    拍照才申请 `CAMERA`。相册选中或拍照成功后立刻
+    拷到 `cacheDir/avatars` 再进裁剪页（契约 `ImageCropHost`，适配 CanHub），
+    确认后压到 ≤5MB 再写入 `filesDir/avatars`。不要长期持有 Picker 的临时 URI。
+    不要接 ArthurHub 原库的 `CropImageActivity`（停更 + 存储权限）。
+    裁剪比例与体积上限走 `ImageProcessConfig`，不要把 1:1 / 5MB 写死在 UI 里。
+    落盘路径固定为 `filesDir/avatars/profile.jpg`：`produceState` 只认路径字符串，
+    覆盖写后必须递增 `avatarRevision` 才能重新解码；`asImageBitmap()` 放主线程。
 
 ---
 
