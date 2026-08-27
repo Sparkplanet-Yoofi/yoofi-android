@@ -1,5 +1,6 @@
 package ai.yoofi.app.ui.navigation
 
+import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.game.GameHomeScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
@@ -25,17 +26,33 @@ internal fun MainTabShell(
     modifier: Modifier = Modifier,
 ) {
     var tab by remember { mutableStateOf(startTab) }
+    var chatOpen by remember { mutableStateOf(false) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {
-            YoofiTab.Home -> HomeExploreScreen()
-            YoofiTab.World -> GameHomeScreen()
+            YoofiTab.Home -> HomeExploreScreen(
+                onListedWorkClick = {
+                    // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
+                    chatOpen = true
+                },
+            )
+            YoofiTab.World -> GameHomeScreen(
+                onPlayedItemClick = { chatOpen = true },
+            )
             YoofiTab.Create -> CreateScreen()
             YoofiTab.Me -> MeScreen()
         }
-        YoofiBottomBar(
-            selected = tab,
-            onTabSelected = { tab = it },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+        if (!chatOpen) {
+            YoofiBottomBar(
+                selected = tab,
+                onTabSelected = { tab = it },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+        if (chatOpen) {
+            ChatRoomScreen(
+                onBack = { chatOpen = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }

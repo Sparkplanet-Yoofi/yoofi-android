@@ -88,3 +88,75 @@ val YoofiDialogBg = Color(0xFF181A1B)
 
 /** 改头像弹层按钮 #35383F */
 val YoofiDialogButton = Color(0xFF35383F)
+
+/** 聊天室顶栏渐变顶色 #120E38，对齐 Figma `1826:9178` */
+val YoofiChatHeaderTop = Color(0xFF120E38)
+
+/** 章节目标胶囊 rgba(124,92,252,0.3) */
+val YoofiChatObjectivePill = Color(0x4D7C5CFC)
+
+/** 章节目标文案 #FAFAFF */
+val YoofiChatObjectiveText = Color(0xFFFAFAFF)
+
+/** Cast 芯片 rgba(163,75,190,0.3) */
+val YoofiChatChipCast = Color(0x4DA34BBE)
+
+/** Map 芯片 rgba(110,75,190,0.3) */
+val YoofiChatChipMap = Color(0x4D6E4BBE)
+
+/** Items 芯片 rgba(190,129,75,0.3) */
+val YoofiChatChipItems = Color(0x4DBE814B)
+
+/** Recap 芯片 rgba(75,160,190,0.3) */
+val YoofiChatChipRecap = Color(0x4D4BA0BE)
+
+/** 玩家气泡底 rgba(255,255,255,0.9) */
+val YoofiChatPlayerBubble = Color(0xE6FFFFFF)
+
+/** 玩家气泡文案 #1A296C */
+val YoofiChatPlayerText = Color(0xFF1A296C)
+
+/** 「Scene Characters」标题与角色卡描边 #EEA662，对齐 Figma `1826:9625` */
+val YoofiChatSceneAccent = Color(0xFFEEA662)
+
+/** 场景角色卡渐变起点 rgb(200,167,148) */
+val YoofiChatSceneCardFrom = Color(0xFFC8A794)
+
+/** 场景角色卡渐变终点 rgb(183,106,73) */
+val YoofiChatSceneCardTo = Color(0xFFB76A49)
+
+/** 场景角色卡副标题 #FFCC9C */
+val YoofiChatSceneHint = Color(0xFFFFCC9C)
+
+/** 获得道具事件底色 rgba(190,129,75,0.3) */
+val YoofiChatEventItemBg = Color(0x4DBE814B)
+
+/** 获得道具事件文案 #F7AC42 */
+val YoofiChatEventItemText = Color(0xFFF7AC42)
+
+/** 解锁地点事件底色 rgba(110,75,190,0.3) */
+val YoofiChatEventLocationBg = Color(0x4D6E4BBE)
+
+/** 解锁地点事件文案 #CABFFF */
+val YoofiChatEventLocationText = Color(0xFFCABFFF)
+
+/** @ 选人面板渐变起点 rgba(36,33,73,0.7) */
+val YoofiChatMentionFrom = Color(0xB3242149)
+
+/** @ 选人面板渐变终点 rgba(19,17,38,0.7) */
+val YoofiChatMentionTo = Color(0xB3131126)
+
+/** 选人面板描边 rgba(255,255,255,0.1) */
+val YoofiChatMentionStroke = Color(0x1AFFFFFF)
+
+/** 选人页码胶囊 rgba(156,90,255,0.05) */
+val YoofiChatPagerFill = Color(0x0D9C5AFF)
+
+/** 径向遮罩中点 rgba(10,9,19,0.55) */
+val YoofiChatRadialMid = Color(0x8C0A0913)
+
+/** Cast 人物卡翻牌时的金色召唤光晕内圈 */
+val YoofiChatSummonGlowInner = Color(0xFFFFD489)
+
+/** Cast 人物卡翻牌时的金色召唤光晕外圈 */
+val YoofiChatSummonGlowOuter = Color(0x00FFB74D)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:viewportWidth="12"
+    android:viewportHeight="12">
+    <path
+        android:fillColor="#00000000"
+        android:strokeWidth="1"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M5.5,4.5L7,6L5.5,7.5M10.5,6C10.5,3.51472 8.48528,1.5 6,1.5C3.51472,1.5 1.5,3.51472 1.5,6C1.5,8.48528 3.51472,10.5 6,10.5C8.48528,10.5 10.5,8.48528 10.5,6Z" />
+</vector>

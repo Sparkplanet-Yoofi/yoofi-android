@@ -77,13 +77,14 @@ private val DemoHeroBanners = listOf(
 )
 
 /**
- * 首页/探索，对齐 Figma `982:14591`。
+ * 首页/探索
  */
 @Composable
 fun HomeExploreScreen(
     modifier: Modifier = Modifier,
     onSearchClick: () -> Unit = {},
     onStartGame: () -> Unit = {},
+    onListedWorkClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -100,6 +101,7 @@ fun HomeExploreScreen(
                 banners = DemoHeroBanners,
                 onSearchClick = onSearchClick,
                 onStartGame = onStartGame,
+                onListedWorkClick = onListedWorkClick,
             )
         }
     }
@@ -115,6 +117,7 @@ private fun HomeHeroWithFeed(
     banners: List<HeroBanner>,
     onSearchClick: () -> Unit,
     onStartGame: () -> Unit,
+    onListedWorkClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val cycle = banners.size.coerceAtLeast(1)
@@ -169,7 +172,7 @@ private fun HomeHeroWithFeed(
                     .padding(start = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp),
             ) {
-                ListedWorksRow()
+                ListedWorksRow(onListedWorkClick = onListedWorkClick)
                 GameLibraryBlock()
             }
         }
@@ -187,7 +190,7 @@ private fun HeroBackdrop(
     // 色标按 844 画布绝对高度，Last pick（约 198dp）仍落在透明段，图能铺满。
     val canvasEndY = with(density) { FigmaCanvasHeight.toPx() }
     val vignetteEndY = with(density) { HeroTopVignetteHeight.toPx() }
-
+    
     Box(modifier = modifier) {
         if (banners.isNotEmpty()) {
             HorizontalPager(
@@ -352,7 +355,9 @@ private fun HeroDots(
 }
 
 @Composable
-private fun ListedWorksRow() {
+private fun ListedWorksRow(
+    onListedWorkClick: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -375,6 +380,7 @@ private fun ListedWorksRow() {
                     listOf(Color(0xFFEFB38D), Color(0xFFB77052)),
                 ),
                 title = stringResource(R.string.card_arranged_marriage),
+                onClick = onListedWorkClick,
             )
             ListedCard(
                 coverRes = R.drawable.img_home_listed_2,
@@ -383,6 +389,7 @@ private fun ListedWorksRow() {
                     listOf(Color(0xFFBFCCD0), Color(0xFF6B859B)),
                 ),
                 title = stringResource(R.string.card_arranged_marriage),
+                onClick = onListedWorkClick,
             )
             ListedCard(
                 coverRes = R.drawable.img_home_listed_3,
@@ -391,6 +398,7 @@ private fun ListedWorksRow() {
                     listOf(Color(0xFFF2BBBB), Color(0xFFC56A6A)),
                 ),
                 title = stringResource(R.string.card_arranged_short),
+                onClick = onListedWorkClick,
             )
         }
     }
@@ -402,12 +410,14 @@ private fun ListedCard(
     rank: String,
     rankBrush: Brush,
     title: String,
+    onClick: () -> Unit,
 ) {
     val (w, h) = ListedCardSize
     Box(
         modifier = Modifier
             .size(w, h)
-            .clip(RoundedCornerShape(12.dp)),
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick),
     ) {
         Image(
             painter = painterResource(coverRes),

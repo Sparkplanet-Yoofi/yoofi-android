@@ -120,6 +120,10 @@
     落盘路径固定为 `filesDir/avatars/profile.jpg`：`produceState` 只认路径字符串，
     覆盖写后必须递增 `avatarRevision` 才能重新解码；`asImageBitmap()` 放主线程。
 
+12. **聊天室从 World Played 封面进全屏 overlay**：`MainTabShell` 打开 `ChatRoomScreen`
+    并藏底栏，不要把聊天室嵌进 World 页。宽屏仍 `fillMaxWidth` + 左右 20，
+    不要把 Figma 350 锁死。Map / Items / Recap 尚无独立画板，只留芯片不造假页。
+
 ---
 
 ## 四、当前技术债（临时方案，勿扩散模仿）

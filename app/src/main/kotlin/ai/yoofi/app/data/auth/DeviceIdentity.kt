@@ -1,6 +1,5 @@
 package ai.yoofi.app.data.auth
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
@@ -15,7 +14,7 @@ import javax.inject.Singleton
 class DeviceIdentity @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) {
-    // TODO
+    // TODO 更新为服务器接口返回
     fun deviceId(): String =
         Settings.Secure.getString(
             context.contentResolver,

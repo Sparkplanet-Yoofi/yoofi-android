@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="29.25"
+    android:viewportHeight="29.25">
+    <path
+        android:fillType="evenOdd"
+        android:pathData="M14.625,0C3.828,0 0,3.828 0,14.625C0,25.422 3.828,29.25 14.625,29.25C25.422,29.25 29.25,25.422 29.25,14.625C29.25,3.828 25.422,0 14.625,0Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="14.625"
+                android:startY="0"
+                android:endX="14.625"
+                android:endY="46.0417">
+                <item android:offset="0" android:color="#FF6C32ED" />
+                <item android:offset="1" android:color="#FF381D7D" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.6252,21.8791C16.8182,21.8791 19.9427,17.5816 21.1832,15.7351C21.5297,15.2206 21.3932,14.5201 20.8787,14.1751C20.3612,13.8271 19.6622,13.9651 19.3172,14.4796C18.1217,16.2571 16.7432,17.9101 15.7502,18.8446V8.49612C15.7502,7.87512 15.2462,7.37112 14.6252,7.37112C14.0042,7.37112 13.5002,7.87512 13.5002,8.49612V18.8341C12.4967,17.8966 11.1227,16.2496 9.93325,14.4796C9.58975,13.9666 8.89225,13.8271 8.37175,14.1751C7.85725,14.5201 7.71925,15.2206 8.06725,15.7351C9.30775,17.5816 12.4322,21.8791 14.6252,21.8791Z" />
+</vector>
