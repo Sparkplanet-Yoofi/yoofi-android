@@ -26,8 +26,10 @@ ksp = "2.2.10-2.0.2"
 hilt = "2.59"
 # 与 Kotlin 2.2.x 对齐；不要用 Moshi
 kotlinxSerializationJson = "1.9.0"
-okhttp = "4.12.0"
-retrofit = "2.11.0"
+# HTTP 客户端：Ktor Client（KMP 可用）。引擎选 OkHttp，
+# 保留 OkHttp 拦截器这条口子，海外弱网的重试 / CDN 降级仍可复用成熟实现。
+# OkHttp 本体由 ktor-client-okhttp 传递引入，不再单独声明。
+ktor = "3.5.2"
 # 架构守卫（兼容性验证用）
 dependencyAnalysis = "3.18.0"
 moduleGraphAssert = "2.9.1"
@@ -57,10 +59,13 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+# 仅测试源集：MockEngine，用于验证 KtorApiCaller 的异常归一化
+ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
 # 仅允许 data.image.crop.canhub 适配层 import；业务禁止直连
 android-image-cropper = { group = "com.vanniktech", name = "android-image-cropper", version.ref = "androidImageCropper" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }

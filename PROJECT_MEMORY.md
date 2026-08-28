@@ -36,12 +36,25 @@
 - **含输入框的全屏页键盘覆盖、不顶布局**：根用 `ImeOverlayBox`（`ai.yoofi.app.ui.ime`），
   非输入点击用 `clickableDismissingIme`。禁止用 `imePadding` / 改 Manifest
   `windowSoftInputMode` 做单页差异。登录注册三页均已覆盖，无「贴键盘」例外。
-- **网络环境写在 `AppEnvironment`，构建只注入环境名**：debug→staging，release→production；
-  覆盖 `-Pyoofi.api.env=production|staging`。禁止业务代码写死 Base URL。
+- **网络环境写在 `AppEnvironment`，构建只注入原始参数**：映射唯一定义处是 `AppEnvironment.forStage`
+  （只有 production 阶段连线上）；覆盖 `-Pyoofi.api.env=production|staging`。禁止业务代码写死 Base URL。
+- **三档只有一套词汇：development / staging / production**，`BuildStage`、`AppEnvironment`、
+  Gradle 参数、文档全部对齐，**禁止再引入 qa / release 等同义词**；旧取值传了会直接构建失败。
+- **构建阶段与数据源开关**（详见 `.ai/apicall.md`）：`BuildStage` 三态
+  由 `BuildConfig.BUILD_STAGE` 注入，`-Pyoofi.stage=` 覆盖；
+  每个接口的 Demo / 真实切换登记在 `DemoFeature`，这是**唯一手改点**。
+  提测 / 上线包若还有接口只有 Demo 实现，`YoofiApplication` 启动自检直接抛错。
+  **禁止再写需要手工翻转的 mock 常量**——`TempMockLoginSuccess` 就是这么差点把 mock 登录带上线的。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。
 - **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；
-  全项目只允许 `RetrofitApiCaller` catch HTTP。拆 KMP 时换 `ApiCaller` 实现，不换 Ktor 于现在。
+  全项目只允许 `KtorApiCaller` catch HTTP。
+- **HTTP 客户端 = Ktor Client 3.5.2 + OkHttp 引擎**（2026-08-28 从 Retrofit 迁完，详见 `.ai/apicall.md`）：
+  提前于「拆 `core:network` 再换」的原定节奏执行，理由是当时只有 4 个文件 import Retrofit/OkHttp、
+  只有 1 个真实接口，迁移面最小且只会越拖越大；`ApiCaller` 接缝生效，Repository / UseCase / UI 零改动。
+  引擎保留 OkHttp，`OkHttp.create { addInterceptor(...) }` 这条口子还在，弱网能力（超时分级 /
+  退避重试 / CDN 降级 / 请求签名）没有丢。`createYoofiHttpClient` 是纯函数，可整体进 commonMain。
+  **禁止再引入 Retrofit / OkHttp 直接依赖。**
 - **第三方必须接口适配**：业务只依赖我方契约（如 `ImageCropHostRenderer`），
   第三方 import 只出现在 `data.*` 适配类。换库不改 UI / UseCase。
   图片裁剪用 CanHub（ArthurHub 已停更，且其 README 要求存储权限，与 Play 相册策略冲突）。
@@ -139,6 +152,10 @@
   `org.gradle.parallel` 仍被注释，`org.gradle.caching` / configuration cache 未配置。
   `org.gradle.jvmargs` 仅 2048m，模块化后需要上调。
 - **无 CI 配置**：Jenkins 流水线尚未建立，签名注入机制已就绪但未接线。
+- **`AppEnvironment` 两个 Base URL 仍是 `http://` 占位域名**（`your-api-server.com`）。
+  API 28 起默认禁止明文流量，换成真实域名后第一个请求就会被系统拦掉。
+  拿到域名时优先换 `https://`；服务端只有 http 才退而配 network security config，
+  且只对测试域名开、生产域名不许开。源码内已留 TODO。
 - **架构守卫缺位期间靠人工**：在 Konsist 等工具接入前，分层越界只能靠 Code Review 兜底，
   Review 时第一优先级必须是模块依赖与分层，而非业务逻辑。
 

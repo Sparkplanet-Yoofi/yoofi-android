@@ -6,14 +6,30 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-// debug 默认测试环境，release 默认线上。本地可覆盖：
-//   ./gradlew assembleDebug -Pyoofi.api.env=production
-fun resolveApiEnv(default: String): String {
-    val override = project.findProperty("yoofi.api.env") as String?
-    return when (override) {
-        "staging", "production" -> override
-        else -> default
+// 构建阶段。全项目这三档只有一套叫法：development / staging / production，
+// 与 BuildStage、AppEnvironment、文档完全一致，不要再引入 qa / release 等同义词。
+// development 允许 Demo 数据源，staging / production 强制真实接口。
+// debug 默认 development，release 默认 production。打提测包：
+//   ./gradlew assembleRelease -Pyoofi.stage=staging
+// 拼错参数直接失败，不静默退回默认值——否则「以为在打提测包，实际打出上线包」。
+fun resolveBuildStage(default: String): String {
+    val override = project.findProperty("yoofi.stage") as? String ?: return default
+    require(override in setOf("development", "staging", "production")) {
+        "yoofi.stage 只接受 development / staging / production，收到：$override"
     }
+    return override
+}
+
+// 环境（Base URL）默认由阶段推导，映射唯一定义在 AppEnvironment.forStage，
+// 构建脚本只把显式覆盖透传过去，不在这里重复一份映射逻辑。
+// 需要偏离默认时才传，例如用 debug 包排查线上问题：
+//   ./gradlew assembleDebug -Pyoofi.api.env=production
+fun apiEnvOverride(): String {
+    val override = project.findProperty("yoofi.api.env") as? String ?: return ""
+    require(override in setOf("staging", "production")) {
+        "yoofi.api.env 只接受 staging / production，收到：$override"
+    }
+    return override
 }
 
 // release 签名凭据全部来自环境变量，由 Jenkins Credentials 在构建时注入，
@@ -66,9 +82,10 @@ android {
         debug {
             buildConfigField(
                 "String",
-                "API_ENV",
-                "\"${resolveApiEnv(default = "staging")}\"",
+                "BUILD_STAGE",
+                "\"${resolveBuildStage(default = "development")}\"",
             )
+            buildConfigField("String", "API_ENV_OVERRIDE", "\"${apiEnvOverride()}\"")
         }
         release {
             isMinifyEnabled = false
@@ -83,9 +100,10 @@ android {
             }
             buildConfigField(
                 "String",
-                "API_ENV",
-                "\"${resolveApiEnv(default = "production")}\"",
+                "BUILD_STAGE",
+                "\"${resolveBuildStage(default = "production")}\"",
             )
+            buildConfigField("String", "API_ENV_OVERRIDE", "\"${apiEnvOverride()}\"")
         }
     }
     compileOptions {
@@ -114,13 +132,17 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.android.image.cropper)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.ktor.client.content.negotiation)
+    testImplementation(libs.ktor.serialization.kotlinx.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

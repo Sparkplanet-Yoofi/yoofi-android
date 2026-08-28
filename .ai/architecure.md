@@ -34,7 +34,7 @@
 | | 图片 | Coil 3 | Compose 原生适配，支持 WebP/GIF；Coil 3 已支持 KMP |
 | | 分页 | Paging 3 | UGC 信息流、作品列表 |
 | DI | 依赖注入 | **Hilt (Dagger)** | 编译期注入，适合模块化多人协作。不用 Koin：运行时解析，大项目错误暴露太晚 |
-| 网络 | HTTP | OkHttp + Retrofit 2 | 弱网适配：自定义拦截器、超时分级、重试、多 CDN 降级、请求签名 |
+| 网络 | HTTP | **Ktor Client 3.x（OkHttp 引擎）** | 2026-08-28 由 Retrofit 迁入，见 `.ai/apicall.md`。引擎保留 OkHttp，弱网适配（拦截器、超时分级、重试、多 CDN 降级、请求签名）能力不变，同时可进 KMP commonMain |
 | | 序列化 | **kotlinx.serialization**（替代 Moshi，见第七章） | 编译期生成，官方维护，**且是唯一可平滑迁移 KMP 的选择** |
 | 持久化 | 数据库 | Room（2.7+） | UGC 草稿、离线内容缓存；2.7+ 起支持 KMP |
 | | KV | DataStore (Proto) | 替代 SharedPreferences；存 token、隐私开关、配置 |
@@ -402,9 +402,11 @@ android.useAndroidX=true
 2. **序列化选 kotlinx.serialization，不选 Moshi**——这是本次修订中最重要的选型变更。Moshi 本身质量很好，但它是 JVM/Android 专用，**不支持 KMP**。一旦 DTO 与解析逻辑遍布 Data 层再想迁移，改造面是全量的。kotlinx.serialization 功能等价、官方维护、Retrofit 有官方 converter，现在选它的额外成本几乎为零，却保住了迁移路径。这是典型的"用零成本换未来可选项"。
 3. **Room 2.7+ / DataStore 均已支持 KMP**，选版本时确认支持面。
 
-按此约束，未来迁移的实际工作量为：`core:model`、`core:common`、各业务 `domain` 可直接复用；`core:network` 需把 Retrofit 换成 Ktor（**`ApiCaller` 与 `XxxRemoteDataSource` 接口不变**，只替换 `RetrofitApiCaller` / `RetrofitXxxRemoteDataSource`）；UI 层按需用 CMP 重写或各平台原生实现。
+按此约束，未来迁移的实际工作量为：`core:model`、`core:common`、各业务 `domain` 可直接复用；**网络层已于 2026-08-28 换成 Ktor，这一项已提前清零**；UI 层按需用 CMP 重写或各平台原生实现。
 
-当前 Android 阶段仍用 Retrofit。新接口禁止在 Repository 里 catch `HttpException`，必须走 `RemoteDataSource` + `ApiCaller`，规范见 `.cursor/rules/remote-datasource.mdc`。
+网络层迁移的复盘：`ApiCaller` 接缝完全兑现了设计预期——全项目只有 4 个文件 import 过 `retrofit2` / `okhttp3`，Repository / UseCase / UI 一行未改。这印证了第 4 点的判断：**接缝的价值不在于「以后能换」，而在于换的时候改动面是可预测的常数**。`createYoofiHttpClient` 与 `KtorApiCaller` 均已不含平台专属代码，拆模块时可直接进 commonMain，届时 iOS 侧只需换 Darwin 引擎。
+
+新接口禁止在 Repository 里 catch `ResponseException`，必须走 `RemoteDataSource` + `ApiCaller`，规范见 `.cursor/rules/remote-datasource.mdc` 与 `.ai/apicall.md`。
 
 ### 7.2 DI 框架的可迁移性
 

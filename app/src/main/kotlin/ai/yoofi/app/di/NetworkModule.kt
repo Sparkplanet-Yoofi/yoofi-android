@@ -1,33 +1,30 @@
 package ai.yoofi.app.di
 
 import ai.yoofi.app.BuildConfig
+import ai.yoofi.app.core.config.BuildStage
 import ai.yoofi.app.core.network.ApiCaller
 import ai.yoofi.app.core.network.AppEnvironment
-import ai.yoofi.app.core.network.RetrofitApiCaller
-import ai.yoofi.app.data.auth.AuthApi
-import ai.yoofi.app.data.auth.AuthHeaderInterceptor
+import ai.yoofi.app.core.network.KtorApiCaller
+import ai.yoofi.app.core.network.createYoofiHttpClient
+import ai.yoofi.app.domain.auth.UserSessionStore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import java.util.concurrent.TimeUnit
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import javax.inject.Singleton
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    /** 环境由阶段推导，`-Pyoofi.api.env` 显式覆盖优先。映射见 [AppEnvironment.forStage]。 */
     @Provides
     @Singleton
-    fun provideAppEnvironment(): AppEnvironment =
-        AppEnvironment.fromName(BuildConfig.API_ENV)
+    fun provideAppEnvironment(stage: BuildStage): AppEnvironment =
+        AppEnvironment.resolve(stage, BuildConfig.API_ENV_OVERRIDE)
 
     @Provides
     @Singleton
@@ -38,47 +35,23 @@ object NetworkModule {
         isLenient = true
     }
 
+    /**
+     * 引擎选 OkHttp：Ktor 的多平台 API 之下仍是这套久经考验的连接池与 HTTP/2 实现。
+     * 后续海外弱网要加重试 / CDN 降级时，`OkHttp.create { addInterceptor(...) }` 这条口子还在。
+     */
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        authHeaderInterceptor: AuthHeaderInterceptor,
-    ): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BODY
-            } else {
-                HttpLoggingInterceptor.Level.NONE
-            }
-        }
-        return OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
-            .callTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(authHeaderInterceptor)
-            .addInterceptor(logging)
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    @OptIn(ExperimentalSerializationApi::class)
-    fun provideRetrofit(
+    fun provideHttpClient(
         environment: AppEnvironment,
-        okHttpClient: OkHttpClient,
         json: Json,
-    ): Retrofit {
-        val contentType = "application/json".toMediaType()
-        return Retrofit.Builder()
-            .baseUrl(environment.baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory(contentType))
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthApi(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
+        userSessionStore: UserSessionStore,
+    ): HttpClient = createYoofiHttpClient(
+        engine = OkHttp.create(),
+        baseUrl = environment.baseUrl,
+        json = json,
+        accessTokenProvider = userSessionStore::currentAccessToken,
+        enableLogging = BuildConfig.DEBUG,
+    )
 }
 
 @Module
@@ -86,5 +59,5 @@ object NetworkModule {
 abstract class NetworkBindModule {
     @Binds
     @Singleton
-    abstract fun bindApiCaller(impl: RetrofitApiCaller): ApiCaller
+    abstract fun bindApiCaller(impl: KtorApiCaller): ApiCaller
 }

@@ -1,46 +1,56 @@
 ---
-description: 新接口必须走 RemoteDataSource + ApiCaller，禁止 Repository catch HttpException
-globs: app/src/main/kotlin/ai/yoofi/app/{core/common,core/network,data/**,di}/**/*.kt
+description: 新接口必须走 RemoteDataSource + ApiCaller，禁止 Repository catch HTTP 异常
+globs: app/src/main/kotlin/ai/yoofi/app/{core/common,core/config,core/network,data/**,di}/**/*.kt
 alwaysApply: false
 ---
 
-# RemoteDataSource 网络分层（KMP 预留）
+# RemoteDataSource 网络分层（Ktor）
 
-新接口按此模板实现。**现在不换 Ktor**；换库时只替换 `ApiCaller` 实现与 `RetrofitXxxRemoteDataSource`。
+HTTP 客户端是 **Ktor Client（OkHttp 引擎）**，2026-08-28 已从 Retrofit 迁完。
+禁止再引入 Retrofit / OkHttp 直接依赖。
+
+完整流程（含 Demo / 真实双实现切换、构建阶段常量）见 `.ai/apicall.md`。
 
 ## 分层（禁止跳层）
 
 ```
-UI / ViewModel → UseCase → Repository → RemoteDataSource（纯 Kotlin）
-                                      → RetrofitXxxRemoteDataSource + AuthApi
+UI / ViewModel → UseCase → Repository → XxxRemoteDataSource（纯 Kotlin 契约）
+                                      → KtorXxxRemoteDataSource（HttpClient）
                                       → ApiCaller.fetch { ... }
 ```
 
 | 层 | 放什么 | 禁止 |
 |---|---|---|
-| `core.common` | `Outcome` / `AppError` | Retrofit、OkHttp、`android.*` |
-| `core.network` | `ApiResponse`、`toOutcome()`、`ApiCaller` 接口 | 业务 DTO |
-| `RetrofitApiCaller` | **全项目唯一** `catch HttpException` / `IOException` | 业务规则 |
-| `XxxRemoteDataSource` | 纯 Kotlin 接口，返回 `Outcome<Dto>` | `@POST`、`HttpException`、`Context` |
-| `RetrofitXxxRemoteDataSource` | 组请求 + `apiCaller.fetch { api.xxx() }` | 写会话、写业务 Result |
-| `XxxRepository` | DTO→Domain、会话、映射 `AppError`→业务 Result | catch HTTP、直接持有 `XxxApi` |
+| `core.common` | `Outcome` / `AppError` | Ktor、`android.*` |
+| `core.network` | `ApiResponse`、`toOutcome()`、`ApiCaller` 接口、`createYoofiHttpClient` | 业务 DTO |
+| `KtorApiCaller` | **全项目唯一** catch `ResponseException` / `IOException` | 业务规则 |
+| `XxxRemoteDataSource` | 纯 Kotlin 接口，返回 `Outcome<Dto>` | `HttpClient`、Ktor 异常、`Context` |
+| `KtorXxxRemoteDataSource` | 组请求 + `apiCaller.fetch { httpClient.xxx().body() }` | 写会话、写业务 Result |
+| `XxxRepository` | DTO→Domain、会话、映射 `AppError`→业务 Result | catch HTTP、直接持有 `HttpClient` |
 
 ## 新增接口清单
 
-1. `XxxApi`：仅 Retrofit 注解，只给 `RetrofitXxxRemoteDataSource` 用
-2. `@Serializable` DTO 放 `data` 包，不要进 domain
-3. `XxxRemoteDataSource.method(...): Outcome<XxxDto>`
-4. `RetrofitXxxRemoteDataSource` 注入 `XxxApi` + `ApiCaller`
-5. Repository 只依赖 `XxxRemoteDataSource`，用 `when (outcome)`
-6. Hilt `@Binds` 接口 → Retrofit 实现
+1. `@Serializable` DTO 放 `data` 包，字段给默认值，不要进 domain
+2. `XxxRemoteDataSource.method(...): Outcome<XxxDto>`，纯 Kotlin
+3. `KtorXxxRemoteDataSource` 注入 `HttpClient` + `ApiCaller`，路径写**相对路径**常量；
+   同时写 `DemoXxxRemoteDataSource` 供开发阶段用
+4. Repository 只依赖 `XxxRemoteDataSource`，用 `when (outcome)`
+5. `DemoFeature` 登记一项，Hilt 用 `@Provides` + `switch.select(...)` 挑实现，
+   **不要再用 `@Binds` 直接绑死实现类**
+6. 接口接通后把 `DemoFeature.xxx.realImplemented` 改成 `true`
 7. ViewModel 仍然只调 UseCase
 
-参考实现：`AuthRemoteDataSource`、`RetrofitAuthRemoteDataSource`、`RemoteAuthRepository`、`RetrofitApiCaller`。
+参考实现：`AuthRemoteDataSource`、`KtorAuthRemoteDataSource`、`DemoAuthRemoteDataSource`、
+`RemoteAuthRepository`、`KtorApiCaller`。
 
 ## 明确禁止
 
-- 在 Repository / UseCase / ViewModel 里 `catch HttpException` 或 `IOException`
-- 把 `AuthApi` / 任意 `*Api` 注入 Repository
+- 在 Repository / UseCase / ViewModel 里 catch `ResponseException` 或 `IOException`
+- 把 `HttpClient` 注入 Repository / UseCase / ViewModel
 - 新接口再写一套 try/catch 网络封装
-- Domain 出现 DTO、Retrofit、`android.*`
-- 为了 KMP 现在引入 Ktor（等拆 `core:network` 模块再换实现）
+- Domain 出现 DTO、Ktor、`android.*`，或任何 mock 开关
+- 写需要手工翻转的 mock 常量；开关一律登记到 `DemoFeature`
+- 业务代码里用 `if (BuildConfig.DEBUG)` 判断数据源
+- 重新引入 Retrofit / OkHttp 直接依赖（OkHttp 只作为 Ktor 引擎传递引入）
+- 改 `createYoofiHttpClient` 的全局超时；单接口放大超时用 per-request `timeout { }`
+- 在数据源里拼 host；Base URL 只由 `defaultRequest` 注入
