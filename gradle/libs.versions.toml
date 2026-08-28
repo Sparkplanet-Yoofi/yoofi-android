@@ -33,6 +33,8 @@ dependencyAnalysis = "3.18.0"
 moduleGraphAssert = "2.9.1"
 # ArthurHub android-image-cropper 已停更；用其官方继任 CanHub（Maven: vanniktech）
 androidImageCropper = "4.7.0"
+# 仅测试源集：runTest / TestDispatcher，落实 codestyle「协程测试禁止实等 delay」
+kotlinxCoroutinesTest = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +63,7 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 # 仅允许 data.image.crop.canhub 适配层 import；业务禁止直连
 android-image-cropper = { group = "com.vanniktech", name = "android-image-cropper", version.ref = "androidImageCropper" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -120,6 +120,7 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.android.image.cropper)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

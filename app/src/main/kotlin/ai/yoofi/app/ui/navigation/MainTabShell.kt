@@ -5,6 +5,7 @@ import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.game.GameHomeScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.me.MeScreen
+import ai.yoofi.app.ui.search.SearchScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -27,21 +28,24 @@ internal fun MainTabShell(
 ) {
     var tab by remember { mutableStateOf(startTab) }
     var chatOpen by remember { mutableStateOf(false) }
+    var searchOpen by remember { mutableStateOf(false) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {
             YoofiTab.Home -> HomeExploreScreen(
+                onSearchClick = { searchOpen = true },
                 onListedWorkClick = {
                     // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
                     chatOpen = true
                 },
             )
             YoofiTab.World -> GameHomeScreen(
+                onSearchClick = { searchOpen = true },
                 onPlayedItemClick = { chatOpen = true },
             )
             YoofiTab.Create -> CreateScreen()
             YoofiTab.Me -> MeScreen()
         }
-        if (!chatOpen) {
+        if (!chatOpen && !searchOpen) {
             YoofiBottomBar(
                 selected = tab,
                 onTabSelected = { tab = it },
@@ -51,6 +55,17 @@ internal fun MainTabShell(
         if (chatOpen) {
             ChatRoomScreen(
                 onBack = { chatOpen = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        if (searchOpen) {
+            SearchScreen(
+                onBack = { searchOpen = false },
+                onStoryClick = {
+                    // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
+                    searchOpen = false
+                    chatOpen = true
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }

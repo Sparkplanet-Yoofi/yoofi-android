@@ -160,3 +160,24 @@ val YoofiChatSummonGlowInner = Color(0xFFFFD489)
 
 /** Cast 人物卡翻牌时的金色召唤光晕外圈 */
 val YoofiChatSummonGlowOuter = Color(0x00FFB74D)
+
+/** 搜索框底色 rgba(91,86,98,0.5) */
+val YoofiSearchFieldFill = Color(0x805B5662)
+
+/** 搜索框描边 rgba(255,255,255,0.1) */
+val YoofiSearchFieldStroke = Color(0x1AFFFFFF)
+
+/** 搜索框光标渐变起点 #CE52FF */
+val YoofiSearchCaretFrom = Color(0xFFCE52FF)
+
+/** 搜索框光标渐变终点 #7945FF */
+val YoofiSearchCaretTo = Color(0xFF7945FF)
+
+/** 联想词里命中关键词的片段 #7945FF */
+val YoofiSearchHighlight = Color(0xFF7945FF)
+
+/** 结果卡蒙版中段 rgba(16,15,32,0.48) */
+val YoofiSearchCardScrimMid = Color(0x7A100F20)
+
+/** 结果卡蒙版末段 rgba(31,0,63,0.54) */
+val YoofiSearchCardScrimEnd = Color(0x8A1F003F)

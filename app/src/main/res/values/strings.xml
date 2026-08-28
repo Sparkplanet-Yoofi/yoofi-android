@@ -114,4 +114,8 @@
     <string name="cd_chat_mention_prev">Previous page</string>
     <string name="cd_chat_mention_next">Next page</string>
     <string name="cd_chat_cast_character">Cast character card</string>
+    <string name="search_hint">Search stories by title</string>
+    <string name="search_cancel">Cancel</string>
+    <string name="search_empty">No stories found.\nPlease try another keyword.</string>
+    <string name="cd_search_clear">Clear keyword</string>
 </resources>
