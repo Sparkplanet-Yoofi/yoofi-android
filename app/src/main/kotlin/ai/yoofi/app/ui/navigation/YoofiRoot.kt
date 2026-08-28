@@ -30,5 +30,4 @@ fun YoofiRoot(modifier: Modifier = Modifier) {
 
 private fun AuthLandingTarget.toStartTab(): YoofiTab = when (this) {
     AuthLandingTarget.Home -> YoofiTab.Home
-    AuthLandingTarget.World -> YoofiTab.World
 }

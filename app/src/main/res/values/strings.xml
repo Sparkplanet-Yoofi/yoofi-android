@@ -118,4 +118,25 @@
     <string name="search_cancel">Cancel</string>
     <string name="search_empty">No stories found.\nPlease try another keyword.</string>
     <string name="cd_search_clear">Clear keyword</string>
+    <string name="detail_follow">Follow</string>
+    <string name="detail_following">Following</string>
+    <string name="detail_cast">Cast</string>
+    <string name="detail_cast_see_all">See all</string>
+    <string name="detail_interaction_area">Interaction Area</string>
+    <string name="detail_comment_hint">Share your thoughts and join the discussion</string>
+    <string name="detail_comment_author">Author</string>
+    <string name="detail_comment_reply">reply</string>
+    <string name="detail_hide_replies">Hide Replies</string>
+    <string name="detail_show_replies">Show Replies</string>
+    <string name="detail_continue_game">Continue Game</string>
+    <string name="cd_detail_back">Back</string>
+    <string name="cd_detail_more">More</string>
+    <string name="cd_detail_save">Save story</string>
+    <string name="cd_detail_expand_synopsis">Expand synopsis</string>
+    <string name="cd_detail_collapse_synopsis">Collapse synopsis</string>
+    <string name="cd_detail_like">Like</string>
+    <string name="cd_detail_reply">Reply</string>
+    <string name="cd_detail_delete">Delete comment</string>
+    <string name="cd_detail_attach_image">Attach image</string>
+    <string name="cd_detail_send">Send comment</string>
 </resources>

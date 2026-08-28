@@ -37,7 +37,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -77,10 +80,14 @@ internal fun ChatRoomFooter(
     val focusRequester = remember { FocusRequester() }
     val mentionOpen = state.overlay == ChatRoomOverlay.Mention
     val inspireOpen = state.overlay == ChatRoomOverlay.Inspiration
+    // 仅在「选中成员」这一刻置位。@ 面板打开时不能抢焦点：
+    // BasicTextField 一拿到焦点就会开输入会话弹键盘，把成员列表挡掉
+    var focusAfterMention by remember { mutableStateOf(false) }
 
-    LaunchedEffect(mentionOpen) {
-        if (mentionOpen) {
+    LaunchedEffect(focusAfterMention) {
+        if (focusAfterMention) {
             focusRequester.requestFocus()
+            focusAfterMention = false
         }
     }
 
@@ -104,14 +111,23 @@ internal fun ChatRoomFooter(
                         members = state.mentionPageMembers,
                         pageIndex = state.mentionPage,
                         pageCount = state.mentionPageCount,
-                        onIntent = onIntent,
+                        onIntent = { intent ->
+                            // 选完成员要接着补后半句，这时才该把焦点和键盘给输入框；
+                            // 翻页等其它意图不碰焦点，免得翻一页弹一次键盘
+                            if (intent is ChatRoomIntent.PickMention) {
+                                focusAfterMention = true
+                            }
+                            onIntent(intent)
+                        },
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
                 }
             }
             InputRow(
                 draft = state.draft,
-                showPlaceholder = state.draft.isEmpty() && !mentionOpen,
+                // 原来 @ 面板一开就抢焦点，输入框有光标才藏提示语；现在不抢焦点了，
+                // 再藏提示语会得到一个既无光标又无文案的空框，所以只看草稿是否为空
+                showPlaceholder = state.draft.isEmpty(),
                 onDraftChange = { onIntent(ChatRoomIntent.DraftChanged(it)) },
                 onAtClick = { onIntent(ChatRoomIntent.OpenMention) },
                 onWandClick = { onIntent(ChatRoomIntent.OpenInspiration) },

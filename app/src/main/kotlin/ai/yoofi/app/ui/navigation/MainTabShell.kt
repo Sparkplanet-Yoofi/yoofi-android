@@ -2,7 +2,8 @@ package ai.yoofi.app.ui.navigation
 
 import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
-import ai.yoofi.app.ui.game.GameHomeScreen
+import ai.yoofi.app.ui.world.GameHomeScreen
+import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.me.MeScreen
 import ai.yoofi.app.ui.search.SearchScreen
@@ -29,14 +30,13 @@ internal fun MainTabShell(
     var tab by remember { mutableStateOf(startTab) }
     var chatOpen by remember { mutableStateOf(false) }
     var searchOpen by remember { mutableStateOf(false) }
+    // 打开中的游戏详情页 id；null 表示没开。工程尚未引入 Navigation，先用状态提升代替回退栈
+    var detailGameId by remember { mutableStateOf<String?>(null) }
     Box(modifier = modifier.fillMaxSize()) {
         when (tab) {
             YoofiTab.Home -> HomeExploreScreen(
                 onSearchClick = { searchOpen = true },
-                onListedWorkClick = {
-                    // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
-                    chatOpen = true
-                },
+                onListedWorkClick = { gameId -> detailGameId = gameId },
             )
             YoofiTab.World -> GameHomeScreen(
                 onSearchClick = { searchOpen = true },
@@ -45,11 +45,20 @@ internal fun MainTabShell(
             YoofiTab.Create -> CreateScreen()
             YoofiTab.Me -> MeScreen()
         }
-        if (!chatOpen && !searchOpen) {
+        if (!chatOpen && !searchOpen && detailGameId == null) {
             YoofiBottomBar(
                 selected = tab,
                 onTabSelected = { tab = it },
                 modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+        detailGameId?.let { gameId ->
+            GameDetailScreen(
+                gameId = gameId,
+                onBack = { detailGameId = null },
+                // 详情页留在栈上：从聊天室返回时回到详情，符合「进游戏再退出」的预期
+                onContinueGame = { chatOpen = true },
+                modifier = Modifier.fillMaxSize(),
             )
         }
         if (chatOpen) {

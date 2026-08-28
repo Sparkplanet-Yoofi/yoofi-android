@@ -25,9 +25,6 @@ private enum class AuthStep {
 enum class AuthLandingTarget {
     /** 老用户直接回 Home。 */
     Home,
-
-    /** 新用户完成或跳过资料填写，落在 World。 */
-    World,
 }
 
 /**
@@ -95,8 +92,8 @@ fun AuthFlow(
             modifier = modifier,
         )
         AuthStep.Profile -> ProfileSetupScreen(
-            onSkip = { onAuthenticated(AuthLandingTarget.World) },
-            onCompleted = { onAuthenticated(AuthLandingTarget.World) },
+            onSkip = { onAuthenticated(AuthLandingTarget.Home) },
+            onCompleted = { onAuthenticated(AuthLandingTarget.Home) },
             modifier = modifier,
         )
     }

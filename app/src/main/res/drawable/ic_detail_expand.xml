@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+<!-- 简介展开/收起。设计稿字形 13.5833，居中放进 16 的画布，故 group 偏移 1.20835 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <group
+        android:translateX="1.20835"
+        android:translateY="1.20835">
+        <path
+            android:pathData="M8.87167,12.8203C11.893,12.3523 12.9583,10.639 12.9583,6.79167C12.9583,2.167 11.4183,0.625 6.79167,0.625C2.165,0.625 0.625,2.167 0.625,6.79167C0.625,11.4163 2.165,12.9583 6.79167,12.9583"
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.8"
+            android:strokeWidth="1.25"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M4.47884,5.83065C4.47884,5.83065 6.07217,8.15465 6.79217,8.15465C7.51217,8.15465 9.10551,5.83065 9.10551,5.83065"
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.8"
+            android:strokeWidth="1.25"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

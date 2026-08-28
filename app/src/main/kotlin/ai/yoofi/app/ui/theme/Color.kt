@@ -21,6 +21,10 @@ val YoofiTitleGradientEnd = Color(0xFF7C5CFC)
 
 /** 底栏选中色 / Color 3 */
 val YoofiAccent = Color(0xFF925CFF)
+/**
+ * 底栏未选中色 / Color 1
+ */
+val YoofiInactive = Color(0xFF807E86)
 
 /** Game 页垂直渐变四档，节点 982:14758 */
 val YoofiGameBg0 = Color(0xFF131126)
@@ -181,3 +185,38 @@ val YoofiSearchCardScrimMid = Color(0x7A100F20)
 
 /** 结果卡蒙版末段 rgba(31,0,63,0.54) */
 val YoofiSearchCardScrimEnd = Color(0x8A1F003F)
+
+// ── 游戏详情页 Figma 1943:13409 / 1943:13476 ──
+
+/** 主行动渐变起点 #6C32ED。Follow 药丸、Continue Game、发送键共用 */
+val YoofiDetailActionFrom = Color(0xFF6C32ED)
+
+/** 主行动渐变终点 #381D7D */
+val YoofiDetailActionTo = Color(0xFF381D7D)
+
+/** 内容卡半透明底 rgba(55,42,80,0.5)，叠在头图上 */
+val YoofiDetailSheet = Color(0x80372A50)
+
+/** 页面底色 #1C1629。内容卡之下、吸底栏都用它 */
+val YoofiDetailBackground = Color(0xFF1C1629)
+
+/** 收藏键与评论输入框底 rgba(76,72,133,0.3) */
+val YoofiDetailFieldFill = Color(0x4D4C4885)
+
+/** 评论输入框描边 #3D3D3D */
+val YoofiDetailFieldStroke = Color(0xFF3D3D3D)
+
+/** 评论正文 #D4D4D4 */
+val YoofiDetailCommentBody = Color(0xFFD4D4D4)
+
+/** 时长徽章底 rgba(255,214,102,0.2) */
+val YoofiDetailHoursBadgeFill = Color(0x33FFD666)
+
+/** 时长徽章文字 #E3BD8A */
+val YoofiDetailHoursBadgeText = Color(0xFFE3BD8A)
+
+/** 作者徽章渐变起点 #906AEF（自右向左） */
+val YoofiDetailAuthorBadgeFrom = Color(0xFF906AEF)
+
+/** 作者徽章渐变终点 #5257FF */
+val YoofiDetailAuthorBadgeTo = Color(0xFF5257FF)

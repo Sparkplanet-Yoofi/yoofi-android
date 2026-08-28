@@ -3,6 +3,8 @@ package ai.yoofi.app.ui.navigation
 import ai.yoofi.app.R
 import ai.yoofi.app.ui.theme.YoofiAccent
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
+import ai.yoofi.app.ui.theme.YoofiInactive
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,12 +21,13 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
@@ -87,18 +90,15 @@ fun YoofiBottomBar(
                 label = stringResource(R.string.tab_home),
                 onClick = { onTabSelected(YoofiTab.Home) },
                 modifier = Modifier.tabSlot(TabHomeStart),
-            ) {
-                Image(
-                    painter = painterResource(
-                        if (selected == YoofiTab.Home) {
-                            R.drawable.ic_nav_house_active
-                        } else {
-                            R.drawable.ic_nav_house
-                        },
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(TabIcon),
-                    contentScale = ContentScale.Fit,
+            ) { tint ->
+                // 两套资源只差「选中时多一层 30% 内填充」的形状，颜色仍由 tint 统一决定
+                TabIconImage(
+                    res = if (selected == YoofiTab.Home) {
+                        R.drawable.ic_nav_house_active
+                    } else {
+                        R.drawable.ic_nav_house
+                    },
+                    tint = tint,
                 )
             }
             TabItem(
@@ -106,59 +106,57 @@ fun YoofiBottomBar(
                 label = stringResource(R.string.tab_world),
                 onClick = { onTabSelected(YoofiTab.World) },
                 modifier = Modifier.tabSlot(TabWorldStart),
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_nav_planet),
-                    contentDescription = null,
-                    modifier = Modifier.size(TabIcon),
-                    contentScale = ContentScale.Fit,
-                )
+            ) { tint ->
+                TabIconImage(R.drawable.ic_nav_planet, tint)
             }
             TabItem(
                 selected = selected == YoofiTab.Create,
                 label = stringResource(R.string.tab_create),
                 onClick = { onTabSelected(YoofiTab.Create) },
                 modifier = Modifier.tabSlot(TabCreateStart),
-            ) {
-                CreateTabIcon()
+            ) { tint ->
+                CreateTabIcon(tint)
             }
             TabItem(
                 selected = selected == YoofiTab.Me,
                 label = stringResource(R.string.tab_me),
                 onClick = { onTabSelected(YoofiTab.Me) },
                 modifier = Modifier.tabSlot(TabMeStart),
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_nav_me),
-                    contentDescription = null,
-                    modifier = Modifier.size(TabIcon),
-                    contentScale = ContentScale.Fit,
-                )
+            ) { tint ->
+                TabIconImage(R.drawable.ic_nav_me, tint)
             }
         }
     }
 }
 
+/**
+ * 这是全底栏唯一决定颜色的地方
+ */
+private fun tabContentColor(selected: Boolean): Color = if (selected) YoofiAccent else YoofiInactive
+
+/**
+ * @param icon 接收 [tabContentColor] 算好的颜色，保证图标和文案不会各染各的
+ */
 @Composable
 private fun TabItem(
     selected: Boolean,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    icon: @Composable () -> Unit,
+    icon: @Composable (Color) -> Unit,
 ) {
+    val contentColor = tabContentColor(selected)
     Column(
         modifier = modifier
             .wrapContentWidth()
-            .alpha(if (selected) 1f else 0.4f)
             .clickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        icon()
+        icon(contentColor)
         Spacer(Modifier.height(4.dp))
         Text(
             text = label,
-            color = if (selected) YoofiAccent else Color.White,
+            color = contentColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -166,6 +164,18 @@ private fun TabItem(
             overflow = TextOverflow.Visible,
         )
     }
+}
+
+/** 单张 26 图标。[ColorFilter.tint] 走 SrcIn，只换 RGB 不动透明度，星球那层 0.3 半透明底会照常保留 */
+@Composable
+private fun TabIconImage(@DrawableRes res: Int, tint: Color) {
+    Image(
+        painter = painterResource(res),
+        contentDescription = null,
+        modifier = Modifier.size(TabIcon),
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(tint),
+    )
 }
 
 /**
@@ -185,7 +195,9 @@ private fun Modifier.tabSlot(slotStart: Dp): Modifier = layout { measurable, con
 }
 
 @Composable
-private fun CreateTabIcon() {
+private fun CreateTabIcon(tint: Color) {
+    // 三颗星共用一个 filter，省掉每次重组建三个对象
+    val filter = remember(tint) { ColorFilter.tint(tint) }
     // Figma Create：26 框内三颗星 (2,6) 14 / (15.5,16.5) 6 / (15.5,4.5) 4
     Box(modifier = Modifier.size(TabIcon)) {
         Image(
@@ -195,6 +207,7 @@ private fun CreateTabIcon() {
                 .offset(x = 2.dp, y = 6.dp)
                 .size(14.dp),
             contentScale = ContentScale.Fit,
+            colorFilter = filter,
         )
         Image(
             painter = painterResource(R.drawable.ic_nav_star_md),
@@ -203,6 +216,7 @@ private fun CreateTabIcon() {
                 .offset(x = 15.5.dp, y = 16.5.dp)
                 .size(6.dp),
             contentScale = ContentScale.Fit,
+            colorFilter = filter,
         )
         Image(
             painter = painterResource(R.drawable.ic_nav_star_sm),
@@ -211,13 +225,23 @@ private fun CreateTabIcon() {
                 .offset(x = 15.5.dp, y = 4.5.dp)
                 .size(4.dp),
             contentScale = ContentScale.Fit,
+            colorFilter = filter,
         )
     }
 }
 
-@Preview(widthDp = 390, heightDp = 120, showBackground = true, backgroundColor = 0xFF000000)
+/** 两个预览各选中一个 Tab，能一眼看出「选中紫、其余白」在每个图标上都成立 */
+@Preview(name = "选中 Home", widthDp = 390, heightDp = 120, showBackground = true, backgroundColor = 0xFF000000)
 @Composable
-private fun YoofiBottomBarPreview() {
+private fun YoofiBottomBarHomePreview() {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
+        YoofiBottomBar(selected = YoofiTab.Home, onTabSelected = {})
+    }
+}
+
+@Preview(name = "选中 World", widthDp = 390, heightDp = 120, showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun YoofiBottomBarWorldPreview() {
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         YoofiBottomBar(selected = YoofiTab.World, onTabSelected = {})
     }

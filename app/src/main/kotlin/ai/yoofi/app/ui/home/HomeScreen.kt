@@ -1,7 +1,7 @@
 package ai.yoofi.app.ui.home
 
 import ai.yoofi.app.R
-import ai.yoofi.app.ui.game.GameSectionHeader
+import ai.yoofi.app.ui.world.GameSectionHeader
 import ai.yoofi.app.ui.theme.YoofiChipText
 import ai.yoofi.app.ui.theme.YoofiDisplaySerif
 import ai.yoofi.app.ui.theme.YoofiStartGameFrom
@@ -84,7 +84,7 @@ fun HomeExploreScreen(
     modifier: Modifier = Modifier,
     onSearchClick: () -> Unit = {},
     onStartGame: () -> Unit = {},
-    onListedWorkClick: () -> Unit = {},
+    onListedWorkClick: (String) -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -117,7 +117,7 @@ private fun HomeHeroWithFeed(
     banners: List<HeroBanner>,
     onSearchClick: () -> Unit,
     onStartGame: () -> Unit,
-    onListedWorkClick: () -> Unit,
+    onListedWorkClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val cycle = banners.size.coerceAtLeast(1)
@@ -356,7 +356,7 @@ private fun HeroDots(
 
 @Composable
 private fun ListedWorksRow(
-    onListedWorkClick: () -> Unit,
+    onListedWorkClick: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -380,7 +380,7 @@ private fun ListedWorksRow(
                     listOf(Color(0xFFEFB38D), Color(0xFFB77052)),
                 ),
                 title = stringResource(R.string.card_arranged_marriage),
-                onClick = onListedWorkClick,
+                onClick = { onListedWorkClick("listed-1") },
             )
             ListedCard(
                 coverRes = R.drawable.img_home_listed_2,
@@ -389,7 +389,7 @@ private fun ListedWorksRow(
                     listOf(Color(0xFFBFCCD0), Color(0xFF6B859B)),
                 ),
                 title = stringResource(R.string.card_arranged_marriage),
-                onClick = onListedWorkClick,
+                onClick = { onListedWorkClick("listed-2") },
             )
             ListedCard(
                 coverRes = R.drawable.img_home_listed_3,
@@ -398,7 +398,7 @@ private fun ListedWorksRow(
                     listOf(Color(0xFFF2BBBB), Color(0xFFC56A6A)),
                 ),
                 title = stringResource(R.string.card_arranged_short),
-                onClick = onListedWorkClick,
+                onClick = { onListedWorkClick("listed-3") },
             )
         }
     }

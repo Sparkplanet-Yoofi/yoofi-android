@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+<!-- 描边款播放图标。首页 Start Game 用的 ic_media_play 是实心款，两者外观不同，勿互换 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:pathData="M4.16667,14.4447V5.55582C4.16667,4.82285 4.16667,4.45596 4.32091,4.23909C4.45553,4.04981 4.66303,3.92554 4.89339,3.89582C5.15724,3.86179 5.48084,4.03438 6.12712,4.37906L14.4604,8.82351L14.4635,8.82485C15.1777,9.20576 15.535,9.39631 15.6522,9.65027C15.7544,9.87182 15.7544,10.1276 15.6522,10.3491C15.5348,10.6034 15.1767,10.7948 14.4604,11.1768L6.12712,15.6212C5.48038,15.9661 5.15733,16.138 4.89339,16.104C4.66303,16.0743 4.45553,15.95 4.32091,15.7608C4.16667,15.5439 4.16667,15.1777 4.16667,14.4447Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.66667"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

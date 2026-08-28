@@ -24,4 +24,7 @@ enum class DemoFeature(
 
     /** 聊天室：`ChatRoomRepository`，服务端接口未定，暂时只有 Demo。 */
     ChatRoom(demoInDevelopment = true, realImplemented = false),
+
+    /** 游戏详情：`GameDetailRepository`，服务端接口未定，暂时只有 Demo。 */
+    GameDetail(demoInDevelopment = true, realImplemented = false),
 }

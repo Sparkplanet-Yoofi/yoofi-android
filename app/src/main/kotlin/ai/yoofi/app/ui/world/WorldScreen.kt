@@ -1,4 +1,4 @@
-package ai.yoofi.app.ui.game
+package ai.yoofi.app.ui.world
 
 import ai.yoofi.app.R
 import ai.yoofi.app.ui.theme.YoofiGameBg0
