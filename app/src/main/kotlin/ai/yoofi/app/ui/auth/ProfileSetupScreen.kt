@@ -5,7 +5,9 @@ import ai.yoofi.app.core.image.ImageProcessConfig
 import ai.yoofi.app.ui.image.ImageCropScreen
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.ime.cursorAtEnd
 import ai.yoofi.app.ui.ime.dismissIme
+import ai.yoofi.app.ui.ime.rememberCursorAtEndField
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiAuthCaretFrom
 import ai.yoofi.app.ui.theme.YoofiAuthCaretTo
@@ -505,9 +507,10 @@ private fun DisplayNameField(
         focused -> YoofiAuthFocusStroke
         else -> YoofiAuthIdleStroke
     }
+    val field = rememberCursorAtEndField(value, onValueChange)
     BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = field.value,
+        onValueChange = field.onValueChange,
         enabled = enabled,
         singleLine = true,
         textStyle = TextStyle(
@@ -523,6 +526,7 @@ private fun DisplayNameField(
         modifier = modifier
             .fillMaxWidth()
             .height(46.dp)
+            .cursorAtEnd(field)
             .onFocusChanged { onFocusChange(it.isFocused) },
         decorationBox = { inner ->
             Box(

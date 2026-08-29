@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+<!-- 灵感条目最左侧的「羽毛 + 竖分隔线」整体，对应 Figma Frame 2147228237。
+     设计里这一帧被整行的水平镜像翻过来用，所以羽毛朝向与分隔线位置都是镜像后的结果；
+     这里用 group scaleX=-1 复现，路径本身保持 Figma 导出的原始坐标，别手动改成镜像坐标。
+     旧的 img_chat_quill.png 是未镜像、且不含分隔线的半成品，已被本文件取代。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="28dp"
+    android:height="20dp"
+    android:viewportWidth="28.25"
+    android:viewportHeight="20">
+    <group
+        android:pivotX="14.125"
+        android:scaleX="-1">
+        <path
+            android:pathData="M0.25,3V17"
+            android:strokeAlpha="0.3"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="0.5" />
+        <path android:pathData="M17.25,16h5a0.8,0.8 0,0 1,0.8 0.8v0a0.8,0.8 0,0 1,-0.8 0.8h-5a0.8,0.8 0,0 1,-0.8 -0.8v0a0.8,0.8 0,0 1,0.8 -0.8z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="17.25"
+                    android:endY="16.8"
+                    android:startX="22.25"
+                    android:startY="16.8"
+                    android:type="linear">
+                    <item android:color="#FFA6A2C1" android:offset="0" />
+                    <item android:color="#FFFFFFFF" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M15.5,16h1.25a0.75,0.75 0,0 1,0 1.5h-1.25a0.75,0.75 0,0 1,0 -1.5z" />
+        <path android:pathData="M11.25,2C22.2377,2 24.2569,11.9343 25.1045,17.1004C25.182,17.5729 24.8156,18 24.3367,18C23.9647,18 23.6484,17.7345 23.5545,17.3745C22.9624,15.1034 21.713,13.8448 19.8056,13.6C16.6944,13.2 14.3611,10.4 13.5833,8L14.75,7.2L13.9722,6.4C13.1944,5.6 12.4136,4.4 11.25,2Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="18.25"
+                    android:endY="18"
+                    android:startX="18.25"
+                    android:startY="2"
+                    android:type="linear">
+                    <item android:color="#FFFFFFFF" android:offset="0" />
+                    <item android:color="#FF9894B8" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

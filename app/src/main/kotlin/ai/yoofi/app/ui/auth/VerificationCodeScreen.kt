@@ -4,6 +4,8 @@ import ai.yoofi.app.R
 import ai.yoofi.app.domain.auth.DemoInvalidEmailOtp
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.ime.cursorAtEnd
+import ai.yoofi.app.ui.ime.rememberCursorAtEndField
 import ai.yoofi.app.ui.theme.YoofiAccent
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiAuthError
@@ -175,18 +177,20 @@ private fun OtpRow(
     onCodeChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val field = rememberCursorAtEndField(code) { raw ->
+        onCodeChange(raw.filter { it.isDigit() }.take(OtpLength))
+    }
     BasicTextField(
-        value = code,
-        onValueChange = { raw ->
-            onCodeChange(raw.filter { it.isDigit() }.take(OtpLength))
-        },
+        value = field.value,
+        onValueChange = field.onValueChange,
         singleLine = true,
         textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
         cursorBrush = SolidColor(Color.Transparent),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .cursorAtEnd(field),
         decorationBox = {
             Row(
                 modifier = Modifier.fillMaxWidth(),

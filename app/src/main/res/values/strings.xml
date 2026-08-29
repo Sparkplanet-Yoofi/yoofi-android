@@ -110,6 +110,8 @@
     <string name="cd_chat_jump_latest">Jump to latest</string>
     <string name="cd_chat_at">Mention character</string>
     <string name="cd_chat_inspire">Inspiration</string>
+    <string name="cd_chat_inspire_edit">Put this line into the input box</string>
+    <string name="cd_chat_send">Send</string>
     <string name="cd_chat_close">Close</string>
     <string name="cd_chat_mention_prev">Previous page</string>
     <string name="cd_chat_mention_next">Next page</string>

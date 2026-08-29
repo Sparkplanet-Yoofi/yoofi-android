@@ -5,6 +5,8 @@ import ai.yoofi.app.domain.search.SearchStory
 import ai.yoofi.app.domain.search.SearchSuggestion
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.ime.cursorAtEnd
+import ai.yoofi.app.ui.ime.rememberCursorAtEndField
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiSearchCaretFrom
 import ai.yoofi.app.ui.theme.YoofiSearchCaretTo
@@ -213,10 +215,11 @@ private fun SearchField(
     // 四个设计稿都带光标，进页即聚焦拉起键盘
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    val field = rememberCursorAtEndField(query, onQueryChange)
 
     BasicTextField(
-        value = query,
-        onValueChange = onQueryChange,
+        value = field.value,
+        onValueChange = field.onValueChange,
         singleLine = true,
         textStyle = TextStyle(
             color = Color.White,
@@ -230,7 +233,8 @@ private fun SearchField(
         keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
         modifier = modifier
             .height(SearchFieldHeight)
-            .focusRequester(focusRequester),
+            .focusRequester(focusRequester)
+            .cursorAtEnd(field),
         decorationBox = { inner ->
             Row(
                 modifier = Modifier

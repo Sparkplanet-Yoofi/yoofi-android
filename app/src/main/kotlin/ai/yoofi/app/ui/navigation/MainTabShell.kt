@@ -2,11 +2,14 @@ package ai.yoofi.app.ui.navigation
 
 import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
-import ai.yoofi.app.ui.world.GameHomeScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.me.MeScreen
 import ai.yoofi.app.ui.search.SearchScreen
+import ai.yoofi.app.ui.surface.ContentBackdropProvider
+import ai.yoofi.app.ui.surface.ContentBackdropRecorder
+import ai.yoofi.app.ui.surface.rememberContentBackdropLayer
+import ai.yoofi.app.ui.world.GameHomeScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -32,51 +35,56 @@ internal fun MainTabShell(
     var searchOpen by remember { mutableStateOf(false) }
     // 打开中的游戏详情页 id；null 表示没开。工程尚未引入 Navigation，先用状态提升代替回退栈
     var detailGameId by remember { mutableStateOf<String?>(null) }
-    Box(modifier = modifier.fillMaxSize()) {
-        when (tab) {
-            YoofiTab.Home -> HomeExploreScreen(
-                onSearchClick = { searchOpen = true },
-                onListedWorkClick = { gameId -> detailGameId = gameId },
-            )
-            YoofiTab.World -> GameHomeScreen(
-                onSearchClick = { searchOpen = true },
-                onPlayedItemClick = { chatOpen = true },
-            )
-            YoofiTab.Create -> CreateScreen()
-            YoofiTab.Me -> MeScreen()
-        }
-        if (!chatOpen && !searchOpen && detailGameId == null) {
-            YoofiBottomBar(
-                selected = tab,
-                onTabSelected = { tab = it },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-        }
-        detailGameId?.let { gameId ->
-            GameDetailScreen(
-                gameId = gameId,
-                onBack = { detailGameId = null },
-                // 详情页留在栈上：从聊天室返回时回到详情，符合「进游戏再退出」的预期
-                onContinueGame = { chatOpen = true },
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-        if (chatOpen) {
-            ChatRoomScreen(
-                onBack = { chatOpen = false },
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-        if (searchOpen) {
-            SearchScreen(
-                onBack = { searchOpen = false },
-                onStoryClick = {
-                    // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
-                    searchOpen = false
-                    chatOpen = true
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
+    val backdropLayer = rememberContentBackdropLayer()
+    ContentBackdropProvider(backdropLayer) {
+        Box(modifier = modifier.fillMaxSize()) {
+            ContentBackdropRecorder(backdropLayer) {
+                when (tab) {
+                    YoofiTab.Home -> HomeExploreScreen(
+                        onSearchClick = { searchOpen = true },
+                        onListedWorkClick = { gameId -> detailGameId = gameId },
+                    )
+                    YoofiTab.World -> GameHomeScreen(
+                        onSearchClick = { searchOpen = true },
+                        onPlayedItemClick = { chatOpen = true },
+                    )
+                    YoofiTab.Create -> CreateScreen()
+                    YoofiTab.Me -> MeScreen()
+                }
+            }
+            if (!chatOpen && !searchOpen && detailGameId == null) {
+                YoofiBottomBar(
+                    selected = tab,
+                    onTabSelected = { tab = it },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+            detailGameId?.let { gameId ->
+                GameDetailScreen(
+                    gameId = gameId,
+                    onBack = { detailGameId = null },
+                    // 详情页留在栈上：从聊天室返回时回到详情，符合「进游戏再退出」的预期
+                    onContinueGame = { chatOpen = true },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (chatOpen) {
+                ChatRoomScreen(
+                    onBack = { chatOpen = false },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (searchOpen) {
+                SearchScreen(
+                    onBack = { searchOpen = false },
+                    onStoryClick = {
+                        // TODO AI不要删：临时线点击后直接跳转聊天室，少了2个游戏详情界面Start Game
+                        searchOpen = false
+                        chatOpen = true
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
 }

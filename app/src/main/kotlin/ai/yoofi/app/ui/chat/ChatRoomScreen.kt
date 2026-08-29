@@ -3,6 +3,7 @@ package ai.yoofi.app.ui.chat
 import ai.yoofi.app.R
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.ime.imeAvoidingPadding
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiChatHeaderTop
 import ai.yoofi.app.ui.theme.YoofiChatRadialMid
@@ -66,7 +67,8 @@ private val JumpArrowCenterOffset = 7.dp
 
 /**
  * 多人聊天室，对齐 Figma `1826:9178`（Cast `1826:9211`、@ `1826:11556`、灵感 `1826:9937`）。
- * 键盘走 [ImeOverlayBox]，不画 iOS 状态栏 / Home Indicator。
+ * 键盘弹起对齐 `1826:10061`：顶栏 [ChatRoomHeader] 留在顶部，列表与 Footer 整体抬到键盘上沿；
+ * 背景仍铺满。点空白收键盘。不画 iOS 状态栏 / Home Indicator。
  */
 @Composable
 internal fun ChatRoomScreen(
@@ -148,70 +150,78 @@ internal fun ChatRoomLayout(
                     ),
                 ),
         )
-        Column(modifier = Modifier.fillMaxSize()) {
-            ChatRoomHeader(
-                title = state.chapterTitle,
-                objective = state.chapterObjective,
-                volumeMuted = state.volumeMuted,
-                onExit = onBack,
-                onToggleVolume = { onIntent(ChatRoomIntent.ToggleVolume) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            ChatMessageList(
-                items = state.items,
-                listState = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                onSceneCharacterClick = { character ->
-                    onIntent(ChatRoomIntent.OpenSceneCharacter(character.id))
-                },
-            )
-            ChatRoomFooter(
-                state = state,
-                onIntent = onIntent,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // 渐变带不占列布局高度，改为向上盖住列表底部：
-                    // 列表因此多拿 54dp 空间并在芯片行处才裁剪，滚到底的内容被渐变淡出而非硬切
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints)
-                        val fade = FooterFadeHeight.roundToPx()
-                        layout(placeable.width, placeable.height - fade) {
-                            placeable.place(0, -fade)
-                        }
-                    }
-                    .onSizeChanged { footerHeightPx = it.height },
-            )
-        }
-        val showJumpArrow = rememberJumpArrowVisible(
-            itemCount = state.items.size,
-            listState = listState,
-        )
-        // 画在 Footer 之后，才不会被 Footer 顶部的半透明渐变洗淡
-        if (showJumpArrow && footerHeightPx > 0) {
-            Image(
-                painter = painterResource(R.drawable.ic_chat_jump_down),
-                contentDescription = stringResource(R.string.cd_chat_jump_latest),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset {
-                        IntOffset(
-                            x = -JumpArrowCenterOffset.roundToPx(),
-                            y = JumpArrowFooterOverlap.roundToPx() - footerHeightPx,
-                        )
-                    }
-                    .size(36.dp)
-                    .shadow(
-                        elevation = 6.dp,
-                        shape = CircleShape,
-                        ambientColor = Color.Black.copy(alpha = 0.15f),
-                        spotColor = Color.Black.copy(alpha = 0.15f),
-                    )
-                    .clickableDismissingIme {
-                        onIntent(ChatRoomIntent.JumpToLatest)
+        // 只垫这一层：背景/遮罩仍铺满屏幕，键盘从底下盖上来。
+        // inset = IME ∪ 导航栏，键盘收起后回落到导航栏，Footer 不再自己垫导航栏。
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .imeAvoidingPadding(),
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                ChatRoomHeader(
+                    title = state.chapterTitle,
+                    objective = state.chapterObjective,
+                    volumeMuted = state.volumeMuted,
+                    onExit = onBack,
+                    onToggleVolume = { onIntent(ChatRoomIntent.ToggleVolume) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                ChatMessageList(
+                    items = state.items,
+                    listState = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    onSceneCharacterClick = { character ->
+                        onIntent(ChatRoomIntent.OpenSceneCharacter(character.id))
                     },
+                )
+                ChatRoomFooter(
+                    state = state,
+                    onIntent = onIntent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // 渐变带不占列布局高度，改为向上盖住列表底部：
+                        // 列表因此多拿 54dp 空间并在芯片行处才裁剪，滚到底的内容被渐变淡出而非硬切
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            val fade = FooterFadeHeight.roundToPx()
+                            layout(placeable.width, placeable.height - fade) {
+                                placeable.place(0, -fade)
+                            }
+                        }
+                        .onSizeChanged { footerHeightPx = it.height },
+                )
+            }
+            val showJumpArrow = rememberJumpArrowVisible(
+                itemCount = state.items.size,
+                listState = listState,
             )
+            // 画在 Footer 之后，才不会被 Footer 顶部的半透明渐变洗淡
+            if (showJumpArrow && footerHeightPx > 0) {
+                Image(
+                    painter = painterResource(R.drawable.ic_chat_jump_down),
+                    contentDescription = stringResource(R.string.cd_chat_jump_latest),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset {
+                            IntOffset(
+                                x = -JumpArrowCenterOffset.roundToPx(),
+                                y = JumpArrowFooterOverlap.roundToPx() - footerHeightPx,
+                            )
+                        }
+                        .size(36.dp)
+                        .shadow(
+                            elevation = 6.dp,
+                            shape = CircleShape,
+                            ambientColor = Color.Black.copy(alpha = 0.15f),
+                            spotColor = Color.Black.copy(alpha = 0.15f),
+                        )
+                        .clickableDismissingIme {
+                            onIntent(ChatRoomIntent.JumpToLatest)
+                        },
+                )
+            }
         }
         if (state.overlay == ChatRoomOverlay.Cast) {
             ChatCastOverlay(

@@ -197,9 +197,12 @@ Compose：
   不要用 `when` 切页替代可滑动 Pager。划过最左再到最后一页，划过最右再到第一页。
   内层竖滑列表不得吞掉外层横滑。详见 `.cursor/rules/nested-loop-pager.mdc`。
 - **含输入框的全屏页默认键盘覆盖**：根用 `ImeOverlayBox`，非输入点击用
-  `clickableDismissingIme`，禁止 `imePadding()` / 按 IME 改按钮坐标把布局顶起。
-  API 在 `ai.yoofi.app.ui.ime`。仅当产品书面要求「按钮贴键盘」才用 `imePadding`，
-  且不要叠 Overlay。登录注册三页（邮箱 / 验证码 / 资料填写）均已覆盖。
+  `clickableDismissingIme`，禁止按 IME 改按钮坐标把布局顶起。
+  API 在 `ai.yoofi.app.ui.ime`。仅当产品书面要求「内容贴键盘」才用
+  `imeAvoidingPadding()`（只垫内容层，继续叠 Overlay）。
+  登录注册三页覆盖不顶；聊天室是例外（Figma `1826:10061`）。
+  **获焦光标必须在文案末尾**：`rememberCursorAtEndField` + `cursorAtEnd`，
+  禁止把 `String` 直接喂给 `BasicTextField`。
   详见 `.cursor/rules/ime-overlay.mdc`。
 - **网络**：OkHttp + Retrofit + kotlinx.serialization；Base URL 只来自
   `AppEnvironment`。新接口必须 `RemoteDataSource` + `ApiCaller.fetch`，

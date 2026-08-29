@@ -2,7 +2,9 @@ package ai.yoofi.app.ui.auth
 
 import ai.yoofi.app.R
 import ai.yoofi.app.ui.ime.ImeOverlayBox
+import ai.yoofi.app.ui.ime.cursorAtEnd
 import ai.yoofi.app.ui.ime.dismissIme
+import ai.yoofi.app.ui.ime.rememberCursorAtEndField
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiAuthCaretFrom
 import ai.yoofi.app.ui.theme.YoofiAuthCaretTo
@@ -146,9 +148,10 @@ private fun EmailField(
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val field = rememberCursorAtEndField(value, onValueChange)
     BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = field.value,
+        onValueChange = field.onValueChange,
         singleLine = true,
         textStyle = TextStyle(
             color = Color.White,
@@ -166,6 +169,7 @@ private fun EmailField(
         modifier = modifier
             .fillMaxWidth()
             .height(46.dp)
+            .cursorAtEnd(field)
             .onFocusChanged { onFocusChange(it.isFocused) },
         decorationBox = { inner ->
             Box(

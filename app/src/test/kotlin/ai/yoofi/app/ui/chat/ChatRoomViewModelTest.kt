@@ -28,8 +28,16 @@ class ChatRoomViewModelTest {
     fun `选人后草稿带 at 前缀`() {
         val viewModel = viewModel()
         viewModel.onIntent(ChatRoomIntent.PickMention("c1"))
-        assertTrue(viewModel.uiState.value.draft.startsWith("@tomy"))
+        assertEquals("@tomy ", viewModel.uiState.value.draft)
         assertEquals(ChatRoomOverlay.None, viewModel.uiState.value.overlay)
+    }
+
+    @Test
+    fun `先打触发符再选人只保留一段 at 加名字`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.DraftChanged("@"))
+        viewModel.onIntent(ChatRoomIntent.PickMention("c1"))
+        assertEquals("@tomy ", viewModel.uiState.value.draft)
     }
 
     @Test
@@ -55,6 +63,31 @@ class ChatRoomViewModelTest {
         assertEquals(before + 2, items.size)
         assertEquals("beat-0", items[items.lastIndex - 1].id)
         assertEquals("beat-1", items.last().id)
+    }
+
+    @Test
+    fun `点灵感羽毛只填草稿不发送`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.OpenInspiration)
+        viewModel.onIntent(ChatRoomIntent.PickInspiration("frozen for a single heartbeat."))
+        val state = viewModel.uiState.value
+        assertEquals("frozen for a single heartbeat.", state.draft)
+        assertEquals(ChatRoomOverlay.None, state.overlay)
+        assertTrue(state.items.none { it is ChatItem.Player })
+    }
+
+    @Test
+    fun `点灵感条目本体直接发送并收起列表`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.OpenInspiration)
+        viewModel.onIntent(ChatRoomIntent.SendInspiration("horrible heartbeat."))
+        val items = viewModel.uiState.value.items
+        val player = items[items.lastIndex - 1]
+        assertTrue(player is ChatItem.Player)
+        assertEquals("horrible heartbeat.", (player as ChatItem.Player).body)
+        assertEquals("beat-0", items.last().id)
+        assertEquals("", viewModel.uiState.value.draft)
+        assertEquals(ChatRoomOverlay.None, viewModel.uiState.value.overlay)
     }
 
     @Test

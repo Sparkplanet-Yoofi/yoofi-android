@@ -4,6 +4,8 @@ import ai.yoofi.app.R
 import ai.yoofi.app.ui.theme.YoofiAccent
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiInactive
+import ai.yoofi.app.ui.surface.BackdropFrostBox
+import ai.yoofi.app.ui.theme.YoofiNavCapsule
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -46,6 +47,12 @@ private val BarStackHeight = 86.dp
 private val CapsuleWidth = 350.dp
 private val CapsuleHeight = 64.dp
 private val CapsuleRadius = 16.dp
+/**
+ * CSS `backdrop-filter: blur(10px)` 的 10 是高斯标准差。
+ * [androidx.compose.ui.draw.blur] 收半径，按详情卡同一公式
+ * `sigma ≈ 0.577 * radius + 0.5` 折成约 16.5dp，照抄 10dp 会几乎看不出糊。
+ */
+private val CapsuleBackdropBlur = 16.dp
 private val TabIcon = 26.dp
 /** Figma 图标槽 28；文案比槽宽，按槽中心放置、允许溢出 */
 private val TabSlotWidth = 28.dp
@@ -78,12 +85,13 @@ fun YoofiBottomBar(
             .height(BarStackHeight),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Box(
+        BackdropFrostBox(
             modifier = Modifier
                 .width(CapsuleWidth)
-                .height(CapsuleHeight)
-                .clip(RoundedCornerShape(CapsuleRadius))
-                .background(Color.Black.copy(alpha = 0.72f)),
+                .height(CapsuleHeight),
+            tint = YoofiNavCapsule,
+            blurRadius = CapsuleBackdropBlur,
+            shape = RoundedCornerShape(CapsuleRadius),
         ) {
             TabItem(
                 selected = selected == YoofiTab.Home,

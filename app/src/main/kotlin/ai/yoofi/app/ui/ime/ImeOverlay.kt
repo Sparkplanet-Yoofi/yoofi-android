@@ -8,7 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -27,7 +32,9 @@ import androidx.compose.ui.semantics.Role
  *
  * 页面根用 [ImeOverlayBox]；非输入点击用 [clickableDismissingIme]；
  * 不要对根布局 / 底栏写 `imePadding()` 或按 `WindowInsets.ime` 改按钮位置。
- * 仅当产品书面要求「按钮贴键盘」时才用 `imePadding`，且不要叠 [ImeOverlayEffect]。
+ * 仅当产品书面要求「内容贴键盘」时才用 [imeAvoidingPadding]，且只垫需要抬起的那一层，
+ * 背景图仍铺满；继续叠 [ImeOverlayBox] 以保持 ADJUST_NOTHING，避免和 Manifest
+ * `adjustResize` 叠一次。
  */
 @Composable
 fun ImeOverlayBox(
@@ -89,6 +96,17 @@ fun Modifier.clickableDismissingIme(
         dismissIme(focusManager, keyboard)
         onClick()
     }
+}
+
+/**
+ * 把内容推到 IME 与导航栏之上。键盘收起后只剩导航栏 inset，布局回落。
+ *
+ * 只给「要抬起」的那一层用（聊天室的 Header + 列表 + Footer），不要套在全屏背景上。
+ * 必须和 [ImeOverlayBox] 一起用：窗口保持 ADJUST_NOTHING，抬起量只来自这一处 inset，
+ * 不会和 `adjustResize` 叠两次。
+ */
+fun Modifier.imeAvoidingPadding(): Modifier = composed {
+    windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
 }
 
 fun dismissIme(

@@ -16,11 +16,21 @@ alwaysApply: false
 2. 按钮 / 芯片 / 返回 / Skip / 重发 用 `Modifier.clickableDismissingIme { }`
 3. IME Action（Done/Next）里调 `dismissIme(focusManager, keyboard)`
 4. **禁止**对根布局或主按钮写 `imePadding()`，禁止按 `WindowInsets.ime` 把按钮改成 `BottomCenter`
+5. 输入框获焦光标必须在末尾：`rememberCursorAtEndField` + `Modifier.cursorAtEnd(field)`。
+   **禁止**把 `String` 直接喂给 `BasicTextField` / `TextField` / `OutlinedTextField`。
+   **禁止**自己用 `SideEffect` / 只在 `onFocusChanged` 里 `TextRange(length)`：
+   外部回填（选 @、选灵感）后立刻 `requestFocus` 时，`BasicTextField` 会在
+   焦点回调之后把选区打回 0，IME 还会把上一键（触发用的 `@`）接到末尾。
+   对齐与「握手期禁止把 IME 回写当作用户输入」只放在 `CursorAtEnd.kt`。
 
 参考实现：`EmailSignUpScreen`、`VerificationCodeScreen`、`ProfileSetupScreen`。
 
 ## 例外
 
-仅当产品**书面明确**要求「主按钮贴着键盘上沿」时才用 `imePadding()`，且 **不要**叠 `ImeOverlayBox` / `ImeOverlayEffect`。登录注册三页均已覆盖，当前无例外页。
+仅当产品**书面明确**要求「内容贴键盘」时，在**需要抬起的那一层**写 `imeAvoidingPadding()`（`WindowInsets.safeDrawing` 底边 = IME ∪ 导航栏）。
+继续叠 `ImeOverlayBox`：窗口保持 `ADJUST_NOTHING`，抬起量只来自这一处 inset，避免和 Manifest `adjustResize` 叠两次。
+背景图不要垫。该页 Footer 不要再写 `navigationBarsPadding()`。
+
+当前例外：聊天室（Figma `1826:10061`，顶栏留顶、Footer 贴键盘）。登录注册三页仍覆盖、不顶。
 
 不要改 `AndroidManifest` 的 `windowSoftInputMode` 来实现单页行为。

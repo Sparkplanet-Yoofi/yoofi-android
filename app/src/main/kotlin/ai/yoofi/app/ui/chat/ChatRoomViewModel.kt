@@ -54,7 +54,12 @@ internal sealed interface ChatRoomIntent {
     data object DismissOverlay : ChatRoomIntent
     data class DraftChanged(val value: String) : ChatRoomIntent
     data class PickMention(val memberId: String) : ChatRoomIntent
+
+    /** 点灵感条目左侧羽毛：把文案填进输入框，交给玩家改，不发送。 */
     data class PickInspiration(val text: String) : ChatRoomIntent
+
+    /** 点灵感条目本体：这句就是玩家要说的，直接发出去。 */
+    data class SendInspiration(val text: String) : ChatRoomIntent
     data object MentionPrevPage : ChatRoomIntent
     data object MentionNextPage : ChatRoomIntent
     data object ToggleVolume : ChatRoomIntent
@@ -103,6 +108,7 @@ internal class ChatRoomViewModel @Inject constructor(
                     it.copy(draft = intent.text, overlay = ChatRoomOverlay.None)
                 }
             }
+            is ChatRoomIntent.SendInspiration -> send(intent.text)
             ChatRoomIntent.MentionPrevPage -> shiftMention(-1)
             ChatRoomIntent.MentionNextPage -> shiftMention(1)
             ChatRoomIntent.ToggleVolume -> {
@@ -127,26 +133,33 @@ internal class ChatRoomViewModel @Inject constructor(
     private fun pickMention(memberId: String) {
         val member = _uiState.value.cast.firstOrNull { it.id == memberId } ?: return
         _uiState.update { state ->
-            val insertion = "@${member.displayName} "
-            val rest = state.draft.trimStart().removePrefix("@").trimStart()
             state.copy(
-                draft = insertion + rest,
+                draft = applyPickedMention(state.draft, member.displayName),
                 overlay = ChatRoomOverlay.None,
             )
         }
     }
 
-    private fun continueStory() {
-        val draft = _uiState.value.draft.trim()
-        // 先落玩家气泡，再追加本轮剧情；草稿为空时就是纯推进剧情
+    /** Continue / 发送键：把当前草稿发出去。 */
+    private fun continueStory() = send(_uiState.value.draft)
+
+    /**
+     * 推进一轮剧情，[body] 非空时先落一条玩家气泡。
+     *
+     * 两个入口共用：[continueStory] 传草稿，[ChatRoomIntent.SendInspiration] 直接传灵感原文。
+     * 灵感不先写回草稿再发，是为了避免「写草稿」和「发送」两次状态更新之间闪出一帧带文字的输入框。
+     */
+    private fun send(body: String) {
+        val line = body.trim()
+        // 先落玩家气泡，再追加本轮剧情；为空时就是纯推进剧情
         val beat = advanceChatStory(storyTurn)
         storyTurn += 1
         _uiState.update { state ->
-            val playerLine = if (draft.isEmpty()) {
+            val playerLine = if (line.isEmpty()) {
                 emptyList()
             } else {
                 playerSeq += 1
-                listOf(ChatItem.Player(id = "player-$playerSeq", body = draft))
+                listOf(ChatItem.Player(id = "player-$playerSeq", body = line))
             }
             state.copy(
                 items = state.items + playerLine + beat,
@@ -154,7 +167,7 @@ internal class ChatRoomViewModel @Inject constructor(
                 overlay = ChatRoomOverlay.None,
             )
         }
-        emitScroll(force = draft.isNotEmpty())
+        emitScroll(force = line.isNotEmpty())
     }
 
     private fun shiftMention(delta: Int) {

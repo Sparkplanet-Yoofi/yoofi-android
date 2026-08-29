@@ -26,6 +26,9 @@ val YoofiAccent = Color(0xFF925CFF)
  */
 val YoofiInactive = Color(0xFF807E86)
 
+/** 底栏胶囊 fill：`rgba(50, 42, 72, 0.50)`，Figma `982:14664` */
+val YoofiNavCapsule = Color(0xFF322A48).copy(alpha = 0.50f)
+
 /** Game 页垂直渐变四档，节点 982:14758 */
 val YoofiGameBg0 = Color(0xFF131126)
 val YoofiGameBg1 = Color(0xFF1D0338)
@@ -77,6 +80,9 @@ val YoofiAuthCaretTo = Color(0xFF7945FF)
 
 /** 资料输入框空闲描边 rgba(100,129,208,0.2) */
 val YoofiAuthIdleStroke = Color(0x336481D0)
+
+/** 聊天输入框编辑态描边 #5257FF。空闲态是 2dp 的 [YoofiAuthIdleStroke]，编辑态换成 1dp 实色 */
+val YoofiChatInputFocusStroke = Color(0xFF5257FF)
 
 /** 性别选中文案 #B594FF */
 val YoofiGenderSelected = Color(0xFFB594FF)

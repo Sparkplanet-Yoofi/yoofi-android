@@ -4,7 +4,7 @@
 > **维护纪律**：每个需求收尾花 5 分钟更新踩坑与技术债。写得及时比写得全更重要。
 > 过期的禁区清单比没有清单更危险——发现失效条目请立即删除或更正。
 >
-> 最近更新：2026-08-27
+> 最近更新：2026-08-29
 
 ---
 
@@ -34,8 +34,10 @@
 - **DI 选 Hilt**：Google 官方支持、与 Jetpack 集成最好；代价是 KMP 场景需要替换，
   因此约定 domain 层不感知 DI 框架，仅靠构造注入。
 - **含输入框的全屏页键盘覆盖、不顶布局**：根用 `ImeOverlayBox`（`ai.yoofi.app.ui.ime`），
-  非输入点击用 `clickableDismissingIme`。禁止用 `imePadding` / 改 Manifest
-  `windowSoftInputMode` 做单页差异。登录注册三页均已覆盖，无「贴键盘」例外。
+  非输入点击用 `clickableDismissingIme`。禁止改 Manifest `windowSoftInputMode` 做单页差异。
+  登录注册三页均已覆盖。聊天室是书面例外（Figma `1826:10061`）：内容层用
+  `imeAvoidingPadding()` 抬到键盘上沿，背景仍铺满。
+  所有输入框获焦光标在末尾，只走 `rememberCursorAtEndField`，禁止直接喂 `String`。
 - **网络环境写在 `AppEnvironment`，构建只注入原始参数**：映射唯一定义处是 `AppEnvironment.forStage`
   （只有 production 阶段连线上）；覆盖 `-Pyoofi.api.env=production|staging`。禁止业务代码写死 Base URL。
 - **三档只有一套词汇：development / staging / production**，`BuildStage`、`AppEnvironment`、
@@ -136,6 +138,24 @@
 12. **聊天室从 World Played 封面进全屏 overlay**：`MainTabShell` 打开 `ChatRoomScreen`
     并藏底栏，不要把聊天室嵌进 World 页。宽屏仍 `fillMaxWidth` + 左右 20，
     不要把 Figma 350 锁死。Map / Items / Recap 尚无独立画板，只留芯片不造假页。
+
+13. **选 @ / 灵感回填后再 `requestFocus`，光标会钉在开头**：
+    `BasicTextField` 在 `onFocusChanged` 之后把选区打回 0，再经 `onValueChange`
+    写回。此时文案已是 `@tomy `，`SideEffect { if (value.text != text) }`
+    以为不用同步。对齐只放 `rememberCursorAtEndField`：组合期改选区 +
+    获焦后等一帧盖回末尾。不要在业务页自己 `TextRange(length)`。
+
+14. **选 @ 后人名跑到 `@` 前面（`tomy @`）**：两处叠加。
+    `pickMention` 不能只 `removePrefix("@")` 再前置插入，要替换文末未完成的
+    `@` / `@xxx`（`applyPickedMention`）。回填后 IME 会把触发键 `@` 接到末尾
+    并写回 ViewModel；握手期必须丢掉与外部文案不一致的 `onValueChange`。
+
+15. **底栏毛玻璃 Local 包错层会整段失效**：`ContentBackdropProvider` 必须同时包
+    「记录 Tab 页的 Recorder」和「读层的 YoofiBottomBar」。只包 Recorder 时
+    底栏 `LocalContentBackdrop` 恒为 null，只剩半透明紫、没有 blur。
+    不要改共享页层的 `renderEffect`（设完立刻清空，GPU 合成时已经没了），
+    裁切后再 `Modifier.blur`，和详情卡同一套路。CSS `blur(10px)` 是标准差，
+    Compose 半径按 `sigma ≈ 0.577 * radius + 0.5` 折成约 16dp。
 
 ---
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma 导出路径，禁止手绘 -->
+<!-- 输入框内右侧的圆形发送键，对应 Figma Group 1912055023。
+     渐变端点 (11,10)→(41,49) 超出 36 视口是 Figma 原始定义，照抄不要归一化，改了色带走向就变了 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="36"
+    android:viewportHeight="36">
+    <path android:pathData="M18,0a18,18 0,1 1,0 36a18,18 0,1 1,0 -36z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="41"
+                android:endY="49"
+                android:startX="11"
+                android:startY="10"
+                android:type="linear">
+                <item android:color="#FF6C32ED" android:offset="0" />
+                <item android:color="#FF381D7D" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M25.0546,11.118C25.0155,11.0446 24.9563,10.9846 24.883,10.9455C23.1446,10.0205 12.7455,13.2438 10.0555,14.7955C9.35465,15.1996 9.04215,15.6746 9.12798,16.2046C9.37548,17.7396 13.5113,18.903 15.7555,19.4238L19.9696,15.2105C20.2138,14.9663 20.6096,14.9663 20.8538,15.2105C21.098,15.4546 21.098,15.8505 20.8538,16.0946L16.5988,20.348C17.133,22.6155 18.2838,26.628 19.7946,26.8713C19.8513,26.8805 19.908,26.8855 19.9638,26.8855C20.4255,26.8855 20.8421,26.5688 21.203,25.9438C22.7546,23.2563 25.9805,12.8588 25.0546,11.118Z" />
+</vector>

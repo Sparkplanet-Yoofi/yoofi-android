@@ -3,6 +3,8 @@ package ai.yoofi.app.ui.gamedetail
 import ai.yoofi.app.R
 import ai.yoofi.app.domain.gamedetail.GameComment
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.ime.cursorAtEnd
+import ai.yoofi.app.ui.ime.rememberCursorAtEndField
 import ai.yoofi.app.ui.theme.YoofiAccent
 import ai.yoofi.app.ui.theme.YoofiDetailAuthorBadgeFrom
 import ai.yoofi.app.ui.theme.YoofiDetailAuthorBadgeTo
@@ -122,14 +124,16 @@ private fun CommentComposer(
             .background(YoofiDetailFieldFill)
             .border(1.dp, YoofiDetailFieldStroke, InputBoxShape),
     ) {
+        val field = rememberCursorAtEndField(draft, onDraftChange)
         BasicTextField(
-            value = draft,
-            onValueChange = onDraftChange,
+            value = field.value,
+            onValueChange = field.onValueChange,
             textStyle = TextStyle(color = Color.White, fontSize = 12.sp),
             cursorBrush = DetailActionBrush,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = InputTextInset, top = InputTextInset, end = InputTextInset),
+                .padding(start = InputTextInset, top = InputTextInset, end = InputTextInset)
+                .cursorAtEnd(field),
             decorationBox = { inner ->
                 if (draft.isEmpty()) {
                     Text(
