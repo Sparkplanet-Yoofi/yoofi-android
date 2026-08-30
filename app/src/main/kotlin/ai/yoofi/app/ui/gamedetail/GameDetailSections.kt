@@ -57,6 +57,7 @@ internal fun DetailAuthorRow(
     author: GameAuthor,
     onToggleFollow: () -> Unit,
     modifier: Modifier = Modifier,
+    onAvatarClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier,
@@ -65,9 +66,12 @@ internal fun DetailAuthorRow(
     ) {
         Image(
             painter = painterResource(detailAvatarRes(author.avatarKey)),
-            contentDescription = null,
+            contentDescription = author.name,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(24.dp).clip(CircleShape),
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .clickableDismissingIme(role = Role.Button, onClick = onAvatarClick),
         )
         Text(
             text = author.name,

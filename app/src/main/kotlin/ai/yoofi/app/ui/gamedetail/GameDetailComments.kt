@@ -2,6 +2,7 @@ package ai.yoofi.app.ui.gamedetail
 
 import ai.yoofi.app.R
 import ai.yoofi.app.domain.gamedetail.GameComment
+import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.ime.cursorAtEnd
 import ai.yoofi.app.ui.ime.rememberCursorAtEndField
@@ -80,6 +81,7 @@ private const val CommentActionAlpha = 0.8f
 internal fun DetailInteractionSection(
     state: GameDetailUiState,
     onIntent: (GameDetailIntent) -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = DetailPagePadding)) {
@@ -102,6 +104,7 @@ internal fun DetailInteractionSection(
                 comment = comment,
                 repliesCollapsed = comment.id in state.collapsedReplyIds,
                 onIntent = onIntent,
+                onOpenGuestProfile = onOpenGuestProfile,
             )
         }
     }
@@ -180,9 +183,15 @@ private fun CommentThread(
     comment: GameComment,
     repliesCollapsed: Boolean,
     onIntent: (GameDetailIntent) -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        CommentRow(comment = comment, avatarSize = TopLevelAvatarSize, onIntent = onIntent)
+        CommentRow(
+            comment = comment,
+            avatarSize = TopLevelAvatarSize,
+            onIntent = onIntent,
+            onOpenGuestProfile = onOpenGuestProfile,
+        )
         if (comment.replies.isEmpty()) return@Column
         if (!repliesCollapsed) {
             comment.replies.forEach { reply ->
@@ -193,6 +202,7 @@ private fun CommentThread(
                         comment = reply,
                         avatarSize = ReplyAvatarSize,
                         onIntent = onIntent,
+                        onOpenGuestProfile = onOpenGuestProfile,
                     )
                 }
             }
@@ -237,6 +247,7 @@ private fun CommentRow(
     comment: GameComment,
     avatarSize: Dp,
     onIntent: (GameDetailIntent) -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -244,9 +255,14 @@ private fun CommentRow(
     ) {
         Image(
             painter = painterResource(detailAvatarRes(comment.avatarKey)),
-            contentDescription = null,
+            contentDescription = comment.authorName,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(avatarSize).clip(CircleShape),
+            modifier = Modifier
+                .size(avatarSize)
+                .clip(CircleShape)
+                .clickableDismissingIme {
+                    comment.toGuestProfileTargetOrNull()?.let(onOpenGuestProfile)
+                },
         )
         Column(
             modifier = Modifier.fillMaxWidth(),

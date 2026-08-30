@@ -4,7 +4,7 @@
 > **维护纪律**：每个需求收尾花 5 分钟更新踩坑与技术债。写得及时比写得全更重要。
 > 过期的禁区清单比没有清单更危险——发现失效条目请立即删除或更正。
 >
-> 最近更新：2026-08-29
+> 最近更新：2026-08-30
 
 ---
 
@@ -47,6 +47,11 @@
   每个接口的 Demo / 真实切换登记在 `DemoFeature`，这是**唯一手改点**。
   提测 / 上线包若还有接口只有 Demo 实现，`YoofiApplication` 启动自检直接抛错。
   **禁止再写需要手工翻转的 mock 常量**——`TempMockLoginSuccess` 就是这么差点把 mock 登录带上线的。
+- **资料页主客态拆屏、不共用 `MeScreen` 开关**：主态是 Tab（设置 + Preview + Get VIP），
+  客态是栈上 overlay（返回 + 三点拉黑）。公共壳在 `ui.profile`（背景、身份卡 slot、一级 Tab、作品格），
+  主态动作留 `MeScreen`，客态动作留 `GuestProfileScreen`。禁止往资料卡塞 `isSelf`：
+  隐私 Tab、关注/私信/举报以后会分叉，布尔开关会把两套产品逻辑缠死。
+  拉黑接口未定，确认后只发 `GuestSnackbar.BlockUser`，接接口时加 UseCase，不要把 HTTP 写进 Screen。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。
 - **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；

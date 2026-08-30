@@ -5,6 +5,8 @@ import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.me.MeScreen
+import ai.yoofi.app.ui.profile.GuestProfileTarget
+import ai.yoofi.app.ui.profile.guest.GuestProfileScreen
 import ai.yoofi.app.ui.search.SearchScreen
 import ai.yoofi.app.ui.surface.ContentBackdropProvider
 import ai.yoofi.app.ui.surface.ContentBackdropRecorder
@@ -35,6 +37,7 @@ internal fun MainTabShell(
     var searchOpen by remember { mutableStateOf(false) }
     // 打开中的游戏详情页 id；null 表示没开。工程尚未引入 Navigation，先用状态提升代替回退栈
     var detailGameId by remember { mutableStateOf<String?>(null) }
+    var guestProfile by remember { mutableStateOf<GuestProfileTarget?>(null) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -52,7 +55,7 @@ internal fun MainTabShell(
                     YoofiTab.Me -> MeScreen()
                 }
             }
-            if (!chatOpen && !searchOpen && detailGameId == null) {
+            if (!chatOpen && !searchOpen && detailGameId == null && guestProfile == null) {
                 YoofiBottomBar(
                     selected = tab,
                     onTabSelected = { tab = it },
@@ -65,6 +68,14 @@ internal fun MainTabShell(
                     onBack = { detailGameId = null },
                     // 详情页留在栈上：从聊天室返回时回到详情，符合「进游戏再退出」的预期
                     onContinueGame = { chatOpen = true },
+                    onOpenGuestProfile = { guestProfile = it },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            guestProfile?.let { target ->
+                GuestProfileScreen(
+                    target = target,
+                    onBack = { guestProfile = null },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

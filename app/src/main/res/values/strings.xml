@@ -141,4 +141,14 @@
     <string name="cd_detail_delete">Delete comment</string>
     <string name="cd_detail_attach_image">Attach image</string>
     <string name="cd_detail_send">Send comment</string>
+    <string name="guest_block_user">Block User</string>
+    <string name="guest_block_confirm">Block</string>
+    <string name="guest_block_confirm_title">Block this user?</string>
+    <string name="guest_block_rule_1">1.You will no longer see content posted by this user on your homepage or recommendations.</string>
+    <string name="guest_block_rule_2">2.This user will not be able to interact with your posts, comment section or profile.</string>
+    <string name="guest_block_rule_3">3.Your mutual follow-relationship will be removed and this user will not be able to follow you again.</string>
+    <string name="guest_block_snackbar">Block user</string>
+    <string name="cd_guest_more">More</string>
+    <string name="cd_guest_follow">Follow</string>
+    <string name="cd_guest_following">Following</string>
 </resources>

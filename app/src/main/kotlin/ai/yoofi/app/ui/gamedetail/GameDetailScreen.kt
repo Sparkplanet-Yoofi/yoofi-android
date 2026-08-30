@@ -1,8 +1,11 @@
 package ai.yoofi.app.ui.gamedetail
 
 import ai.yoofi.app.R
+import ai.yoofi.app.domain.gamedetail.GameAuthor
+import ai.yoofi.app.domain.gamedetail.GameComment
 import ai.yoofi.app.domain.gamedetail.GameDetail
 import ai.yoofi.app.ui.ime.ImeOverlayBox
+import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiDetailActionFrom
@@ -133,6 +136,7 @@ internal fun GameDetailScreen(
     gameId: String,
     onBack: () -> Unit,
     onContinueGame: () -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GameDetailViewModel = hiltViewModel(),
 ) {
@@ -144,6 +148,7 @@ internal fun GameDetailScreen(
         onIntent = viewModel::onIntent,
         onBack = onBack,
         onContinueGame = onContinueGame,
+        onOpenGuestProfile = onOpenGuestProfile,
         modifier = modifier,
     )
 }
@@ -154,6 +159,7 @@ internal fun GameDetailLayout(
     onIntent: (GameDetailIntent) -> Unit,
     onBack: () -> Unit,
     onContinueGame: () -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit = {},
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
 ) {
@@ -167,6 +173,7 @@ internal fun GameDetailLayout(
                         state = state,
                         detail = detail,
                         onIntent = onIntent,
+                        onOpenGuestProfile = onOpenGuestProfile,
                     )
                 }
                 // 给吸底栏让位，否则最后一条评论会被压住
@@ -226,6 +233,7 @@ private fun DetailSheet(
     state: GameDetailUiState,
     detail: GameDetail,
     onIntent: (GameDetailIntent) -> Unit,
+    onOpenGuestProfile: (GuestProfileTarget) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -272,6 +280,7 @@ private fun DetailSheet(
                 DetailAuthorRow(
                     author = detail.author,
                     onToggleFollow = { onIntent(GameDetailIntent.ToggleFollow) },
+                    onAvatarClick = { onOpenGuestProfile(detail.author.toGuestProfileTarget()) },
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
                 Spacer(Modifier.height(SynopsisTop))
@@ -284,7 +293,11 @@ private fun DetailSheet(
                 Spacer(Modifier.height(CastTop))
                 DetailCastSection(cast = detail.cast)
                 Spacer(Modifier.height(InteractionTop))
-                DetailInteractionSection(state = state, onIntent = onIntent)
+                DetailInteractionSection(
+                    state = state,
+                    onIntent = onIntent,
+                    onOpenGuestProfile = onOpenGuestProfile,
+                )
             }
         }
     }
@@ -399,4 +412,20 @@ private fun GameDetailExpandedPreview() {
             onContinueGame = {},
         )
     }
+}
+
+internal fun GameAuthor.toGuestProfileTarget(): GuestProfileTarget = GuestProfileTarget(
+    userId = id,
+    displayName = name,
+    avatarKey = avatarKey,
+    following = following,
+)
+
+internal fun GameComment.toGuestProfileTargetOrNull(): GuestProfileTarget? {
+    if (deletable) return null
+    return GuestProfileTarget(
+        userId = "name:$authorName:$avatarKey",
+        displayName = authorName,
+        avatarKey = avatarKey,
+    )
 }
