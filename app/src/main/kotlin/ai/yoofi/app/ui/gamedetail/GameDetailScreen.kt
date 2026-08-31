@@ -5,9 +5,14 @@ import ai.yoofi.app.domain.gamedetail.GameAuthor
 import ai.yoofi.app.domain.gamedetail.GameComment
 import ai.yoofi.app.domain.gamedetail.GameDetail
 import ai.yoofi.app.ui.ime.ImeOverlayBox
+import ai.yoofi.app.ui.gamedetail.report.ReportContentScreen
+import ai.yoofi.app.ui.gamedetail.report.ReportResetSheet
+import ai.yoofi.app.ui.gamedetail.report.toReportTarget
 import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
+import ai.yoofi.app.ui.theme.YoofiSnackbarContainer
+import ai.yoofi.app.ui.theme.YoofiSnackbarContent
 import ai.yoofi.app.ui.theme.YoofiDetailActionFrom
 import ai.yoofi.app.ui.theme.YoofiDetailActionTo
 import ai.yoofi.app.ui.theme.YoofiDetailBackground
@@ -35,10 +40,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -142,7 +152,14 @@ internal fun GameDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(gameId) { viewModel.load(gameId) }
-    BackHandler(onBack = onBack)
+    BackHandler {
+        when {
+            state.reportOpen -> viewModel.onIntent(GameDetailIntent.CloseReport)
+            state.overlay != GameDetailOverlay.None ->
+                viewModel.onIntent(GameDetailIntent.DismissOverlay)
+            else -> onBack()
+        }
+    }
     GameDetailLayout(
         state = state,
         onIntent = viewModel::onIntent,
@@ -164,33 +181,77 @@ internal fun GameDetailLayout(
     scrollState: ScrollState = rememberScrollState(),
 ) {
     val detail = state.detail
-    ImeOverlayBox(modifier = modifier.background(Color.Black)) {
-        if (detail != null) {
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DetailHero(coverKey = detail.coverKey)
-                    DetailSheet(
-                        state = state,
-                        detail = detail,
-                        onIntent = onIntent,
-                        onOpenGuestProfile = onOpenGuestProfile,
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resetMessage = stringResource(R.string.detail_start_new_story_snackbar)
+    LaunchedEffect(state.snackbar) {
+        val kind = state.snackbar ?: return@LaunchedEffect
+        val message = when (kind) {
+            GameDetailSnackbar.StartNewStory -> resetMessage
+        }
+        snackbarHostState.currentSnackbarData?.dismiss()
+        snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
+        onIntent(GameDetailIntent.ConsumeSnackbar)
+    }
+    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
+        ImeOverlayBox(modifier = Modifier.fillMaxSize()) {
+            if (detail != null) {
+                Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        DetailHero(coverKey = detail.coverKey)
+                        DetailSheet(
+                            state = state,
+                            detail = detail,
+                            onIntent = onIntent,
+                            onOpenGuestProfile = onOpenGuestProfile,
+                        )
+                    }
+                    // 给吸底栏让位，否则最后一条评论会被压住
+                    Spacer(
+                        Modifier
+                            .navigationBarsPadding()
+                            .height(ActionButtonHeight + BottomBarPaddingV * 2),
                     )
                 }
-                // 给吸底栏让位，否则最后一条评论会被压住
-                Spacer(
-                    Modifier
-                        .navigationBarsPadding()
-                        .height(ActionButtonHeight + BottomBarPaddingV * 2),
+            }
+            DetailTopBar(
+                onBack = onBack,
+                onMore = { onIntent(GameDetailIntent.OpenMenu) },
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+            DetailBottomBar(
+                saved = detail?.saved == true,
+                onContinueGame = onContinueGame,
+                onToggleSaved = { onIntent(GameDetailIntent.ToggleSaved) },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp),
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = YoofiSnackbarContainer,
+                    contentColor = YoofiSnackbarContent,
+                    shape = RoundedCornerShape(12.dp),
+                )
+            }
+            if (state.overlay == GameDetailOverlay.Menu) {
+                ReportResetSheet(
+                    onReset = { onIntent(GameDetailIntent.ResetStory) },
+                    onReport = { onIntent(GameDetailIntent.OpenReport) },
+                    onDismiss = { onIntent(GameDetailIntent.DismissOverlay) },
                 )
             }
         }
-        DetailTopBar(onBack = onBack, modifier = Modifier.align(Alignment.TopCenter))
-        DetailBottomBar(
-            saved = detail?.saved == true,
-            onContinueGame = onContinueGame,
-            onToggleSaved = { onIntent(GameDetailIntent.ToggleSaved) },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+        if (state.reportOpen && detail != null) {
+            ReportContentScreen(
+                target = detail.toReportTarget(),
+                onClose = { onIntent(GameDetailIntent.CloseReport) },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
@@ -305,7 +366,11 @@ private fun DetailSheet(
 
 /** Figma `662:2144`：返回与更多。状态栏高度交给系统 insets，不照抄设计稿的 iOS 状态栏。 */
 @Composable
-private fun DetailTopBar(onBack: () -> Unit, modifier: Modifier = Modifier) {
+private fun DetailTopBar(
+    onBack: () -> Unit,
+    onMore: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
             .statusBarsPadding()
@@ -325,7 +390,9 @@ private fun DetailTopBar(onBack: () -> Unit, modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(R.drawable.ic_detail_more),
             contentDescription = stringResource(R.string.cd_detail_more),
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier
+                .size(24.dp)
+                .clickableDismissingIme(onClick = onMore),
         )
     }
 }

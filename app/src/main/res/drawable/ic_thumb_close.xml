@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma `2252:18449` circle-x，填充 #6C32ED -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:pathData="M10,18.75C14.8325,18.75 18.75,14.8325 18.75,10C18.75,5.16751 14.8325,1.25 10,1.25C5.16751,1.25 1.25,5.16751 1.25,10C1.25,14.8325 5.16751,18.75 10,18.75Z"
+        android:fillColor="#6C32ED" />
+    <path
+        android:pathData="M12.5,7.5L7.5,12.5"
+        android:strokeWidth="1.875"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M7.5,7.5L12.5,12.5"
+        android:strokeWidth="1.875"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -11,6 +11,7 @@ import ai.yoofi.app.domain.gamedetail.PostGameCommentUseCase
 import ai.yoofi.app.domain.gamedetail.ToggleAuthorFollowUseCase
 import ai.yoofi.app.domain.gamedetail.ToggleCommentLikeUseCase
 import ai.yoofi.app.domain.gamedetail.ToggleGameSavedUseCase
+import ai.yoofi.app.domain.report.SubmitReportUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,4 +64,7 @@ object GameDetailProvideModule {
     fun provideToggleGameSavedUseCase(
         repository: GameDetailRepository,
     ): ToggleGameSavedUseCase = ToggleGameSavedUseCase(repository)
+
+    @Provides
+    fun provideSubmitReportUseCase(): SubmitReportUseCase = SubmitReportUseCase()
 }

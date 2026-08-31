@@ -59,6 +59,12 @@
   一次解析，禁止在 `MeLayout` 里反复 `if (vacant)`。加新的「我的」态只加策略实现。
   禁止往资料卡塞布尔开关；客态仍是独立 Screen，不要用策略把主客缠回去。
   拉黑接口未定，确认后只发 `GuestSnackbar.BlockUser`，接接口时加 UseCase，不要把 HTTP 写进 Screen。
+- **详情三点菜单与举报表单拆开**：详情 VM 只管家 `overlay` / 重置 Snackbar / `reportOpen`。
+  举报表单独立 `ui.gamedetail.report` + `ReportContentViewModel` + `SubmitReportUseCase`。
+  重置接口未定，确认后只发 `GameDetailSnackbar.StartNewStory`（文案 `Start a new story`）。
+  举报三步 Reason → Details → Done，对齐 Figma `2252:18328` / `2252:18374` / `2252:18531`。
+  菜单底栏对齐 `2252:18526`。截图走系统 Photo Picker，最多 3 张，不申请 `READ_MEDIA_*`。
+  接接口只改 UseCase，不要把举报表单塞进 `GameDetailViewModel`。
 - **资料创建与编辑是两条入口，不是 `isEdit` 开关**：`ProfileEditorEntry.Create`（注册后完善，Skip + Continue，走现有创建 mock）与
   `ProfileEditorEntry.Edit`（Me 铅笔进 `1943:14006`，返回 + Save，走 `UpdateProfileUseCase`）。
   表单壳共用 `ProfileSetupScreen`；提交契约分开，接接口时创建另加 CompleteProfileUseCase，不要把编辑塞进创建的 delay mock。
@@ -180,6 +186,10 @@
     `MeLayout` 里把 presence 收成 `vacant` 再问五次，等于又把 `isEmpty` 请回来；
     可变部分只走 `MineProfileStrategy`。GoF 双类 + Hilt Map 不必上，运行时
     `when (presence)` 选 object 即可。客态不要塞进同一策略。
+
+17. **详情举报不要写进 GameDetailViewModel**：三点菜单、重置 Snackbar、是否打开举报页
+    归详情管家；原因 / 500 字详情 / 最多 3 张截图走独立 Screen。Hilt VM 跟详情同作用域，
+    `bind` 每次进入必须重开原因页，否则提交成功后再点开会停在 Done。
 
 ---
 

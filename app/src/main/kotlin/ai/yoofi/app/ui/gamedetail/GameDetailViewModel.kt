@@ -19,6 +19,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+internal enum class GameDetailOverlay { None, Menu }
+
+internal enum class GameDetailSnackbar { StartNewStory }
+
 internal data class GameDetailUiState(
     val loading: Boolean = true,
     val detail: GameDetail? = null,
@@ -31,6 +35,9 @@ internal data class GameDetailUiState(
      * 所以这里存的是「例外」而不是「已展开集合」，省得每次加载都要初始化一遍。
      */
     val collapsedReplyIds: Set<String> = emptySet(),
+    val overlay: GameDetailOverlay = GameDetailOverlay.None,
+    val snackbar: GameDetailSnackbar? = null,
+    val reportOpen: Boolean = false,
 )
 
 internal sealed interface GameDetailIntent {
@@ -44,6 +51,12 @@ internal sealed interface GameDetailIntent {
 
     /** 主楼底部「Hide Replies」。 */
     data class ToggleReplies(val commentId: String) : GameDetailIntent
+    data object OpenMenu : GameDetailIntent
+    data object DismissOverlay : GameDetailIntent
+    data object ResetStory : GameDetailIntent
+    data object OpenReport : GameDetailIntent
+    data object CloseReport : GameDetailIntent
+    data object ConsumeSnackbar : GameDetailIntent
 }
 
 /**
@@ -102,6 +115,27 @@ internal class GameDetailViewModel @Inject constructor(
             is GameDetailIntent.ToggleLike -> onToggleLike(intent.commentId)
             is GameDetailIntent.DeleteComment -> onDeleteComment(intent.commentId)
             is GameDetailIntent.ToggleReplies -> onToggleReplies(intent.commentId)
+            GameDetailIntent.OpenMenu -> _uiState.update {
+                it.copy(overlay = GameDetailOverlay.Menu)
+            }
+            GameDetailIntent.DismissOverlay -> _uiState.update {
+                it.copy(overlay = GameDetailOverlay.None)
+            }
+            GameDetailIntent.ResetStory -> _uiState.update {
+                it.copy(
+                    overlay = GameDetailOverlay.None,
+                    snackbar = GameDetailSnackbar.StartNewStory,
+                )
+            }
+            GameDetailIntent.OpenReport -> _uiState.update {
+                it.copy(overlay = GameDetailOverlay.None, reportOpen = true)
+            }
+            GameDetailIntent.CloseReport -> _uiState.update {
+                it.copy(reportOpen = false)
+            }
+            GameDetailIntent.ConsumeSnackbar -> _uiState.update {
+                it.copy(snackbar = null)
+            }
         }
     }
 
