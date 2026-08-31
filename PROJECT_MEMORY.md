@@ -55,7 +55,9 @@
   `ResolveMineProfilePresenceUseCase` 看会话：未登录、`profileCompleted == false`、昵称为空 → 空态。
   创建资料成功走 `MarkProfileCompletedUseCase`，Skip 不标完善。
   空态铅笔进 `ProfileEditorEntry.Create`，主态铅笔进 `Edit`。
-  禁止往资料卡塞布尔开关；以后加封禁/审核态只加 `ProfileAudience` 分支 + Screen。
+  「我的」主空差异用 `MineProfileStrategy`（`VacantMineStrategy` / `PopulatedMineStrategy`）
+  一次解析，禁止在 `MeLayout` 里反复 `if (vacant)`。加新的「我的」态只加策略实现。
+  禁止往资料卡塞布尔开关；客态仍是独立 Screen，不要用策略把主客缠回去。
   拉黑接口未定，确认后只发 `GuestSnackbar.BlockUser`，接接口时加 UseCase，不要把 HTTP 写进 Screen。
 - **资料创建与编辑是两条入口，不是 `isEdit` 开关**：`ProfileEditorEntry.Create`（注册后完善，Skip + Continue，走现有创建 mock）与
   `ProfileEditorEntry.Edit`（Me 铅笔进 `1943:14006`，返回 + Save，走 `UpdateProfileUseCase`）。
@@ -175,6 +177,9 @@
     `ProfileIdentity.stats`，观众放 `ProfileAudience` / `MineProfilePresence`。
     Demo 登录 `profileCompleted == false`，Skip 后「我的」就是空态；
     创建成功必须 `MarkProfileCompletedUseCase`，否则 Tab 复用 VM 会一直空。
+    `MeLayout` 里把 presence 收成 `vacant` 再问五次，等于又把 `isEmpty` 请回来；
+    可变部分只走 `MineProfileStrategy`。GoF 双类 + Hilt Map 不必上，运行时
+    `when (presence)` 选 object 即可。客态不要塞进同一策略。
 
 ---
 

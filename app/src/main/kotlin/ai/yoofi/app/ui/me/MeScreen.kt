@@ -6,14 +6,11 @@ import ai.yoofi.app.ui.pager.animateToRealPage
 import ai.yoofi.app.ui.pager.loopingPageCount
 import ai.yoofi.app.ui.pager.loopingStartPage
 import ai.yoofi.app.ui.pager.realPageIndex
-import ai.yoofi.app.ui.profile.ProfileCreationsPane
-import ai.yoofi.app.ui.profile.ProfileIdentity
 import ai.yoofi.app.ui.profile.ProfileIdentityCard
 import ai.yoofi.app.ui.profile.ProfileLorebookEmptyPane
 import ai.yoofi.app.ui.profile.ProfilePageBackground
 import ai.yoofi.app.ui.profile.ProfilePrimaryTab
 import ai.yoofi.app.ui.profile.ProfilePrimaryTabs
-import ai.yoofi.app.ui.profile.ProfileStat
 import ai.yoofi.app.ui.profile.ProfileWorkKind
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiSnackbarContainer
@@ -108,7 +105,7 @@ internal fun MeLayout(
     onSetupProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val vacant = presence == MineProfilePresence.Vacant
+    val strategy = presence.strategy()
     val primaryTabs = ProfilePrimaryTab.entries
     val cycle = primaryTabs.size
     val pagerState = rememberPagerState(
@@ -123,11 +120,7 @@ internal fun MeLayout(
     val copyLabel = stringResource(R.string.cd_copy_id)
     val copiedMessage = stringResource(R.string.me_id_copied)
     var workKind by remember { mutableStateOf(ProfileWorkKind.StoryGame) }
-    val identity = if (vacant) {
-        vacantMineIdentity()
-    } else {
-        populatedMineIdentity(publicId = userId)
-    }
+    val identity = strategy.identity(userId)
     Box(modifier = modifier.fillMaxSize()) {
         ProfilePageBackground()
         Column(
@@ -146,50 +139,43 @@ internal fun MeLayout(
                 nameAccessory = {
                     Image(
                         painter = painterResource(R.drawable.ic_edit_pencil),
-                        contentDescription = stringResource(
-                            if (vacant) {
-                                R.string.cd_complete_profile
-                            } else {
-                                R.string.cd_edit_profile
-                            },
-                        ),
+                        contentDescription = stringResource(strategy.pencilCdRes),
                         modifier = Modifier
                             .size(18.dp)
                             .clickable(
                                 role = Role.Button,
-                                onClick = if (vacant) onSetupProfile else onEditProfile,
+                                onClick = strategy.onPencil(
+                                    onEditProfile = onEditProfile,
+                                    onSetupProfile = onSetupProfile,
+                                ),
                             ),
                     )
                 },
-                idTrailing = if (vacant) {
-                    null
-                } else {
-                    {
-                        Image(
-                            painter = painterResource(R.drawable.ic_copy),
-                            contentDescription = stringResource(R.string.cd_copy_id),
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clickable(
-                                    role = Role.Button,
-                                    onClick = {
-                                        copyUserIdToClipboard(
-                                            context,
-                                            label = copyLabel,
-                                            userId = userId,
+                idTrailing = strategy.wrapIdTrailing {
+                    Image(
+                        painter = painterResource(R.drawable.ic_copy),
+                        contentDescription = stringResource(R.string.cd_copy_id),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = {
+                                    copyUserIdToClipboard(
+                                        context,
+                                        label = copyLabel,
+                                        userId = userId,
+                                    )
+                                    scope.launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        snackbarHostState.showSnackbar(
+                                            message = copiedMessage,
+                                            duration = SnackbarDuration.Short,
                                         )
-                                        scope.launch {
-                                            snackbarHostState.currentSnackbarData?.dismiss()
-                                            snackbarHostState.showSnackbar(
-                                                message = copiedMessage,
-                                                duration = SnackbarDuration.Short,
-                                            )
-                                        }
-                                    },
-                                )
-                                .padding(6.dp),
-                        )
-                    }
+                                    }
+                                },
+                            )
+                            .padding(6.dp),
+                    )
                 },
                 trailing = { GetVipChip() },
             )
@@ -215,15 +201,11 @@ internal fun MeLayout(
                     ProfilePrimaryTab.Lorebook -> {
                         ProfileLorebookEmptyPane(Modifier.fillMaxSize())
                     }
-                    ProfilePrimaryTab.Creations -> if (vacant) {
-                        ProfileLorebookEmptyPane(Modifier.fillMaxSize())
-                    } else {
-                        ProfileCreationsPane(
-                            workKind = workKind,
-                            onWorkKindChange = { workKind = it },
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
+                    ProfilePrimaryTab.Creations -> strategy.Creations(
+                        workKind = workKind,
+                        onWorkKindChange = { workKind = it },
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
             }
         }
@@ -241,41 +223,6 @@ internal fun MeLayout(
             )
         }
     }
-}
-
-@Composable
-private fun vacantMineIdentity(): ProfileIdentity {
-    val zero = stringResource(R.string.me_stat_zero)
-    return ProfileIdentity(
-        displayName = stringResource(R.string.me_nickname_placeholder),
-        publicId = null,
-        avatarRes = null,
-        showFanBadge = false,
-        stats = listOf(
-            ProfileStat(count = zero, label = stringResource(R.string.me_stat_create)),
-            ProfileStat(count = zero, label = stringResource(R.string.me_stat_favorite)),
-            ProfileStat(count = zero, label = stringResource(R.string.me_stat_follow)),
-        ),
-    )
-}
-
-@Composable
-private fun populatedMineIdentity(publicId: String): ProfileIdentity {
-    return ProfileIdentity(
-        displayName = stringResource(R.string.me_display_name),
-        publicId = publicId,
-        avatarRes = R.drawable.img_me_avatar,
-        stats = listOf(
-            ProfileStat(
-                count = stringResource(R.string.me_following_count),
-                label = stringResource(R.string.me_following_label),
-            ),
-            ProfileStat(
-                count = stringResource(R.string.me_follower_count),
-                label = stringResource(R.string.me_follower_label),
-            ),
-        ),
-    )
 }
 
 @Composable
