@@ -234,4 +234,9 @@
     <string name="settings_linked_last_body">This is your only sign-in method and cannot be unlinked. To close this account, please use Delete Account.</string>
     <string name="settings_linked_ok">OK</string>
     <string name="settings_linked_unlinked_snackbar">Unlink account</string>
+    <string name="settings_blocked_unblock">Unblock</string>
+    <string name="settings_blocked_on">block on %1$s</string>
+    <string name="settings_blocked_confirm_title">Unblock this user?</string>
+    <string name="settings_blocked_confirm_body">After unblocking, this user will be able to view your profile and posts.</string>
+    <string name="settings_blocked_unblocked">User Unblocked</string>
 </resources>

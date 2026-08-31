@@ -14,6 +14,8 @@ import ai.yoofi.app.domain.auth.GetLinkedAccountsUseCase
 import ai.yoofi.app.domain.auth.LogoutUseCase
 import ai.yoofi.app.domain.auth.SendDeleteCodeUseCase
 import ai.yoofi.app.domain.auth.UnlinkAccountUseCase
+import ai.yoofi.app.domain.block.GetBlockedUsersUseCase
+import ai.yoofi.app.domain.block.UnblockUserUseCase
 import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
 import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
@@ -96,4 +98,10 @@ object AuthProvideModule {
 
     @Provides
     fun provideUnlinkAccountUseCase(): UnlinkAccountUseCase = UnlinkAccountUseCase()
+
+    @Provides
+    fun provideGetBlockedUsersUseCase(): GetBlockedUsersUseCase = GetBlockedUsersUseCase()
+
+    @Provides
+    fun provideUnblockUserUseCase(): UnblockUserUseCase = UnblockUserUseCase()
 }

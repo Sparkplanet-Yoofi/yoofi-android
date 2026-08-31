@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma `2252:17466` 解除拉黑成功勾 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="15dp"
+    android:height="15dp"
+    android:viewportWidth="14.6"
+    android:viewportHeight="14.6">
+    <path
+        android:fillColor="#00C274"
+        android:pathData="M7.3,0A7.3,7.3 0,1 1,7.3 14.6A7.3,7.3 0,1 1,7.3 0Z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M4.633,7.3L6.411,9.078L9.967,5.522"
+        android:strokeWidth="1.333"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

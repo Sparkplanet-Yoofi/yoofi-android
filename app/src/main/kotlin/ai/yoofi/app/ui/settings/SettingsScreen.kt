@@ -59,6 +59,7 @@ private val RowDivider = Color.White.copy(alpha = 0.07f)
 internal fun SettingsScreen(
     onBack: () -> Unit,
     onLinkedAccounts: () -> Unit,
+    onBlockedUsers: () -> Unit,
     onDeleteAccount: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
@@ -70,6 +71,7 @@ internal fun SettingsScreen(
         logoutConfirm = state.logoutConfirm,
         onBack = onBack,
         onLinkedAccounts = onLinkedAccounts,
+        onBlockedUsers = onBlockedUsers,
         onDeleteAccount = onDeleteAccount,
         onIntent = viewModel::onIntent,
         modifier = modifier,
@@ -81,6 +83,7 @@ internal fun SettingsLayout(
     logoutConfirm: Boolean,
     onBack: () -> Unit,
     onLinkedAccounts: () -> Unit,
+    onBlockedUsers: () -> Unit,
     onDeleteAccount: () -> Unit,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
@@ -127,7 +130,10 @@ internal fun SettingsLayout(
                 SettingsGroup(title = stringResource(R.string.settings_privacy)) {
                     SettingsNavRow(title = stringResource(R.string.settings_privacy_settings))
                     SettingsRowDivider()
-                    SettingsNavRow(title = stringResource(R.string.settings_blocked_users))
+                    SettingsNavRow(
+                        title = stringResource(R.string.settings_blocked_users),
+                        onClick = onBlockedUsers,
+                    )
                 }
                 SettingsGroup(title = stringResource(R.string.settings_support_about)) {
                     SettingsNavRow(title = stringResource(R.string.settings_feedback))
@@ -291,6 +297,7 @@ private fun SettingsScreenPreview() {
             logoutConfirm = false,
             onBack = {},
             onLinkedAccounts = {},
+            onBlockedUsers = {},
             onDeleteAccount = {},
             onIntent = {},
         )
@@ -305,6 +312,7 @@ private fun SettingsLogoutPreview() {
             logoutConfirm = true,
             onBack = {},
             onLinkedAccounts = {},
+            onBlockedUsers = {},
             onDeleteAccount = {},
             onIntent = {},
         )
