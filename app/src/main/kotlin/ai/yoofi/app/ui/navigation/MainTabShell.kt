@@ -9,6 +9,7 @@ import ai.yoofi.app.ui.auth.ProfileSetupScreen
 import ai.yoofi.app.ui.me.MeScreen
 import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.profile.guest.GuestProfileScreen
+import ai.yoofi.app.ui.profile.preview.PreviewProfileScreen
 import ai.yoofi.app.ui.search.SearchScreen
 import ai.yoofi.app.ui.settings.SettingsScreen
 import ai.yoofi.app.ui.settings.delete.DeleteAccountScreen
@@ -30,7 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
- * 登录后的四 Tab 壳：只管当前 Tab、底栏与设置子页 overlay。
+ * 登录后的四 Tab 壳：只管当前 Tab、底栏、设置子页与资料预览 overlay。
  * 登出或删号成功必须走 [onSignedOut]，由 [YoofiRoot] 把 landing 置空，否则清会话后仍停在 Tab。
  *
  * @param startTab 首次进入落地的 Tab，由调用方按登录结果决定。
@@ -54,6 +55,7 @@ internal fun MainTabShell(
     var linkedAccountsOpen by remember { mutableStateOf(false) }
     var blockedUsersOpen by remember { mutableStateOf(false) }
     var feedbackOpen by remember { mutableStateOf(false) }
+    var previewProfileOpen by remember { mutableStateOf(false) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -70,6 +72,7 @@ internal fun MainTabShell(
                     YoofiTab.Create -> CreateScreen()
                     YoofiTab.Me -> MeScreen(
                         onSettingsClick = { settingsOpen = true },
+                        onPreviewProfile = { previewProfileOpen = true },
                         onEditProfile = { profileEditor = ProfileEditorEntry.Edit },
                         onSetupProfile = { profileEditor = ProfileEditorEntry.Create },
                     )
@@ -84,7 +87,8 @@ internal fun MainTabShell(
                 !deleteAccountOpen &&
                 !linkedAccountsOpen &&
                 !blockedUsersOpen &&
-                !feedbackOpen
+                !feedbackOpen &&
+                !previewProfileOpen
             ) {
                 YoofiBottomBar(
                     selected = tab,
@@ -155,6 +159,12 @@ internal fun MainTabShell(
             if (feedbackOpen) {
                 FeedbackScreen(
                     onClose = { feedbackOpen = false },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (previewProfileOpen) {
+                PreviewProfileScreen(
+                    onBack = { previewProfileOpen = false },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

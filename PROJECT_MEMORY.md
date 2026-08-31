@@ -52,6 +52,11 @@
   主态与空态都在 Tab「我的」（设置 + Preview + Get VIP），空态对齐 Figma `982:13113`
   （Nickname、占位头像、0 Create/Favorite/Follow、无 ID 编号）。
   客态仍是栈上 overlay（返回 + 三点拉黑）。公共壳在 `ui.profile`。
+  「Preview Profile」独立 `ui.profile.preview` + `PreviewProfileViewModel`，不要塞进 MeViewModel，
+  也不要用 `isSelf` 复用客态。对齐 Figma `2252:19446`：返回 + 居中标题，资料卡无铅笔 /
+  复制 / VIP，头像角标是别人看到的关注 +（不可点）。Tab 是 Played / Lorebook / Props，
+  不是「我的」的 Lorebook / Creations。Played 接口未定，四张 Demo 卡走
+  `GetPreviewPlayedWorksUseCase`。
   `ResolveMineProfilePresenceUseCase` 看会话：未登录、`profileCompleted == false`、昵称为空 → 空态。
   创建资料成功走 `MarkProfileCompletedUseCase`，Skip 不标完善。
   空态铅笔进 `ProfileEditorEntry.Create`，主态铅笔进 `Edit`。

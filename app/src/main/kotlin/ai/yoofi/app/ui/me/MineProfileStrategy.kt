@@ -46,6 +46,9 @@ internal fun MineProfilePresence.strategy(): MineProfileStrategy = when (this) {
     MineProfilePresence.Populated -> PopulatedMineStrategy
 }
 
+/**
+ * 「我的」空态 的策略实现
+ */
 internal data object VacantMineStrategy : MineProfileStrategy {
     override val pencilCdRes: Int = R.string.cd_complete_profile
 
@@ -84,6 +87,9 @@ internal data object VacantMineStrategy : MineProfileStrategy {
     }
 }
 
+/**
+ * 「我的」主态 的策略实现
+ */
 internal data object PopulatedMineStrategy : MineProfileStrategy {
     override val pencilCdRes: Int = R.string.cd_edit_profile
 

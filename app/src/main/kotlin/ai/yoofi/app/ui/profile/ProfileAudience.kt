@@ -7,6 +7,7 @@ import ai.yoofi.app.domain.profile.MineProfilePresence
  *
  * - [Mine]：Tab「我的」，再按 [MineProfilePresence] 分主态 / 空态
  * - [Guest]：栈上客态 overlay
+ * 预览页是独立 Screen（`ui.profile.preview`），不要加进本密封类当 `isSelf`。
  */
 internal sealed interface ProfileAudience {
     /** 当前用户看自己的个人中心。 */
