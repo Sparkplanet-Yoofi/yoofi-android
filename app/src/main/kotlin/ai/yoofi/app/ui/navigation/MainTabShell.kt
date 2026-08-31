@@ -10,6 +10,8 @@ import ai.yoofi.app.ui.me.MeScreen
 import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.profile.guest.GuestProfileScreen
 import ai.yoofi.app.ui.search.SearchScreen
+import ai.yoofi.app.ui.settings.SettingsScreen
+import ai.yoofi.app.ui.settings.delete.DeleteAccountScreen
 import ai.yoofi.app.ui.surface.ContentBackdropProvider
 import ai.yoofi.app.ui.surface.ContentBackdropRecorder
 import ai.yoofi.app.ui.surface.rememberContentBackdropLayer
@@ -25,13 +27,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
- * 登录后的四 Tab 壳：只管当前 Tab 与底栏，不掺登录判断。
+ * 登录后的四 Tab 壳：只管当前 Tab、底栏与设置 / 删号 overlay。
+ * 登出或删号成功必须走 [onSignedOut]，由 [YoofiRoot] 把 landing 置空，否则清会话后仍停在 Tab。
  *
  * @param startTab 首次进入落地的 Tab，由调用方按登录结果决定。
+ * @param onSignedOut 会话已清，回到登录流。
  */
 @Composable
 internal fun MainTabShell(
     startTab: YoofiTab,
+    onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var tab by remember { mutableStateOf(startTab) }
@@ -41,6 +46,8 @@ internal fun MainTabShell(
     var detailGameId by remember { mutableStateOf<String?>(null) }
     var guestProfile by remember { mutableStateOf<GuestProfileTarget?>(null) }
     var profileEditor by remember { mutableStateOf<ProfileEditorEntry?>(null) }
+    var settingsOpen by remember { mutableStateOf(false) }
+    var deleteAccountOpen by remember { mutableStateOf(false) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -56,6 +63,7 @@ internal fun MainTabShell(
                     )
                     YoofiTab.Create -> CreateScreen()
                     YoofiTab.Me -> MeScreen(
+                        onSettingsClick = { settingsOpen = true },
                         onEditProfile = { profileEditor = ProfileEditorEntry.Edit },
                         onSetupProfile = { profileEditor = ProfileEditorEntry.Create },
                     )
@@ -65,7 +73,9 @@ internal fun MainTabShell(
                 !searchOpen &&
                 detailGameId == null &&
                 guestProfile == null &&
-                profileEditor == null
+                profileEditor == null &&
+                !settingsOpen &&
+                !deleteAccountOpen
             ) {
                 YoofiBottomBar(
                     selected = tab,
@@ -102,6 +112,25 @@ internal fun MainTabShell(
             if (chatOpen) {
                 ChatRoomScreen(
                     onBack = { chatOpen = false },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (settingsOpen) {
+                SettingsScreen(
+                    onBack = { settingsOpen = false },
+                    onDeleteAccount = { deleteAccountOpen = true },
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (deleteAccountOpen) {
+                DeleteAccountScreen(
+                    onClose = { deleteAccountOpen = false },
+                    onAccountDeleted = {
+                        deleteAccountOpen = false
+                        settingsOpen = false
+                        onSignedOut()
+                    },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

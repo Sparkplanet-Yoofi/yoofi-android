@@ -25,7 +25,11 @@ fun YoofiRoot(modifier: Modifier = Modifier) {
         )
         return
     }
-    MainTabShell(startTab = target.toStartTab(), modifier = modifier)
+    MainTabShell(
+        startTab = target.toStartTab(),
+        onSignedOut = { landing = null },
+        modifier = modifier,
+    )
 }
 
 private fun AuthLandingTarget.toStartTab(): YoofiTab = when (this) {

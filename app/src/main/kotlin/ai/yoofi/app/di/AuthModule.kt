@@ -8,7 +8,10 @@ import ai.yoofi.app.data.auth.InMemoryUserSession
 import ai.yoofi.app.data.auth.KtorAuthRemoteDataSource
 import ai.yoofi.app.data.auth.RemoteAuthRepository
 import ai.yoofi.app.domain.auth.AuthRepository
+import ai.yoofi.app.domain.auth.DeleteAccountUseCase
 import ai.yoofi.app.domain.auth.GetCurrentUserUseCase
+import ai.yoofi.app.domain.auth.LogoutUseCase
+import ai.yoofi.app.domain.auth.SendDeleteCodeUseCase
 import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
 import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
@@ -72,4 +75,17 @@ object AuthProvideModule {
     fun provideMarkProfileCompletedUseCase(
         userSessionStore: UserSessionStore,
     ): MarkProfileCompletedUseCase = MarkProfileCompletedUseCase(userSessionStore)
+
+    @Provides
+    fun provideLogoutUseCase(
+        userSessionStore: UserSessionStore,
+    ): LogoutUseCase = LogoutUseCase(userSessionStore)
+
+    @Provides
+    fun provideDeleteAccountUseCase(
+        userSessionStore: UserSessionStore,
+    ): DeleteAccountUseCase = DeleteAccountUseCase(userSessionStore)
+
+    @Provides
+    fun provideSendDeleteCodeUseCase(): SendDeleteCodeUseCase = SendDeleteCodeUseCase()
 }

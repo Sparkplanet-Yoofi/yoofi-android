@@ -68,6 +68,14 @@
 - **资料创建与编辑是两条入口，不是 `isEdit` 开关**：`ProfileEditorEntry.Create`（注册后完善，Skip + Continue，走现有创建 mock）与
   `ProfileEditorEntry.Edit`（Me 铅笔进 `1943:14006`，返回 + Save，走 `UpdateProfileUseCase`）。
   表单壳共用 `ProfileSetupScreen`；提交契约分开，接接口时创建另加 CompleteProfileUseCase，不要把编辑塞进创建的 delay mock。
+- **设置与注销不要塞进 MeViewModel**：设置独立 `ui.settings` + `SettingsViewModel`（列表 + 登出弹层）。
+  注销独立 `ui.settings.delete` + `DeleteAccountViewModel`。
+  点选路径：警告 `2252:16542` → 有密 `2252:16583` → 无密 `2252:16629` → 成功 `2252:16685`。
+  Figma 把有密 / 无密画成并列稿；当前按点选路径两页都走到，接账号类型接口后只留一页。
+  登出对齐 `2252:17923` 弹窗，不是警告页。`2252:16542` 标题是 Delete Account。
+  登出 / 删号成功必须 `YoofiRoot.landing = null`，只 `UserSessionStore.clear()` 会停在 Tab。
+  Language / Linked Accounts 等行先画出入口，子页未定不要顺手做。
+  接注销接口只改 `DeleteAccountUseCase` / `SendDeleteCodeUseCase`。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。
 - **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；
@@ -190,6 +198,10 @@
 17. **详情举报不要写进 GameDetailViewModel**：三点菜单、重置 Snackbar、是否打开举报页
     归详情管家；原因 / 500 字详情 / 最多 3 张截图走独立 Screen。Hilt VM 跟详情同作用域，
     `bind` 每次进入必须重开原因页，否则提交成功后再点开会停在 Done。
+
+18. **登出只清会话不够**：`YoofiRoot` 用 `landing != null` 决定是否停在 Tab。
+    不把 `landing` 置空，Tab 壳还在，用户会看到已退出的「我的」。
+    删号成功倒计时结束走 `onAccountDeleted`；警告页 Cancel 只关 overlay，不要误调登出。
 
 ---
 

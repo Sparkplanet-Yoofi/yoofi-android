@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma `2252:16567` circle-alert，禁止手绘 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="16.35"
+    android:viewportHeight="16.35">
+    <path
+        android:fillColor="#FF1D61"
+        android:pathData="M8.175,15.675C12.3171,15.675 15.675,12.3171 15.675,8.175C15.675,4.03286 12.3171,0.675 8.175,0.675C4.03286,0.675 0.675,4.03286 0.675,8.175C0.675,12.3171 4.03286,15.675 8.175,15.675Z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M8.175,5.175V8.175"
+        android:strokeWidth="1.35"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M8.175,11.175H8.1825"
+        android:strokeWidth="1.35"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
