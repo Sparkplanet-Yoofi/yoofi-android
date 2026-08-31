@@ -224,4 +224,14 @@
     <string name="settings_delete_done_seconds">seconds.</string>
     <string name="cd_delete_ack">Acknowledge deletion consequences</string>
     <string name="cd_toggle_password">Toggle password visibility</string>
+    <string name="settings_linked_unlink">Unlink</string>
+    <string name="settings_linked_link">Link</string>
+    <string name="settings_linked_not_linked">Not linked</string>
+    <string name="settings_linked_provider_google">Google</string>
+    <string name="settings_linked_provider_apple">Apple</string>
+    <string name="settings_linked_unlink_title">Unlink Account</string>
+    <string name="settings_linked_unlink_body">You won\'t be able to log in with this %1$s account after unlinking. Are you sure?</string>
+    <string name="settings_linked_last_body">This is your only sign-in method and cannot be unlinked. To close this account, please use Delete Account.</string>
+    <string name="settings_linked_ok">OK</string>
+    <string name="settings_linked_unlinked_snackbar">Unlink account</string>
 </resources>

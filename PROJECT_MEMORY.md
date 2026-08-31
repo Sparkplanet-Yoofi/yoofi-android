@@ -74,7 +74,10 @@
   Figma 把有密 / 无密画成并列稿；当前按点选路径两页都走到，接账号类型接口后只留一页。
   登出对齐 `2252:17923` 弹窗，不是警告页。`2252:16542` 标题是 Delete Account。
   登出 / 删号成功必须 `YoofiRoot.landing = null`，只 `UserSessionStore.clear()` 会停在 Tab。
-  Language / Linked Accounts 等行先画出入口，子页未定不要顺手做。
+  Language 等行先画出入口，子页未定不要顺手做。
+  关联账号独立 `ui.settings.linked` + `LinkedAccountsViewModel`，不要塞进设置管家。
+  双账号对齐 `2252:17106`，点已绑定行出 `2252:17312`；只剩一条对齐 `2252:17155`，
+  点 Unlink 出 `2252:17254`。解绑接口未定，确认后只发 Snackbar，接接口改 `UnlinkAccountUseCase`。
   接注销接口只改 `DeleteAccountUseCase` / `SendDeleteCodeUseCase`。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。

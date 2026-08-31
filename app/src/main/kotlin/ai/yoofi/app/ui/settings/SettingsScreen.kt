@@ -53,11 +53,12 @@ private val RowDivider = Color.White.copy(alpha = 0.07f)
 
 /**
  * 设置页，对齐 Figma `2304:20673`。
- * 其余行先画出入口，子页未定时点击为空实现。
+ * Language 等行先画出入口，子页未定时点击为空实现。
  */
 @Composable
 internal fun SettingsScreen(
     onBack: () -> Unit,
+    onLinkedAccounts: () -> Unit,
     onDeleteAccount: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
@@ -68,6 +69,7 @@ internal fun SettingsScreen(
     SettingsLayout(
         logoutConfirm = state.logoutConfirm,
         onBack = onBack,
+        onLinkedAccounts = onLinkedAccounts,
         onDeleteAccount = onDeleteAccount,
         onIntent = viewModel::onIntent,
         modifier = modifier,
@@ -78,6 +80,7 @@ internal fun SettingsScreen(
 internal fun SettingsLayout(
     logoutConfirm: Boolean,
     onBack: () -> Unit,
+    onLinkedAccounts: () -> Unit,
     onDeleteAccount: () -> Unit,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
@@ -116,7 +119,10 @@ internal fun SettingsLayout(
                     )
                 }
                 SettingsGroup(title = stringResource(R.string.settings_privacy)) {
-                    SettingsNavRow(title = stringResource(R.string.settings_linked_accounts))
+                    SettingsNavRow(
+                        title = stringResource(R.string.settings_linked_accounts),
+                        onClick = onLinkedAccounts,
+                    )
                 }
                 SettingsGroup(title = stringResource(R.string.settings_privacy)) {
                     SettingsNavRow(title = stringResource(R.string.settings_privacy_settings))
@@ -212,12 +218,15 @@ private fun SettingsGroup(
 }
 
 @Composable
-private fun SettingsNavRow(title: String) {
+private fun SettingsNavRow(
+    title: String,
+    onClick: () -> Unit = {},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clickableDismissingIme(role = Role.Button, onClick = {})
+            .clickableDismissingIme(role = Role.Button, onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -281,6 +290,7 @@ private fun SettingsScreenPreview() {
         SettingsLayout(
             logoutConfirm = false,
             onBack = {},
+            onLinkedAccounts = {},
             onDeleteAccount = {},
             onIntent = {},
         )
@@ -294,6 +304,7 @@ private fun SettingsLogoutPreview() {
         SettingsLayout(
             logoutConfirm = true,
             onBack = {},
+            onLinkedAccounts = {},
             onDeleteAccount = {},
             onIntent = {},
         )
