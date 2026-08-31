@@ -434,6 +434,7 @@ private fun DoneStep(
                 append(stringResource(R.string.settings_delete_done_thanks))
                 append("\n")
                 append(stringResource(R.string.settings_delete_done_redirect_before))
+                append("\n")
                 withStyle(
                     SpanStyle(
                         color = YoofiAccent,

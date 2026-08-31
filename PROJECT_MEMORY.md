@@ -81,6 +81,9 @@
   黑名单独立 `ui.settings.blocked` + `BlockedUsersViewModel`，不要塞进设置管家。
   列表对齐 `2252:17322`，点 Unblock 出 `2252:17548`，成功 Toast 对齐 `2252:17465`（文案 User Unblocked）。
   解禁接口未定，确认后只发 Toast 并就地删行，接接口改 `UnblockUserUseCase`。
+  反馈独立 `ui.settings.feedback` + `FeedbackViewModel`，不要塞进设置管家。
+  空表对齐 `2252:17719`，选类型+描述后对齐 `2252:17770`，成功对齐 `2252:17821`。
+  提交接口未定，确认后只切成功页，接接口改 `SubmitFeedbackUseCase`。
   接注销接口只改 `DeleteAccountUseCase` / `SendDeleteCodeUseCase`。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。

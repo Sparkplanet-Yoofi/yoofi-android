@@ -60,6 +60,7 @@ internal fun SettingsScreen(
     onBack: () -> Unit,
     onLinkedAccounts: () -> Unit,
     onBlockedUsers: () -> Unit,
+    onFeedback: () -> Unit,
     onDeleteAccount: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
@@ -72,6 +73,7 @@ internal fun SettingsScreen(
         onBack = onBack,
         onLinkedAccounts = onLinkedAccounts,
         onBlockedUsers = onBlockedUsers,
+        onFeedback = onFeedback,
         onDeleteAccount = onDeleteAccount,
         onIntent = viewModel::onIntent,
         modifier = modifier,
@@ -84,6 +86,7 @@ internal fun SettingsLayout(
     onBack: () -> Unit,
     onLinkedAccounts: () -> Unit,
     onBlockedUsers: () -> Unit,
+    onFeedback: () -> Unit,
     onDeleteAccount: () -> Unit,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
@@ -136,7 +139,10 @@ internal fun SettingsLayout(
                     )
                 }
                 SettingsGroup(title = stringResource(R.string.settings_support_about)) {
-                    SettingsNavRow(title = stringResource(R.string.settings_feedback))
+                    SettingsNavRow(
+                        title = stringResource(R.string.settings_feedback),
+                        onClick = onFeedback,
+                    )
                     SettingsRowDivider()
                     SettingsNavRow(title = stringResource(R.string.settings_terms))
                     SettingsRowDivider()
@@ -298,6 +304,7 @@ private fun SettingsScreenPreview() {
             onBack = {},
             onLinkedAccounts = {},
             onBlockedUsers = {},
+            onFeedback = {},
             onDeleteAccount = {},
             onIntent = {},
         )
@@ -313,6 +320,7 @@ private fun SettingsLogoutPreview() {
             onBack = {},
             onLinkedAccounts = {},
             onBlockedUsers = {},
+            onFeedback = {},
             onDeleteAccount = {},
             onIntent = {},
         )

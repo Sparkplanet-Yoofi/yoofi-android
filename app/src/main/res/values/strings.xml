@@ -239,4 +239,17 @@
     <string name="settings_blocked_confirm_title">Unblock this user?</string>
     <string name="settings_blocked_confirm_body">After unblocking, this user will be able to view your profile and posts.</string>
     <string name="settings_blocked_unblocked">User Unblocked</string>
+    <string name="settings_feedback_type">Feedback Type</string>
+    <string name="settings_feedback_type_suggestion">Suggestion</string>
+    <string name="settings_feedback_type_bug">Bug</string>
+    <string name="settings_feedback_type_content">Content</string>
+    <string name="settings_feedback_type_other">Other</string>
+    <string name="settings_feedback_description">Description</string>
+    <string name="settings_feedback_description_hint">Please describe problems you encountered in-detail and your improvement suggestions</string>
+    <string name="settings_feedback_count">%1$d/500</string>
+    <string name="settings_feedback_contact">Contact info (Optional)</string>
+    <string name="settings_feedback_contact_hint">Email address for follow-up (optional)</string>
+    <string name="settings_feedback_submit">Submit</string>
+    <string name="settings_feedback_submitted">Feedback submitted</string>
+    <string name="settings_feedback_submitted_body">Thank you for your feedback. Our team will review it and make improvements as soon as possible.</string>
 </resources>
