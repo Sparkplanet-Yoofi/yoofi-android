@@ -7,5 +7,7 @@ interface UserSessionStore {
     fun save(session: AuthSession)
     fun currentUser(): User?
     fun currentAccessToken(): String?
+    /** 完整会话；资料是否完善等字段只从这里读，不要另开平行状态。 */
+    fun currentSession(): AuthSession?
     fun clear()
 }

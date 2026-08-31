@@ -23,6 +23,8 @@ class InMemoryUserSession @Inject constructor() : UserSessionStore {
 
     override fun currentAccessToken(): String? = session?.accessToken
 
+    override fun currentSession(): AuthSession? = session
+
     @Synchronized
     override fun clear() {
         session = null

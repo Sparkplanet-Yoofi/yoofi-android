@@ -4,7 +4,7 @@
 > **维护纪律**：每个需求收尾花 5 分钟更新踩坑与技术债。写得及时比写得全更重要。
 > 过期的禁区清单比没有清单更危险——发现失效条目请立即删除或更正。
 >
-> 最近更新：2026-08-30
+> 最近更新：2026-08-31
 
 ---
 
@@ -47,11 +47,19 @@
   每个接口的 Demo / 真实切换登记在 `DemoFeature`，这是**唯一手改点**。
   提测 / 上线包若还有接口只有 Demo 实现，`YoofiApplication` 启动自检直接抛错。
   **禁止再写需要手工翻转的 mock 常量**——`TempMockLoginSuccess` 就是这么差点把 mock 登录带上线的。
-- **资料页主客态拆屏、不共用 `MeScreen` 开关**：主态是 Tab（设置 + Preview + Get VIP），
-  客态是栈上 overlay（返回 + 三点拉黑）。公共壳在 `ui.profile`（背景、身份卡 slot、一级 Tab、作品格），
-  主态动作留 `MeScreen`，客态动作留 `GuestProfileScreen`。禁止往资料卡塞 `isSelf`：
-  隐私 Tab、关注/私信/举报以后会分叉，布尔开关会把两套产品逻辑缠死。
+- **资料页按观众拆屏，不共用 `isSelf` / `isEmpty`**：词汇是 `ProfileAudience`
+  （`Mine.Populated` 主态 / `Mine.Vacant` 空态 / `Guest` 客态）。
+  主态与空态都在 Tab「我的」（设置 + Preview + Get VIP），空态对齐 Figma `982:13113`
+  （Nickname、占位头像、0 Create/Favorite/Follow、无 ID 编号）。
+  客态仍是栈上 overlay（返回 + 三点拉黑）。公共壳在 `ui.profile`。
+  `ResolveMineProfilePresenceUseCase` 看会话：未登录、`profileCompleted == false`、昵称为空 → 空态。
+  创建资料成功走 `MarkProfileCompletedUseCase`，Skip 不标完善。
+  空态铅笔进 `ProfileEditorEntry.Create`，主态铅笔进 `Edit`。
+  禁止往资料卡塞布尔开关；以后加封禁/审核态只加 `ProfileAudience` 分支 + Screen。
   拉黑接口未定，确认后只发 `GuestSnackbar.BlockUser`，接接口时加 UseCase，不要把 HTTP 写进 Screen。
+- **资料创建与编辑是两条入口，不是 `isEdit` 开关**：`ProfileEditorEntry.Create`（注册后完善，Skip + Continue，走现有创建 mock）与
+  `ProfileEditorEntry.Edit`（Me 铅笔进 `1943:14006`，返回 + Save，走 `UpdateProfileUseCase`）。
+  表单壳共用 `ProfileSetupScreen`；提交契约分开，接接口时创建另加 CompleteProfileUseCase，不要把编辑塞进创建的 delay mock。
 - **登录会话在内存**：`UserSessionStore` / `GetCurrentUserUseCase`；导航看 `isNewUser`，
   `profileCompleted` 只存会话。Token 尚未落盘。
 - **网络隔离**：Repository 只依赖纯 Kotlin `RemoteDataSource` + `Outcome`；
@@ -161,6 +169,12 @@
     不要改共享页层的 `renderEffect`（设完立刻清空，GPU 合成时已经没了），
     裁切后再 `Modifier.blur`，和详情卡同一套路。CSS `blur(10px)` 是标准差，
     Compose 半径按 `sigma ≈ 0.577 * radius + 0.5` 折成约 16dp。
+
+16. **资料空态不要写成 `MeScreen(isEmpty)`**：Figma `982:13113` 的计数是
+    Create / Favorite / Follow，主态仍是 Following / Follower。差异放
+    `ProfileIdentity.stats`，观众放 `ProfileAudience` / `MineProfilePresence`。
+    Demo 登录 `profileCompleted == false`，Skip 后「我的」就是空态；
+    创建成功必须 `MarkProfileCompletedUseCase`，否则 Tab 复用 VM 会一直空。
 
 ---
 

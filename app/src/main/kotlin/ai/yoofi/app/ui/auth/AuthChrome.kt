@@ -90,6 +90,7 @@ internal fun AuthBackground(
 internal fun AuthSignUpHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.auth_sign_up_title),
 ) {
     Box(
         modifier = modifier
@@ -107,7 +108,7 @@ internal fun AuthSignUpHeader(
                 .clickableDismissingIme(onClick = onBack),
         )
         Text(
-            text = stringResource(R.string.auth_sign_up_title),
+            text = title,
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,

@@ -38,6 +38,15 @@
     <string name="cd_section_more">See all</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_copy_id">Copy ID</string>
+    <string name="cd_edit_profile">Edit profile</string>
+    <string name="cd_complete_profile">Complete profile</string>
+    <string name="me_nickname_placeholder">Nickname</string>
+    <string name="me_stat_zero">0</string>
+    <string name="me_stat_create">Create</string>
+    <string name="me_stat_favorite">Favorite</string>
+    <string name="me_stat_follow">Follow</string>
+    <string name="me_edit_profile">Edit Profile</string>
+    <string name="me_edit_profile_save">Save</string>
     <string name="me_id_copied">已复制</string>
     <string name="auth_continue_google">Continue with Google</string>
     <string name="auth_or">Or</string>

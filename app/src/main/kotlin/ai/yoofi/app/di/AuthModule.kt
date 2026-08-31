@@ -11,6 +11,9 @@ import ai.yoofi.app.domain.auth.AuthRepository
 import ai.yoofi.app.domain.auth.GetCurrentUserUseCase
 import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
+import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
+import ai.yoofi.app.domain.profile.ResolveMineProfilePresenceUseCase
+import ai.yoofi.app.domain.profile.UpdateProfileUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -56,4 +59,17 @@ object AuthProvideModule {
     fun provideGetCurrentUserUseCase(
         userSessionStore: UserSessionStore,
     ): GetCurrentUserUseCase = GetCurrentUserUseCase(userSessionStore)
+
+    @Provides
+    fun provideUpdateProfileUseCase(): UpdateProfileUseCase = UpdateProfileUseCase()
+
+    @Provides
+    fun provideResolveMineProfilePresenceUseCase(
+        userSessionStore: UserSessionStore,
+    ): ResolveMineProfilePresenceUseCase = ResolveMineProfilePresenceUseCase(userSessionStore)
+
+    @Provides
+    fun provideMarkProfileCompletedUseCase(
+        userSessionStore: UserSessionStore,
+    ): MarkProfileCompletedUseCase = MarkProfileCompletedUseCase(userSessionStore)
 }

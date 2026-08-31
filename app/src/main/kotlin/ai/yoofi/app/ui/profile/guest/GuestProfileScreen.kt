@@ -13,6 +13,7 @@ import ai.yoofi.app.ui.profile.ProfileLorebookEmptyPane
 import ai.yoofi.app.ui.profile.ProfilePageBackground
 import ai.yoofi.app.ui.profile.ProfilePrimaryTab
 import ai.yoofi.app.ui.profile.ProfilePrimaryTabs
+import ai.yoofi.app.ui.profile.ProfileStat
 import ai.yoofi.app.ui.profile.ProfileWorkKind
 import ai.yoofi.app.ui.profile.profileAvatarRes
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
@@ -113,9 +114,17 @@ internal fun GuestProfileLayout(
     val identity = ProfileIdentity(
         displayName = target.displayName,
         publicId = stringResource(R.string.me_user_id),
-        followingCount = stringResource(R.string.me_following_count),
-        followerCount = stringResource(R.string.me_follower_count),
         avatarRes = avatarRes,
+        stats = listOf(
+            ProfileStat(
+                count = stringResource(R.string.me_following_count),
+                label = stringResource(R.string.me_following_label),
+            ),
+            ProfileStat(
+                count = stringResource(R.string.me_follower_count),
+                label = stringResource(R.string.me_follower_label),
+            ),
+        ),
     )
     LaunchedEffect(snackbar) {
         val kind = snackbar ?: return@LaunchedEffect

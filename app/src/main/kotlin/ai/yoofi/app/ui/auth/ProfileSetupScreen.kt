@@ -55,8 +55,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -129,29 +131,54 @@ private enum class GenderOption(
 }
 
 /**
- * 用户资料填写，覆盖 Figma 七态。
- * 键盘走 [ImeOverlayBox]，不顶起 Continue。
+ * 用户资料页。创建入口覆盖 Figma `2117:18954` 七态；编辑入口对齐 `1943:14006`。
+ * 键盘走 [ImeOverlayBox]，不顶起主按钮。
  */
 @Composable
 internal fun ProfileSetupScreen(
+    entry: ProfileEditorEntry,
     onSkip: () -> Unit,
     onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
+    onEditFinished: () -> Unit = {},
     viewModel: ProfileSetupViewModel = hiltViewModel(),
 ) {
     val avatarState by viewModel.uiState.collectAsStateWithLifecycle()
-    var name by remember { mutableStateOf(DemoDefaultDisplayName) }
-    var gender by remember { mutableStateOf<GenderOption?>(null) }
+    LaunchedEffect(entry) { viewModel.bind(entry) }
+    val initialName = when (entry) {
+        ProfileEditorEntry.Create -> DemoDefaultDisplayName
+        ProfileEditorEntry.Edit -> stringResource(R.string.me_display_name)
+    }
+    var name by remember(entry) { mutableStateOf(initialName) }
+    var gender by remember(entry) {
+        mutableStateOf(
+            if (entry is ProfileEditorEntry.Edit) GenderOption.Female else null,
+        )
+    }
     var nameIssue by remember { mutableStateOf<DisplayNameIssue?>(null) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var hasFailedOnce by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    LaunchedEffect(avatarState.editSaveFailed) {
+        if (avatarState.editSaveFailed) saving = false
+    }
 
-    AvatarPickerEffect(viewModel)
+    if (entry is ProfileEditorEntry.Edit) {
+        BackHandler(onBack = onEditFinished)
+    }
+
+    AvatarPickerEffect(
+        viewModel = viewModel,
+        onEditSaved = {
+            saving = false
+            onEditFinished()
+        },
+    )
 
     Box(modifier = modifier.fillMaxSize()) {
         ProfileSetupContent(
+            entry = entry,
             name = name,
             onNameChange = { value ->
                 name = value.take(DisplayNameMaxLength)
@@ -167,7 +194,7 @@ internal fun ProfileSetupScreen(
             },
             nameIssue = nameIssue,
             saving = saving,
-            saveFailed = saveFailed,
+            saveFailed = saveFailed || avatarState.editSaveFailed,
             avatarError = avatarState.avatarError,
             showAvatarSheet = avatarState.showAvatarSheet,
             avatarPath = avatarState.avatarPath,
@@ -180,6 +207,7 @@ internal fun ProfileSetupScreen(
             onChooseGallery = { viewModel.onIntent(ProfileSetupIntent.ChooseFromGallery) },
             onTakePhoto = { viewModel.onIntent(ProfileSetupIntent.TakePhoto) },
             onSkip = onSkip,
+            onBack = onEditFinished,
             onContinue = {
                 if (saving) return@ProfileSetupContent
                 if (name.isBlank()) {
@@ -187,23 +215,39 @@ internal fun ProfileSetupScreen(
                     saveFailed = false
                     return@ProfileSetupContent
                 }
-                if (name == DemoTakenDisplayName) {
-                    nameIssue = DisplayNameIssue.Unavailable
-                    saveFailed = false
-                    return@ProfileSetupContent
-                }
-                nameIssue = null
-                saveFailed = false
-                saving = true
-                scope.launch {
-                    delay(900)
-                    saving = false
-                    if (!hasFailedOnce) {
-                        hasFailedOnce = true
-                        // 服务端更新失败：输入框红框 + 占用文案。
-                        nameIssue = DisplayNameIssue.Unavailable
-                    } else {
-                        onCompleted()
+                when (entry) {
+                    ProfileEditorEntry.Create -> {
+                        if (name == DemoTakenDisplayName) {
+                            nameIssue = DisplayNameIssue.Unavailable
+                            saveFailed = false
+                            return@ProfileSetupContent
+                        }
+                        nameIssue = null
+                        saveFailed = false
+                        saving = true
+                        scope.launch {
+                            delay(900)
+                            saving = false
+                            if (!hasFailedOnce) {
+                                hasFailedOnce = true
+                                // 服务端更新失败：输入框红框 + 占用文案。
+                                nameIssue = DisplayNameIssue.Unavailable
+                            } else {
+                                viewModel.onCreateSucceeded()
+                                onCompleted()
+                            }
+                        }
+                    }
+                    ProfileEditorEntry.Edit -> {
+                        nameIssue = null
+                        saveFailed = false
+                        saving = true
+                        viewModel.onIntent(
+                            ProfileSetupIntent.SubmitEdit(
+                                displayName = name,
+                                genderKey = gender?.name,
+                            ),
+                        )
                     }
                 }
             },
@@ -226,6 +270,7 @@ internal fun ProfileSetupScreen(
 
 @Composable
 private fun ProfileSetupContent(
+    entry: ProfileEditorEntry,
     name: String,
     onNameChange: (String) -> Unit,
     gender: GenderOption?,
@@ -243,6 +288,7 @@ private fun ProfileSetupContent(
     onChooseGallery: () -> Unit,
     onTakePhoto: () -> Unit,
     onSkip: () -> Unit,
+    onBack: () -> Unit,
     onContinue: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -254,15 +300,26 @@ private fun ProfileSetupContent(
     ImeOverlayBox(modifier = modifier) {
         AuthBackground()
         Column(modifier = Modifier.fillMaxSize()) {
-            ProfileSetupHeader(
-                skipAlpha = skipAlpha,
-                skipEnabled = !saving,
-                onSkip = onSkip,
-            )
+            when (entry) {
+                ProfileEditorEntry.Create -> ProfileSetupHeader(
+                    skipAlpha = skipAlpha,
+                    skipEnabled = !saving,
+                    onSkip = onSkip,
+                )
+                ProfileEditorEntry.Edit -> AuthSignUpHeader(
+                    onBack = onBack,
+                    title = stringResource(R.string.me_edit_profile),
+                )
+            }
             Spacer(modifier = Modifier.height(28.dp))
             ProfileAvatar(
                 avatarPath = avatarPath,
                 avatarRevision = avatarRevision,
+                placeholderRes = if (entry is ProfileEditorEntry.Edit) {
+                    R.drawable.img_me_avatar
+                } else {
+                    null
+                },
                 enabled = !saving && !isPickingAvatar,
                 onCameraClick = onCameraClick,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -342,6 +399,10 @@ private fun ProfileSetupContent(
         }
         ProfileContinueButton(
             saving = saving,
+            labelRes = when (entry) {
+                ProfileEditorEntry.Create -> R.string.auth_continue_yoofi
+                ProfileEditorEntry.Edit -> R.string.me_edit_profile_save
+            },
             onClick = onContinue,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -414,6 +475,7 @@ private fun ProfileAvatar(
     enabled: Boolean,
     onCameraClick: () -> Unit,
     modifier: Modifier = Modifier,
+    @DrawableRes placeholderRes: Int? = null,
 ) {
     // 头像固定写 profile.jpg，路径不变；必须用 revision 强制重新解码。
     val avatarBitmap by produceState<ImageBitmap?>(
@@ -458,6 +520,13 @@ private fun ProfileAvatar(
                         contentScale = ContentScale.Crop,
                     )
                 }
+            } else if (placeholderRes != null) {
+                Image(
+                    painter = painterResource(placeholderRes),
+                    contentDescription = stringResource(R.string.cd_auth_avatar),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
             } else {
                 Image(
                     painter = painterResource(R.drawable.ic_profile_face),
@@ -662,6 +731,7 @@ private fun ProfileContinueButton(
     saving: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes labelRes: Int = R.string.auth_continue_yoofi,
 ) {
     Box(
         modifier = modifier
@@ -678,7 +748,7 @@ private fun ProfileContinueButton(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = stringResource(R.string.auth_continue_yoofi),
+            text = stringResource(labelRes),
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
@@ -842,6 +912,7 @@ private fun AvatarDialogButton(
 private fun ProfileSetupScreenPreview() {
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
         ProfileSetupContent(
+            entry = ProfileEditorEntry.Create,
             name = DemoDefaultDisplayName,
             onNameChange = {},
             gender = null,
@@ -859,6 +930,36 @@ private fun ProfileSetupScreenPreview() {
             onChooseGallery = {},
             onTakePhoto = {},
             onSkip = {},
+            onBack = {},
+            onContinue = {},
+        )
+    }
+}
+
+@Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun ProfileEditScreenPreview() {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
+        ProfileSetupContent(
+            entry = ProfileEditorEntry.Edit,
+            name = "Jenny",
+            onNameChange = {},
+            gender = GenderOption.Female,
+            onGenderChange = {},
+            nameIssue = null,
+            saving = false,
+            saveFailed = false,
+            avatarError = false,
+            showAvatarSheet = false,
+            avatarPath = null,
+            avatarRevision = 0L,
+            isPickingAvatar = false,
+            onCameraClick = {},
+            onDismissAvatarSheet = {},
+            onChooseGallery = {},
+            onTakePhoto = {},
+            onSkip = {},
+            onBack = {},
             onContinue = {},
         )
     }

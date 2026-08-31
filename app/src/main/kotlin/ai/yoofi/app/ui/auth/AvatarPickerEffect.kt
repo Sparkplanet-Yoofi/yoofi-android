@@ -10,6 +10,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 
@@ -18,7 +19,10 @@ import androidx.core.app.ActivityCompat
  * 相册走系统选择器，不申请 READ_MEDIA / 存储权限（Play 政策）。
  */
 @Composable
-internal fun AvatarPickerEffect(viewModel: ProfileSetupViewModel) {
+internal fun AvatarPickerEffect(
+    viewModel: ProfileSetupViewModel,
+    onEditSaved: () -> Unit = {},
+) {
     val context = LocalContext.current
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -51,6 +55,7 @@ internal fun AvatarPickerEffect(viewModel: ProfileSetupViewModel) {
         )
     }
 
+    val latestOnEditSaved = rememberUpdatedState(onEditSaved)
     LaunchedEffect(viewModel) {
         viewModel.sideEffect.collect { effect ->
             when (effect) {
@@ -81,6 +86,7 @@ internal fun AvatarPickerEffect(viewModel: ProfileSetupViewModel) {
                     }
                     runCatching { context.startActivity(intent) }
                 }
+                ProfileSetupSideEffect.EditSaved -> latestOnEditSaved.value()
             }
         }
     }

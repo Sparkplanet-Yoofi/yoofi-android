@@ -92,6 +92,7 @@ fun AuthFlow(
             modifier = modifier,
         )
         AuthStep.Profile -> ProfileSetupScreen(
+            entry = ProfileEditorEntry.Create,
             onSkip = { onAuthenticated(AuthLandingTarget.Home) },
             onCompleted = { onAuthenticated(AuthLandingTarget.Home) },
             modifier = modifier,

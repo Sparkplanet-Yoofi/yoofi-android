@@ -4,6 +4,8 @@ import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
+import ai.yoofi.app.ui.auth.ProfileEditorEntry
+import ai.yoofi.app.ui.auth.ProfileSetupScreen
 import ai.yoofi.app.ui.me.MeScreen
 import ai.yoofi.app.ui.profile.GuestProfileTarget
 import ai.yoofi.app.ui.profile.guest.GuestProfileScreen
@@ -38,6 +40,7 @@ internal fun MainTabShell(
     // 打开中的游戏详情页 id；null 表示没开。工程尚未引入 Navigation，先用状态提升代替回退栈
     var detailGameId by remember { mutableStateOf<String?>(null) }
     var guestProfile by remember { mutableStateOf<GuestProfileTarget?>(null) }
+    var profileEditor by remember { mutableStateOf<ProfileEditorEntry?>(null) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -52,10 +55,18 @@ internal fun MainTabShell(
                         onPlayedItemClick = { chatOpen = true },
                     )
                     YoofiTab.Create -> CreateScreen()
-                    YoofiTab.Me -> MeScreen()
+                    YoofiTab.Me -> MeScreen(
+                        onEditProfile = { profileEditor = ProfileEditorEntry.Edit },
+                        onSetupProfile = { profileEditor = ProfileEditorEntry.Create },
+                    )
                 }
             }
-            if (!chatOpen && !searchOpen && detailGameId == null && guestProfile == null) {
+            if (!chatOpen &&
+                !searchOpen &&
+                detailGameId == null &&
+                guestProfile == null &&
+                profileEditor == null
+            ) {
                 YoofiBottomBar(
                     selected = tab,
                     onTabSelected = { tab = it },
@@ -76,6 +87,15 @@ internal fun MainTabShell(
                 GuestProfileScreen(
                     target = target,
                     onBack = { guestProfile = null },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            profileEditor?.let { entry ->
+                ProfileSetupScreen(
+                    entry = entry,
+                    onSkip = { profileEditor = null },
+                    onCompleted = { profileEditor = null },
+                    onEditFinished = { profileEditor = null },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

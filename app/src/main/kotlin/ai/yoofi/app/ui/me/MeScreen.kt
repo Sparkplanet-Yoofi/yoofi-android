@@ -1,6 +1,7 @@
 package ai.yoofi.app.ui.me
 
 import ai.yoofi.app.R
+import ai.yoofi.app.domain.profile.MineProfilePresence
 import ai.yoofi.app.ui.pager.animateToRealPage
 import ai.yoofi.app.ui.pager.loopingPageCount
 import ai.yoofi.app.ui.pager.loopingStartPage
@@ -12,6 +13,7 @@ import ai.yoofi.app.ui.profile.ProfileLorebookEmptyPane
 import ai.yoofi.app.ui.profile.ProfilePageBackground
 import ai.yoofi.app.ui.profile.ProfilePrimaryTab
 import ai.yoofi.app.ui.profile.ProfilePrimaryTabs
+import ai.yoofi.app.ui.profile.ProfileStat
 import ai.yoofi.app.ui.profile.ProfileWorkKind
 import ai.yoofi.app.ui.theme.YoofiAndroidTheme
 import ai.yoofi.app.ui.theme.YoofiSnackbarContainer
@@ -65,18 +67,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 /**
- * 我的页主态。对齐 `982:13174`，创建态对齐 `982:12845`。
- * 资料卡 / Tab / 作品格与客态共用 `ui.profile`，主态专属动作留在本页。
+ * 我的页：主态 / 空态由 [MeViewModel] 解析，客态不进本页。
  */
 @Composable
 fun MeScreen(
     modifier: Modifier = Modifier,
     onSettingsClick: () -> Unit = {},
     onPreviewProfile: () -> Unit = {},
+    onEditProfile: () -> Unit = {},
+    onSetupProfile: () -> Unit = {},
 ) {
+    val viewModel: MeViewModel = hiltViewModel()
+    val presence by viewModel.presence.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
+    MeLayout(
+        presence = presence,
+        onSettingsClick = onSettingsClick,
+        onPreviewProfile = onPreviewProfile,
+        onEditProfile = onEditProfile,
+        onSetupProfile = onSetupProfile,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun MeLayout(
+    presence: MineProfilePresence,
+    onSettingsClick: () -> Unit,
+    onPreviewProfile: () -> Unit,
+    onEditProfile: () -> Unit,
+    onSetupProfile: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val vacant = presence == MineProfilePresence.Vacant
     val primaryTabs = ProfilePrimaryTab.entries
     val cycle = primaryTabs.size
     val pagerState = rememberPagerState(
@@ -91,13 +123,11 @@ fun MeScreen(
     val copyLabel = stringResource(R.string.cd_copy_id)
     val copiedMessage = stringResource(R.string.me_id_copied)
     var workKind by remember { mutableStateOf(ProfileWorkKind.StoryGame) }
-    val identity = ProfileIdentity(
-        displayName = stringResource(R.string.me_display_name),
-        publicId = userId,
-        followingCount = stringResource(R.string.me_following_count),
-        followerCount = stringResource(R.string.me_follower_count),
-        avatarRes = R.drawable.img_me_avatar,
-    )
+    val identity = if (vacant) {
+        vacantMineIdentity()
+    } else {
+        populatedMineIdentity(publicId = userId)
+    }
     Box(modifier = modifier.fillMaxSize()) {
         ProfilePageBackground()
         Column(
@@ -116,35 +146,50 @@ fun MeScreen(
                 nameAccessory = {
                     Image(
                         painter = painterResource(R.drawable.ic_edit_pencil),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                },
-                idTrailing = {
-                    Image(
-                        painter = painterResource(R.drawable.ic_copy),
-                        contentDescription = stringResource(R.string.cd_copy_id),
+                        contentDescription = stringResource(
+                            if (vacant) {
+                                R.string.cd_complete_profile
+                            } else {
+                                R.string.cd_edit_profile
+                            },
+                        ),
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(18.dp)
                             .clickable(
                                 role = Role.Button,
-                                onClick = {
-                                    copyUserIdToClipboard(
-                                        context,
-                                        label = copyLabel,
-                                        userId = userId,
-                                    )
-                                    scope.launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar(
-                                            message = copiedMessage,
-                                            duration = SnackbarDuration.Short,
-                                        )
-                                    }
-                                },
-                            )
-                            .padding(6.dp),
+                                onClick = if (vacant) onSetupProfile else onEditProfile,
+                            ),
                     )
+                },
+                idTrailing = if (vacant) {
+                    null
+                } else {
+                    {
+                        Image(
+                            painter = painterResource(R.drawable.ic_copy),
+                            contentDescription = stringResource(R.string.cd_copy_id),
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable(
+                                    role = Role.Button,
+                                    onClick = {
+                                        copyUserIdToClipboard(
+                                            context,
+                                            label = copyLabel,
+                                            userId = userId,
+                                        )
+                                        scope.launch {
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                            snackbarHostState.showSnackbar(
+                                                message = copiedMessage,
+                                                duration = SnackbarDuration.Short,
+                                            )
+                                        }
+                                    },
+                                )
+                                .padding(6.dp),
+                        )
+                    }
                 },
                 trailing = { GetVipChip() },
             )
@@ -170,11 +215,15 @@ fun MeScreen(
                     ProfilePrimaryTab.Lorebook -> {
                         ProfileLorebookEmptyPane(Modifier.fillMaxSize())
                     }
-                    ProfilePrimaryTab.Creations -> ProfileCreationsPane(
-                        workKind = workKind,
-                        onWorkKindChange = { workKind = it },
-                        modifier = Modifier.fillMaxSize(),
-                    )
+                    ProfilePrimaryTab.Creations -> if (vacant) {
+                        ProfileLorebookEmptyPane(Modifier.fillMaxSize())
+                    } else {
+                        ProfileCreationsPane(
+                            workKind = workKind,
+                            onWorkKindChange = { workKind = it },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
             }
         }
@@ -192,6 +241,41 @@ fun MeScreen(
             )
         }
     }
+}
+
+@Composable
+private fun vacantMineIdentity(): ProfileIdentity {
+    val zero = stringResource(R.string.me_stat_zero)
+    return ProfileIdentity(
+        displayName = stringResource(R.string.me_nickname_placeholder),
+        publicId = null,
+        avatarRes = null,
+        showFanBadge = false,
+        stats = listOf(
+            ProfileStat(count = zero, label = stringResource(R.string.me_stat_create)),
+            ProfileStat(count = zero, label = stringResource(R.string.me_stat_favorite)),
+            ProfileStat(count = zero, label = stringResource(R.string.me_stat_follow)),
+        ),
+    )
+}
+
+@Composable
+private fun populatedMineIdentity(publicId: String): ProfileIdentity {
+    return ProfileIdentity(
+        displayName = stringResource(R.string.me_display_name),
+        publicId = publicId,
+        avatarRes = R.drawable.img_me_avatar,
+        stats = listOf(
+            ProfileStat(
+                count = stringResource(R.string.me_following_count),
+                label = stringResource(R.string.me_following_label),
+            ),
+            ProfileStat(
+                count = stringResource(R.string.me_follower_count),
+                label = stringResource(R.string.me_follower_label),
+            ),
+        ),
+    )
 }
 
 @Composable
@@ -287,6 +371,26 @@ private fun copyUserIdToClipboard(context: Context, label: String, userId: Strin
 @Composable
 private fun MeScreenPreview() {
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
-        MeScreen()
+        MeLayout(
+            presence = MineProfilePresence.Populated,
+            onSettingsClick = {},
+            onPreviewProfile = {},
+            onEditProfile = {},
+            onSetupProfile = {},
+        )
+    }
+}
+
+@Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun MeVacantPreview() {
+    YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {
+        MeLayout(
+            presence = MineProfilePresence.Vacant,
+            onSettingsClick = {},
+            onPreviewProfile = {},
+            onEditProfile = {},
+            onSetupProfile = {},
+        )
     }
 }

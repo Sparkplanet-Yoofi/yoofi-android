@@ -1,10 +1,12 @@
 package ai.yoofi.app.ui.profile
 
 import ai.yoofi.app.R
+import ai.yoofi.app.ui.theme.YoofiAuthFieldFill
 import ai.yoofi.app.ui.theme.YoofiProfileStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,14 +27,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * 主态 / 客态共用的资料卡。
- * 差异走 slot：主态塞编辑、复制、Get VIP；客态塞关注加号，不往卡里塞 `isSelf`。
+ * 主态 / 客态 / 空态共用的资料卡。
+ * 差异走 slot 与 [ProfileIdentity] 字段，不往卡里塞 `isSelf` / `isEmpty`。
  */
 @Composable
 internal fun ProfileIdentityCard(
@@ -61,14 +62,32 @@ internal fun ProfileIdentityCard(
                 .align(Alignment.CenterStart)
                 .size(72.dp),
         ) {
-            Image(
-                painter = painterResource(identity.avatarRes),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop,
-            )
+            val avatarRes = identity.avatarRes
+            if (avatarRes != null) {
+                Image(
+                    painter = painterResource(avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                // 空态占位：紫底圆 + 脸标，对齐 Figma `982:13124`
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(YoofiAuthFieldFill),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_profile_face),
+                        contentDescription = null,
+                        modifier = Modifier.size(width = 36.dp, height = 43.dp),
+                    )
+                }
+            }
             if (avatarBadge != null) {
                 Box(
                     modifier = Modifier.align(Alignment.BottomEnd),
@@ -97,36 +116,43 @@ internal fun ProfileIdentityCard(
                 }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_badge_fan),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(Color(0xFFFFC95D), Color(0xFFFF903A)),
+                    if (identity.showFanBadge) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_badge_fan),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                    }
+                    if (identity.showIdBadge) {
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(Color(0xFFFFC95D), Color(0xFFFF903A)),
+                                    ),
                                 ),
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "ID",
+                                color = Color.White,
+                                fontSize = 6.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                    val publicId = identity.publicId
+                    if (publicId != null) {
+                        Spacer(Modifier.width(4.dp))
                         Text(
-                            text = "ID",
-                            color = Color.White,
-                            fontSize = 6.sp,
-                            fontWeight = FontWeight.Bold,
+                            text = publicId,
+                            color = Color.White.copy(alpha = 0.5f),
+                            fontSize = 12.sp,
                         )
                     }
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = identity.publicId,
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 12.sp,
-                    )
                     if (idTrailing != null) {
                         Spacer(Modifier.width(4.dp))
                         idTrailing()
@@ -134,32 +160,26 @@ internal fun ProfileIdentityCard(
                 }
             }
             Spacer(Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = identity.followingCount,
-                    color = Color(0xFFDEDEDE),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = stringResource(R.string.me_following_label),
-                    color = Color(0xFFB3B3B3),
-                    fontSize = 12.sp,
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = identity.followerCount,
-                    color = Color(0xFFDEDEDE),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = stringResource(R.string.me_follower_label),
-                    color = Color(0xFFB3B3B3),
-                    fontSize = 12.sp,
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                identity.stats.forEach { stat ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stat.count,
+                            color = Color(0xFFDEDEDE),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stat.label,
+                            color = Color(0xFFB3B3B3),
+                            fontSize = 12.sp,
+                        )
+                    }
+                }
             }
         }
         if (trailing != null) {

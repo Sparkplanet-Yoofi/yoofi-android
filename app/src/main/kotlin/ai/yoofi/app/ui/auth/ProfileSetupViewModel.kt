@@ -1,11 +1,15 @@
 package ai.yoofi.app.ui.auth
 
+import ai.yoofi.app.core.common.Outcome
 import ai.yoofi.app.domain.avatar.PersistEncodedAvatarUseCase
 import ai.yoofi.app.domain.avatar.PersistPickedAvatarUseCase
 import ai.yoofi.app.domain.avatar.PrepareCameraCaptureUseCase
 import ai.yoofi.app.domain.avatar.ResolveTakePhotoUseCase
 import ai.yoofi.app.domain.avatar.StageAvatarCropUseCase
 import ai.yoofi.app.domain.avatar.TakePhotoDecision
+import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
+import ai.yoofi.app.domain.profile.ProfileDraft
+import ai.yoofi.app.domain.profile.UpdateProfileUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +32,8 @@ data class ProfileSetupUiState(
     val avatarRevision: Long = 0L,
     val isPicking: Boolean = false,
     val avatarError: Boolean = false,
+    /** 仅编辑入口的保存失败；创建入口仍用 Screen 本地态。 */
+    val editSaveFailed: Boolean = false,
 )
 
 sealed interface ProfileSetupIntent {
@@ -47,6 +53,12 @@ sealed interface ProfileSetupIntent {
     data object CropFailed : ProfileSetupIntent
     data class CropConfirmed(val encodedPath: String) : ProfileSetupIntent
     data object ClearAvatarError : ProfileSetupIntent
+
+    /** 仅编辑入口使用；创建入口仍走 Screen 里的首次完善逻辑。 */
+    data class SubmitEdit(
+        val displayName: String,
+        val genderKey: String?,
+    ) : ProfileSetupIntent
 }
 
 sealed interface ProfileSetupSideEffect {
@@ -54,6 +66,9 @@ sealed interface ProfileSetupSideEffect {
     data class LaunchCamera(val outputUri: String) : ProfileSetupSideEffect
     data object RequestCameraPermission : ProfileSetupSideEffect
     data object OpenAppSettings : ProfileSetupSideEffect
+
+    /** 编辑资料保存成功，由 Screen 关掉编辑页回到 Me。 */
+    data object EditSaved : ProfileSetupSideEffect
 }
 
 @HiltViewModel
@@ -63,6 +78,8 @@ internal class ProfileSetupViewModel @Inject constructor(
     private val persistPickedAvatar: PersistPickedAvatarUseCase,
     private val stageAvatarCrop: StageAvatarCropUseCase,
     private val persistEncodedAvatar: PersistEncodedAvatarUseCase,
+    private val updateProfile: UpdateProfileUseCase,
+    private val markProfileCompleted: MarkProfileCompletedUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileSetupUiState())
@@ -73,6 +90,20 @@ internal class ProfileSetupViewModel @Inject constructor(
 
     private var pendingCaptureUri: String? = null
     private var cameraPermissionAsked: Boolean = false
+
+    /**
+     * 切换入口时清掉上一入口留下的弹层 / 失败态，头像文件可以沿用。
+     * [entry] 留给接创建/编辑拉取接口时按入口预填。
+     */
+    fun bind(entry: ProfileEditorEntry) {
+        _uiState.update {
+            it.copy(
+                showAvatarSheet = false,
+                editSaveFailed = false,
+                avatarError = false,
+            )
+        }
+    }
 
     fun onIntent(intent: ProfileSetupIntent) {
         when (intent) {
@@ -100,6 +131,29 @@ internal class ProfileSetupViewModel @Inject constructor(
             is ProfileSetupIntent.CropConfirmed -> persistCropped(intent.encodedPath)
             ProfileSetupIntent.ClearAvatarError -> {
                 _uiState.update { it.copy(avatarError = false) }
+            }
+            is ProfileSetupIntent.SubmitEdit -> submitEdit(intent)
+        }
+    }
+
+    /** 创建入口提交成功：会话标已完善，再由 Screen 关页。Skip 不要调。 */
+    fun onCreateSucceeded() {
+        markProfileCompleted()
+    }
+
+    private fun submitEdit(intent: ProfileSetupIntent.SubmitEdit) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(editSaveFailed = false) }
+            when (
+                updateProfile(
+                    ProfileDraft(
+                        displayName = intent.displayName,
+                        genderKey = intent.genderKey,
+                    ),
+                )
+            ) {
+                is Outcome.Ok -> emit(ProfileSetupSideEffect.EditSaved)
+                is Outcome.Err -> _uiState.update { it.copy(editSaveFailed = true) }
             }
         }
     }

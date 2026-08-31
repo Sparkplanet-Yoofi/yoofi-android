@@ -8,12 +8,24 @@ import ai.yoofi.app.domain.avatar.PersistPickedAvatarUseCase
 import ai.yoofi.app.domain.avatar.PrepareCameraCaptureUseCase
 import ai.yoofi.app.domain.avatar.ResolveTakePhotoUseCase
 import ai.yoofi.app.domain.avatar.StageAvatarCropUseCase
+import ai.yoofi.app.domain.auth.AuthSession
+import ai.yoofi.app.domain.auth.User
+import ai.yoofi.app.domain.auth.UserSessionStore
+import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
+import ai.yoofi.app.domain.profile.UpdateProfileUseCase
+import ai.yoofi.app.testing.MainDispatcherRule
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
 class ProfileSetupViewModelTest {
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Test
     fun `打开相册会关掉弹层并进入 picking`() {
@@ -42,6 +54,15 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
+    fun `编辑入口保存成功发出 EditSaved`() = runTest(mainDispatcherRule.dispatcher) {
+        val viewModel = viewModel()
+        viewModel.onIntent(
+            ProfileSetupIntent.SubmitEdit(displayName = "Jenny", genderKey = "Female"),
+        )
+        assertEquals(ProfileSetupSideEffect.EditSaved, viewModel.sideEffect.first())
+    }
+
+    @Test
     fun `取消选择退出 picking`() {
         val viewModel = viewModel()
         viewModel.onIntent(ProfileSetupIntent.ChooseFromGallery)
@@ -50,9 +71,29 @@ class ProfileSetupViewModelTest {
         assertEquals(null, viewModel.uiState.value.avatarPath)
     }
 
+    @Test
+    fun `创建成功会把会话标成已完善`() {
+        val sessionStore = FakeSessionStore()
+        sessionStore.save(
+            AuthSession(
+                user = User(userId = 1L, nickname = "mock", avatarUrl = ""),
+                accessToken = "at",
+                refreshToken = "rt",
+                accessExpiresIn = 1,
+                refreshExpiresIn = 1,
+                isNewUser = true,
+                profileCompleted = false,
+            ),
+        )
+        val viewModel = viewModel(sessionStore = sessionStore)
+        viewModel.onCreateSucceeded()
+        assertTrue(sessionStore.currentSession()?.profileCompleted == true)
+    }
+
     private fun viewModel(
         hardware: Boolean = true,
         permission: Boolean = true,
+        sessionStore: UserSessionStore = FakeSessionStore(),
     ): ProfileSetupViewModel {
         val store = object : AvatarLocalStore {
             override fun createCaptureUri(): String = "content://yoofi/capture.jpg"
@@ -84,6 +125,26 @@ class ProfileSetupViewModelTest {
             persistPickedAvatar = PersistPickedAvatarUseCase(store),
             stageAvatarCrop = StageAvatarCropUseCase(store),
             persistEncodedAvatar = PersistEncodedAvatarUseCase(store),
+            updateProfile = UpdateProfileUseCase(),
+            markProfileCompleted = MarkProfileCompletedUseCase(sessionStore),
         )
+    }
+}
+
+private class FakeSessionStore : UserSessionStore {
+    private var session: AuthSession? = null
+
+    override fun save(session: AuthSession) {
+        this.session = session
+    }
+
+    override fun currentUser(): User? = session?.user
+
+    override fun currentAccessToken(): String? = session?.accessToken
+
+    override fun currentSession(): AuthSession? = session
+
+    override fun clear() {
+        session = null
     }
 }

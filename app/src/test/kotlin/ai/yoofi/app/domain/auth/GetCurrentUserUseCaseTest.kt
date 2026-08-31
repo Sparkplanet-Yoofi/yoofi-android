@@ -42,6 +42,8 @@ private class FakeUserSessionStore : UserSessionStore {
 
     override fun currentAccessToken(): String? = session?.accessToken
 
+    override fun currentSession(): AuthSession? = session
+
     override fun clear() {
         session = null
     }
