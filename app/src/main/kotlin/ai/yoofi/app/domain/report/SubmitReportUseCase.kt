@@ -1,7 +1,7 @@
 package ai.yoofi.app.domain.report
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
 
 /**
  * 提交内容举报。接口未定时先本地校验后成功，接上后只改这里和 Repository。

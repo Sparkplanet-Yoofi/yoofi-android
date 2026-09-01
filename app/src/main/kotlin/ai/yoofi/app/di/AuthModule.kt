@@ -1,7 +1,7 @@
 package ai.yoofi.app.di
 
-import ai.yoofi.app.core.config.DataSourceSwitch
-import ai.yoofi.app.core.config.DemoFeature
+import ai.yoofi.shared.config.DataSourceSwitch
+import ai.yoofi.shared.config.DemoFeature
 import ai.yoofi.app.data.auth.AuthRemoteDataSource
 import ai.yoofi.app.data.auth.DemoAuthRemoteDataSource
 import ai.yoofi.app.data.auth.InMemoryUserSession
@@ -19,8 +19,11 @@ import ai.yoofi.app.domain.block.UnblockUserUseCase
 import ai.yoofi.app.domain.feedback.SubmitFeedbackUseCase
 import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
+import ai.yoofi.app.domain.chat.ObserveChatRoomUseCase
 import ai.yoofi.app.domain.gamedetail.GetGameCastCardsUseCase
 import ai.yoofi.app.domain.gamedetail.GetGameCastCharacterUseCase
+import ai.yoofi.app.domain.gamedetail.GetGameItemTargetsUseCase
+import ai.yoofi.app.domain.gamedetail.GetGameItemsUseCase
 import ai.yoofi.app.domain.gamedetail.GetGameMapsUseCase
 import ai.yoofi.app.domain.profile.GetPreviewPlayedWorksUseCase
 import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
@@ -126,4 +129,12 @@ object AuthProvideModule {
     @Provides
     fun provideGetGameCastCharacterUseCase(): GetGameCastCharacterUseCase =
         GetGameCastCharacterUseCase()
+
+    @Provides
+    fun provideGetGameItemsUseCase(): GetGameItemsUseCase = GetGameItemsUseCase()
+
+    @Provides
+    fun provideGetGameItemTargetsUseCase(
+        observeChatRoom: ObserveChatRoomUseCase,
+    ): GetGameItemTargetsUseCase = GetGameItemTargetsUseCase(observeChatRoom)
 }

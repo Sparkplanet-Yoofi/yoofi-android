@@ -3,6 +3,7 @@ package ai.yoofi.app.ui.gamedetail.map
 import ai.yoofi.app.domain.gamedetail.GetGameMapsUseCase
 import ai.yoofi.app.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -59,6 +60,41 @@ class GameMapViewModelTest {
         assertFalse(viewModel.uiState.value.loading)
         assertEquals("map-03", viewModel.uiState.value.currentMapId)
         assertEquals(0, viewModel.uiState.value.loadingProgress)
+    }
+
+    @Test
+    fun `点红钉弹出 Go 再点一次收起`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(GameMapIntent.SelectLocation("pin-1"))
+        assertEquals("pin-1", viewModel.uiState.value.selectedLocationId)
+        viewModel.onIntent(GameMapIntent.SelectLocation("pin-1"))
+        assertEquals("", viewModel.uiState.value.selectedLocationId)
+    }
+
+    @Test
+    fun `点 Go 发出聊天文案并清选中`() = runTest(mainDispatcherRule.dispatcher) {
+        val viewModel = viewModel()
+        val effects = mutableListOf<GameMapSideEffect>()
+        val job = launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.onIntent(GameMapIntent.SelectLocation("loc-3"))
+        viewModel.onIntent(GameMapIntent.ConfirmGo)
+        runCurrent()
+        assertEquals("", viewModel.uiState.value.selectedLocationId)
+        val go = effects.single() as GameMapSideEffect.GoToChat
+        assertEquals("Go to location.", go.text)
+        assertEquals("demo-scene", go.backgroundKey)
+        job.cancel()
+    }
+
+    @Test
+    fun `未选地点点 Go 不发副作用`() = runTest(mainDispatcherRule.dispatcher) {
+        val viewModel = viewModel()
+        val effects = mutableListOf<GameMapSideEffect>()
+        val job = launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.onIntent(GameMapIntent.ConfirmGo)
+        runCurrent()
+        assertTrue(effects.isEmpty())
+        job.cancel()
     }
 
     @Test

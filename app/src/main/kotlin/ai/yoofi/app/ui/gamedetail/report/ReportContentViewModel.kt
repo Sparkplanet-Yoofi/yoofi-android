@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.gamedetail.report
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.report.ReportDraft
 import ai.yoofi.app.domain.report.ReportReason
 import ai.yoofi.app.domain.report.SubmitReportUseCase

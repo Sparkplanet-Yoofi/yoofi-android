@@ -1,13 +1,12 @@
 package ai.yoofi.app.di
 
 import ai.yoofi.app.BuildConfig
-import ai.yoofi.app.core.config.BuildStage
-import ai.yoofi.app.core.network.ApiCaller
-import ai.yoofi.app.core.network.AppEnvironment
-import ai.yoofi.app.core.network.KtorApiCaller
-import ai.yoofi.app.core.network.createYoofiHttpClient
+import ai.yoofi.shared.config.BuildStage
+import ai.yoofi.shared.network.ApiCaller
+import ai.yoofi.shared.network.AppEnvironment
+import ai.yoofi.shared.network.KtorApiCaller
+import ai.yoofi.shared.network.createYoofiHttpClient
 import ai.yoofi.app.domain.auth.UserSessionStore
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,12 +51,14 @@ object NetworkModule {
         accessTokenProvider = userSessionStore::currentAccessToken,
         enableLogging = BuildConfig.DEBUG,
     )
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class NetworkBindModule {
-    @Binds
+    /**
+     * [KtorApiCaller] 在 shared 模块里是纯 Kotlin 类，没有 `@Inject` 构造函数，
+     * 因此不能用 `@Binds`（它要求实现类本身可被 Hilt 构造），只能手写 `@Provides`。
+     *
+     * 这是所有下沉类型的统一处理方式：**shared 不认识 Hilt，装配责任落在宿主这一侧。**
+     */
+    @Provides
     @Singleton
-    abstract fun bindApiCaller(impl: KtorApiCaller): ApiCaller
+    fun provideApiCaller(json: Json): ApiCaller = KtorApiCaller(json)
 }

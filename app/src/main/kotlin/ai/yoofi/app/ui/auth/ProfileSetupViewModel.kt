@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.auth
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.avatar.PersistEncodedAvatarUseCase
 import ai.yoofi.app.domain.avatar.PersistPickedAvatarUseCase
 import ai.yoofi.app.domain.avatar.PrepareCameraCaptureUseCase

@@ -1,7 +1,7 @@
 package ai.yoofi.app.di
 
-import ai.yoofi.app.core.config.DataSourceSwitch
-import ai.yoofi.app.core.config.DemoFeature
+import ai.yoofi.shared.config.DataSourceSwitch
+import ai.yoofi.shared.config.DemoFeature
 import javax.inject.Provider
 
 /**

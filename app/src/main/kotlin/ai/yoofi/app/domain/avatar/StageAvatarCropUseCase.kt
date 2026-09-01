@@ -1,6 +1,6 @@
 package ai.yoofi.app.domain.avatar
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 
 /**
  * 把相册/拍照临时 URI 立刻拷到缓存，供裁剪页使用，避免授权过期。

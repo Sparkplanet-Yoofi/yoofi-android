@@ -1,6 +1,6 @@
 package ai.yoofi.app.domain.avatar
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 
 /** 把系统回传的 content URI 落到应用私有目录，避免授权过期后头像空白。 */
 class PersistPickedAvatarUseCase(

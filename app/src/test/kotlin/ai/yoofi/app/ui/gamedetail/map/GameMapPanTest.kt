@@ -30,6 +30,30 @@ class GameMapPanTest {
     }
 
     @Test
+    fun `稿面大于视口时按 916 绘制`() {
+        assertEquals(
+            916f,
+            mapCoverDisplayPx(
+                designPx = 916f,
+                viewportWidth = 390f,
+                viewportHeight = 844f,
+            ),
+        )
+    }
+
+    @Test
+    fun `视口高于稿面时放大到盖住短边`() {
+        assertEquals(
+            1280f,
+            mapCoverDisplayPx(
+                designPx = 916f,
+                viewportWidth = 800f,
+                viewportHeight = 1280f,
+            ),
+        )
+    }
+
+    @Test
     fun `图比视口小时居中`() {
         val centered = coerceMapOffset(
             offset = Offset.Zero,

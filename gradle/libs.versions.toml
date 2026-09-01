@@ -29,7 +29,13 @@ kotlinxSerializationJson = "1.9.0"
 # HTTP 客户端：Ktor Client（KMP 可用）。引擎选 OkHttp，
 # 保留 OkHttp 拦截器这条口子，海外弱网的重试 / CDN 降级仍可复用成熟实现。
 # OkHttp 本体由 ktor-client-okhttp 传递引入，不再单独声明。
-ktor = "3.5.2"
+#
+# ⚠️ 锁死在 3.3.x，升级前先读 .ai/kmp.md §3.3。
+# 3.4+ 的 Kotlin/Native klib 由 Kotlin 2.3.x 编译（ABI 2.3.0），而 AGP 9.0.1
+# 内置的编译器是 Kotlin 2.2.10，只能消费 ABI <= 2.2.0。纯 Android 构建感知不到
+# （JVM 字节码无此机制），但 yoofi-shared 的 iOS 目标会直接编译失败。
+# 两仓库版本必须严格一致，否则 app 依赖 shared 后会解析到高版本，与 klib 编译期版本错配。
+ktor = "3.3.3"
 # 架构守卫（兼容性验证用）
 dependencyAnalysis = "3.18.0"
 moduleGraphAssert = "2.9.1"
@@ -37,8 +43,12 @@ moduleGraphAssert = "2.9.1"
 androidImageCropper = "4.7.0"
 # 仅测试源集：runTest / TestDispatcher，落实 codestyle「协程测试禁止实等 delay」
 kotlinxCoroutinesTest = "1.10.2"
+# KMP 共享库。源码模式（默认）下这个版本号不参与解析，Composite Build 直接替换为本地源码；
+# 只有二进制模式（-Pyoofi.shared.mode=binary）才真的按它去仓库取包。详见 .ai/kmp.md §12。
+yoofiShared = "0.1.0-SNAPSHOT"
 
 [libraries]
+yoofi-shared = { group = "ai.yoofi", name = "shared", version.ref = "yoofiShared" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

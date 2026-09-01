@@ -1,7 +1,7 @@
 package ai.yoofi.app.data.auth
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.auth.AuthSession
 import ai.yoofi.app.domain.auth.User
 import ai.yoofi.app.domain.auth.UserSessionStore

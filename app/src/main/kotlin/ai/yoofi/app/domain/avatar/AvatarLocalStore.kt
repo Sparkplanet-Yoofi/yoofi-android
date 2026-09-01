@@ -1,6 +1,6 @@
 package ai.yoofi.app.domain.avatar
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 
 /**
  * 头像落本地私有目录。URI 用字符串，避免 domain 依赖 android.net.Uri。

@@ -180,7 +180,16 @@
 
 12. **聊天室从 World Played 封面进全屏 overlay**：`MainTabShell` 打开 `ChatRoomScreen`
     并藏底栏，不要把聊天室嵌进 World 页。宽屏仍 `fillMaxWidth` + 左右 20，
-    不要把 Figma 350 锁死。Items / Recap 尚无独立画板，只留芯片不造假页。
+    不要把 Figma 350 锁死。Recap 尚无独立画板，只留芯片不造假页。
+    聊天室 Items 芯片跳独立 `ui.gamedetail.item` + `GameItemViewModel`，对齐
+    `2304:24267`。点任意卡都走多人底栏 `2304:24509`（Select Target → 选人），
+    不要给普通道具另开 Use Item 入口；`GameItemKind.General` 只控制徽章显隐。
+    选人确认后经 `SendItemMessage` 回写聊天室，不要把道具 UI 塞进 ChatRoomViewModel。
+    Hilt VM 跟 Activity 同作用域，Items 再进必须 `ShowList`，否则会停在选人页。
+    底栏不要盖一层全屏点击取消，否则换卡会先 Dismiss 再才能选中。
+    预览走 `ItemPreviewHost`（当前 2D，白蒙层 `2464:27742`），日后换 3D 只改适配。
+    选人对齐 `2304:24760` / `2304:24649` / `2304:24871`。列表走
+    `GetGameItemsUseCase`，目标走 `GetGameItemTargetsUseCase`，接接口只改 UseCase。
     聊天室 Cast 芯片跳独立 `ui.gamedetail.cast` + `GameCastViewModel`，对齐
     `2304:23753`，不要塞进 ChatRoomViewModel，也不要拆掉翻牌 overlay 代码。
     人物接口未定，四张金卡 + 两个空槽走 `GetGameCastCardsUseCase`。
@@ -189,9 +198,14 @@
     关闭回人物页；Continue Game 关 Cast 回聊天室。稿里隐藏的 Stories / Memories /
     Gallery 与右侧更多菜单不要画出来。
     聊天室 Map 芯片跳独立 `ui.gamedetail.map` + `GameMapViewModel`，对齐
-    `2453:27236`（列表 `2453:27362`、切换 Dialog `2304:24255`）。用户给的
-    `2252:18315` 是超大底图矩形，不是手机画板。底图可拖、Location 用 0..1
-    图幅坐标打点；地图列表走 `GetGameMapsUseCase`，接接口只改 UseCase。
+    `2453:27236`（列表 `2453:27362`、切换 Dialog `2304:24255`、Go 气泡
+    `2453:27489`）。用户给的 `2252:18315` / `2453:27240` / `2453:27366`
+    是超大底图矩形，不是手机画板。底图按稿面 `916dp` 铺满视口再拖，禁止用 PNG
+    像素当布局（xxhdpi 会缩成一角）。Location 用 0..1 图幅坐标打点。
+    点标签或红钉弹出 Go 预览；点 Go 经 `SendMapMessage` 回写聊天室，底图走
+    `sceneKey`（Demo `demo-scene` 用 `img_home_hero`，和默认房间底区分，点 Go 能看出换底）。
+    不要把地图 UI 塞进 ChatRoomViewModel。Hilt VM 再进必须 `ShowMap`。
+    地图列表走 `GetGameMapsUseCase`，接接口只改 UseCase。
 
 13. **选 @ / 灵感回填后再 `requestFocus`，光标会钉在开头**：
     `BasicTextField` 在 `onFocusChanged` 之后把选区打回 0，再经 `onValueChange`

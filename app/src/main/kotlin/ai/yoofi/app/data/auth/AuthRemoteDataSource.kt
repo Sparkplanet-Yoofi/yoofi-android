@@ -1,6 +1,6 @@
 package ai.yoofi.app.data.auth
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 
 /**
  * 认证远程数据源。纯 Kotlin 契约，禁止出现 Retrofit / OkHttp / android.*

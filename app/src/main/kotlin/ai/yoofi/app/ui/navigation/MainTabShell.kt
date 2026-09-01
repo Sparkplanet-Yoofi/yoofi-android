@@ -5,6 +5,8 @@ import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.gamedetail.cast.GameCastScreen
 import ai.yoofi.app.ui.gamedetail.character.GameCastCharacterScreen
+import ai.yoofi.app.ui.gamedetail.item.GameItemScreen
+import ai.yoofi.app.ui.gamedetail.map.GameMapGoResult
 import ai.yoofi.app.ui.gamedetail.map.GameMapScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.auth.ProfileEditorEntry
@@ -61,6 +63,9 @@ internal fun MainTabShell(
     var previewProfileOpen by remember { mutableStateOf(false) }
     var gameCastOpen by remember { mutableStateOf(false) }
     var gameMapOpen by remember { mutableStateOf(false) }
+    var gameItemsOpen by remember { mutableStateOf(false) }
+    var pendingItemMessage by remember { mutableStateOf<String?>(null) }
+    var pendingMapGo by remember { mutableStateOf<GameMapGoResult?>(null) }
     var castCharacterId by remember { mutableStateOf<String?>(null) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
@@ -97,6 +102,7 @@ internal fun MainTabShell(
                 !previewProfileOpen &&
                 !gameCastOpen &&
                 !gameMapOpen &&
+                !gameItemsOpen &&
                 castCharacterId == null
             ) {
                 YoofiBottomBar(
@@ -137,10 +143,18 @@ internal fun MainTabShell(
                         castCharacterId = null
                         gameCastOpen = false
                         gameMapOpen = false
+                        gameItemsOpen = false
+                        pendingItemMessage = null
+                        pendingMapGo = null
                         chatOpen = false
                     },
                     onOpenCast = { gameCastOpen = true },
                     onOpenMap = { gameMapOpen = true },
+                    onOpenItems = { gameItemsOpen = true },
+                    pendingItemMessage = pendingItemMessage,
+                    onPendingItemConsumed = { pendingItemMessage = null },
+                    pendingMapGo = pendingMapGo,
+                    onPendingMapConsumed = { pendingMapGo = null },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -173,6 +187,21 @@ internal fun MainTabShell(
                 GameMapScreen(
                     onBack = { gameMapOpen = false },
                     onClose = { gameMapOpen = false },
+                    onGoToLocation = { result ->
+                        gameMapOpen = false
+                        pendingMapGo = result
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (gameItemsOpen) {
+                GameItemScreen(
+                    onBack = { gameItemsOpen = false },
+                    onClose = { gameItemsOpen = false },
+                    onUseItem = { message ->
+                        gameItemsOpen = false
+                        pendingItemMessage = message
+                    },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

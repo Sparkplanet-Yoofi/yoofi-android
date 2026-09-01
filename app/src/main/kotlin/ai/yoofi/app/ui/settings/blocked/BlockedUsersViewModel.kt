@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.settings.blocked
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.block.BlockedUser
 import ai.yoofi.app.domain.block.GetBlockedUsersUseCase
 import ai.yoofi.app.domain.block.UnblockUserUseCase

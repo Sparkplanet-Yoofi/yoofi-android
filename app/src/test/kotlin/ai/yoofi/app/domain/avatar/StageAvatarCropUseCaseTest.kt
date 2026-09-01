@@ -1,7 +1,7 @@
 package ai.yoofi.app.domain.avatar
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

@@ -1,6 +1,6 @@
 package ai.yoofi.app.domain.avatar
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 
 /** 把裁剪压缩后的 JPEG 拷到头像目录，不再二次解码。 */
 class PersistEncodedAvatarUseCase(

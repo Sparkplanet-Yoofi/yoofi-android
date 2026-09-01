@@ -1,6 +1,6 @@
 package ai.yoofi.app.domain.auth
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.testing.FakeUserSessionStore
 import ai.yoofi.app.testing.fakeSession
 import kotlinx.coroutines.runBlocking

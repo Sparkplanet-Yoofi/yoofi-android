@@ -8,8 +8,8 @@ class GetGameMapsUseCase {
     operator fun invoke(): List<GameMap> = DemoGameMaps
 }
 
-/** Figma `2453:27236` 底图 916×916，摆在屏幕 (-242, 12)。 */
-private const val FigMapSize = 916f
+/** Figma `2453:27236` 底图边长见 [GameMapDesignSizeDp]，摆在屏幕 (-242, 12)。 */
+private const val FigMapSize = GameMapDesignSizeDp
 private const val FigImageLeft = -242f
 private const val FigImageTop = 12f
 
@@ -59,12 +59,56 @@ private fun figNormX(screenX: Float): Float = (screenX - FigImageLeft) / FigMapS
 
 private fun figNormY(screenY: Float): Float = (screenY - FigImageTop) / FigMapSize
 
+private const val DemoPreviewKey = "demo-go"
+/** 地点图，不用默认聊天底，点 Go 后才能看出底图换了。 */
+private const val DemoSceneKey = "demo-scene"
+
 private fun map01Locations(): List<GameMapLocation> = listOf(
-    GameMapLocation("loc-1", "location", figNormX(137f), figNormY(313f), GameMapMarkerKind.Label),
-    GameMapLocation("loc-2", "location", figNormX(297f), figNormY(195f), GameMapMarkerKind.Label),
-    GameMapLocation("loc-3", "location", figNormX(259f), figNormY(518f), GameMapMarkerKind.Label),
-    GameMapLocation("loc-4", "location", figNormX(26f), figNormY(488f), GameMapMarkerKind.Label),
-    GameMapLocation("pin-1", "", figNormX(156f), figNormY(347f), GameMapMarkerKind.Pin),
+    GameMapLocation(
+        id = "loc-1",
+        name = "location",
+        x = figNormX(137f),
+        y = figNormY(313f),
+        kind = GameMapMarkerKind.Label,
+        previewKey = DemoPreviewKey,
+        sceneKey = DemoSceneKey,
+    ),
+    GameMapLocation(
+        id = "loc-2",
+        name = "location",
+        x = figNormX(297f),
+        y = figNormY(195f),
+        kind = GameMapMarkerKind.Label,
+        previewKey = DemoPreviewKey,
+        sceneKey = DemoSceneKey,
+    ),
+    GameMapLocation(
+        id = "loc-3",
+        name = "location",
+        x = figNormX(259f),
+        y = figNormY(518f),
+        kind = GameMapMarkerKind.Label,
+        previewKey = DemoPreviewKey,
+        sceneKey = DemoSceneKey,
+    ),
+    GameMapLocation(
+        id = "loc-4",
+        name = "location",
+        x = figNormX(26f),
+        y = figNormY(488f),
+        kind = GameMapMarkerKind.Label,
+        previewKey = DemoPreviewKey,
+        sceneKey = DemoSceneKey,
+    ),
+    GameMapLocation(
+        id = "pin-1",
+        name = "",
+        x = figNormX(156f),
+        y = figNormY(347f),
+        kind = GameMapMarkerKind.Pin,
+        previewKey = DemoPreviewKey,
+        sceneKey = DemoSceneKey,
+    ),
 )
 
 private fun shiftLocations(

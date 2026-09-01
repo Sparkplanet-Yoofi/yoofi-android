@@ -51,6 +51,12 @@ if (!releaseKeystorePath.isNullOrBlank() && !hasReleaseKeystore) {
     logger.warn("警告：环境变量 YOOFI_KEYSTORE_PATH 指向 $releaseKeystorePath，但该文件不存在，release 将产出未签名 APK")
 }
 
+// 双仓版本对齐守卫挂到 check 上：本地 `./gradlew check`、CI 的验证阶段都会自动跑。
+// 不挂 assemble/preBuild，避免拖慢日常增量构建。任务定义见根 build.gradle.kts。
+tasks.matching { it.name == "check" }.configureEach {
+    dependsOn(rootProject.tasks.named("checkSharedVersionAlignment"))
+}
+
 android {
     namespace = "ai.yoofi.app"
     compileSdk {
@@ -117,6 +123,11 @@ android {
 }
 
 dependencies {
+    // KMP 共享模块。这里写的是 Maven 坐标而非 project(":shared")——
+    // Composite Build 的模块不在本 settings 内，project(...) 解析不到。
+    // 源码 / 二进制两种模式共用这一行声明，由 settings.gradle.kts 决定解析到哪边。
+    implementation(libs.yoofi.shared)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

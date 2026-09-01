@@ -1,7 +1,7 @@
 package ai.yoofi.app.data.avatar
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.avatar.AvatarLocalStore
 import android.content.Context
 import android.graphics.Bitmap

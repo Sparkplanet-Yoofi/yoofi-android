@@ -1,8 +1,8 @@
 package ai.yoofi.app.data.auth
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
-import ai.yoofi.app.core.network.ApiInvalidOrExpiredCode
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
+import ai.yoofi.shared.network.ApiInvalidOrExpiredCode
 import ai.yoofi.app.domain.auth.DemoInvalidEmailOtp
 import javax.inject.Inject
 import javax.inject.Singleton

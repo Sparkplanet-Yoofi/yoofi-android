@@ -1,6 +1,6 @@
 package ai.yoofi.app
 
-import ai.yoofi.app.core.config.DataSourceSwitch
+import ai.yoofi.shared.config.DataSourceSwitch
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject

@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.settings.linked
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.auth.GetLinkedAccountsUseCase
 import ai.yoofi.app.domain.auth.LinkedAccount
 import ai.yoofi.app.domain.auth.LinkedAccountProvider

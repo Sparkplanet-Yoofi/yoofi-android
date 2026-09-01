@@ -3,11 +3,13 @@ package ai.yoofi.app.ui.gamedetail.map
 import ai.yoofi.app.R
 import ai.yoofi.app.domain.gamedetail.GameMap
 import ai.yoofi.app.ui.ime.clickableDismissingIme
+import ai.yoofi.app.ui.theme.YoofiAuthError
 import ai.yoofi.app.ui.theme.YoofiAuthFocusStroke
 import ai.yoofi.app.ui.theme.YoofiCameraTo
 import ai.yoofi.app.ui.theme.YoofiDialogBg
 import ai.yoofi.app.ui.theme.YoofiDialogButton
 import ai.yoofi.app.ui.theme.YoofiDialogScrim
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,6 +54,11 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.cos
 import kotlin.math.sin
 
+internal val MapGoCalloutWidth = 94.dp
+internal val MapGoCalloutHeight = 77.dp
+internal val MapGoCalloutGap = 9.dp
+private val GoButtonShape = RoundedCornerShape(100.dp)
+private val GoPreviewShape = RoundedCornerShape(10.dp)
 private val ChipShape = RoundedCornerShape(8.dp)
 private val DialogShape = RoundedCornerShape(16.dp)
 private val ActionShape = RoundedCornerShape(20.dp)
@@ -60,6 +68,49 @@ private val ListFill = Color(0x8056566D)
 private val SelectedFill = Color(0x80925CFF)
 private val TrackColor = Color.White.copy(alpha = 0.10f)
 private val ProgressColors = listOf(YoofiAuthFocusStroke, YoofiCameraTo)
+
+/**
+ * 点地点后的 Go 气泡，对齐 Figma `2453:27489`。
+ * 94×77 预览框 + 白描边三角尾；Go 药丸 37×23、`#FF1D61`、白边。
+ */
+@Composable
+internal fun GameMapGoCallout(
+    @DrawableRes previewRes: Int,
+    onGo: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.size(MapGoCalloutWidth, MapGoCalloutHeight),
+    ) {
+        Image(
+            painter = painterResource(previewRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(GoPreviewShape)
+                .border(1.5.dp, Color.White, GoPreviewShape),
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 29.dp, top = 39.dp)
+                .size(width = 37.dp, height = 23.dp)
+                .clip(GoButtonShape)
+                .background(YoofiAuthError)
+                .border(1.dp, Color.White, GoButtonShape)
+                .clickable(role = Role.Button, onClick = onGo),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.map_go),
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
 
 /**
  * 右上角 Map 01 芯片 + 下拉列表，对齐 Figma `2453:27236` / `2453:27362`。

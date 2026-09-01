@@ -1,9 +1,9 @@
 package ai.yoofi.app.di
 
 import ai.yoofi.app.BuildConfig
-import ai.yoofi.app.core.config.BuildStage
-import ai.yoofi.app.core.config.DataSourceSwitch
-import ai.yoofi.app.core.config.StageDataSourceSwitch
+import ai.yoofi.shared.config.BuildStage
+import ai.yoofi.shared.config.DataSourceSwitch
+import ai.yoofi.shared.config.StageDataSourceSwitch
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,7 +1,7 @@
 package ai.yoofi.app.domain.profile
 
-import ai.yoofi.app.core.common.AppError
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.AppError
+import ai.yoofi.shared.common.Outcome
 
 /**
  * 编辑已有资料。接口未定时先直接成功，接上后只改这里和 Repository，不改 Screen。

@@ -1,5 +1,8 @@
 package ai.yoofi.app.domain.gamedetail
 
+/** Figma `2453:27240` 底图边长，单位 dp。布局按这个画，不按 PNG 像素。 */
+const val GameMapDesignSizeDp = 916f
+
 /**
  * 一张可拖动的游戏地图。
  *
@@ -19,6 +22,8 @@ data class GameMap(
 /**
  * 地图打点。[x]/[y] 是图幅归一化坐标，左上为 (0,0)。
  * [kind] 决定画标签还是钉；[name] 给标签文案，钉可空。
+ * [previewKey] 是点标记后 Go 气泡里的地点预览；[sceneKey] 是点 Go 后聊天室底图。
+ * 接接口时两把钥匙都由服务端下发，UI 只做解析。
  */
 data class GameMapLocation(
     val id: String,
@@ -26,7 +31,18 @@ data class GameMapLocation(
     val x: Float,
     val y: Float,
     val kind: GameMapMarkerKind,
+    val previewKey: String = "",
+    val sceneKey: String = "",
 )
+
+/**
+ * 点 Go 后发到聊天室的玩家气泡。
+ * 地点名为空时用 location，与稿面标签占位一致。
+ */
+fun formatMapGoMessage(locationName: String): String {
+    val name = locationName.trim().ifBlank { "location" }
+    return "Go to $name."
+}
 
 enum class GameMapMarkerKind {
     Label,

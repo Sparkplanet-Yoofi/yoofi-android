@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.settings.feedback
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.feedback.FeedbackDraft
 import ai.yoofi.app.domain.feedback.FeedbackType
 import ai.yoofi.app.domain.feedback.SubmitFeedbackUseCase

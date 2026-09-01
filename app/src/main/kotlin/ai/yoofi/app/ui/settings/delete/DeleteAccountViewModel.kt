@@ -1,6 +1,6 @@
 package ai.yoofi.app.ui.settings.delete
 
-import ai.yoofi.app.core.common.Outcome
+import ai.yoofi.shared.common.Outcome
 import ai.yoofi.app.domain.auth.DeleteAccountProof
 import ai.yoofi.app.domain.auth.DeleteAccountUseCase
 import ai.yoofi.app.domain.auth.DeleteConfirmPhrase
