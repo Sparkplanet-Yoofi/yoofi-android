@@ -1,16 +1,20 @@
 package ai.yoofi.app.ui.gamedetail.map
 
 import ai.yoofi.app.domain.gamedetail.GameMap
+import ai.yoofi.app.domain.gamedetail.GameMapLocation
 import ai.yoofi.app.domain.gamedetail.GetGameMapsUseCase
+import ai.yoofi.app.domain.gamedetail.formatMapGoMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,17 +29,39 @@ internal data class GameMapUiState(
     val listOpen: Boolean = false,
     val loading: Boolean = false,
     val loadingProgress: Int = 0,
+    val selectedLocationId: String = "",
 ) {
     val currentMap: GameMap?
         get() = maps.firstOrNull { it.id == currentMapId } ?: maps.firstOrNull()
+
+    val selectedLocation: GameMapLocation?
+        get() = currentMap?.locations?.firstOrNull { it.id == selectedLocationId }
 }
 
 internal sealed interface GameMapIntent {
+    /** Map 芯片每次进入都清掉 Go 气泡。Activity 级 Hilt VM 会记住选中点。 */
+    data object ShowMap : GameMapIntent
     data object ToggleList : GameMapIntent
     data object DismissList : GameMapIntent
     data class SelectMap(val mapId: String) : GameMapIntent
     data object CancelLoading : GameMapIntent
+    data class SelectLocation(val locationId: String) : GameMapIntent
+    data object DismissGo : GameMapIntent
+    data object ConfirmGo : GameMapIntent
 }
+
+internal sealed interface GameMapSideEffect {
+    data class GoToChat(
+        val text: String,
+        val backgroundKey: String,
+    ) : GameMapSideEffect
+}
+
+/** 点 Go 后回写聊天室：玩家气泡 + 切换底图。 */
+internal data class GameMapGoResult(
+    val message: String,
+    val backgroundKey: String,
+)
 
 /**
  * 游戏详情地图页。聊天室 Map 芯片跳这里，不进 ChatRoomViewModel。
@@ -59,19 +85,27 @@ internal class GameMapViewModel @Inject constructor(
         uiState = _uiState.asStateFlow()
     }
 
+    private val _sideEffect = Channel<GameMapSideEffect>(capacity = Channel.BUFFERED)
+    val sideEffect = _sideEffect.receiveAsFlow()
+
     private var switchJob: Job? = null
 
     fun onIntent(intent: GameMapIntent) {
         when (intent) {
+            GameMapIntent.ShowMap,
+            GameMapIntent.DismissGo,
+            -> dismissGo()
             GameMapIntent.ToggleList -> {
                 if (_uiState.value.loading) return
-                _uiState.update { it.copy(listOpen = !it.listOpen) }
+                _uiState.update { it.copy(listOpen = !it.listOpen, selectedLocationId = "") }
             }
             GameMapIntent.DismissList -> {
                 _uiState.update { it.copy(listOpen = false) }
             }
             is GameMapIntent.SelectMap -> selectMap(intent.mapId)
             GameMapIntent.CancelLoading -> cancelLoading()
+            is GameMapIntent.SelectLocation -> selectLocation(intent.locationId)
+            GameMapIntent.ConfirmGo -> confirmGo()
         }
     }
 
@@ -85,10 +119,38 @@ internal class GameMapViewModel @Inject constructor(
         startSwitch(mapId)
     }
 
+    private fun selectLocation(locationId: String) {
+        val state = _uiState.value
+        if (state.loading) return
+        val location = state.currentMap?.locations?.firstOrNull { it.id == locationId } ?: return
+        val next = if (state.selectedLocationId == location.id) "" else location.id
+        _uiState.update { it.copy(selectedLocationId = next, listOpen = false) }
+    }
+
+    private fun confirmGo() {
+        val location = _uiState.value.selectedLocation ?: return
+        _sideEffect.trySend(
+            GameMapSideEffect.GoToChat(
+                text = formatMapGoMessage(location.name),
+                backgroundKey = location.sceneKey,
+            ),
+        )
+        dismissGo()
+    }
+
+    private fun dismissGo() {
+        _uiState.update { it.copy(selectedLocationId = "") }
+    }
+
     private fun startSwitch(targetId: String) {
         switchJob?.cancel()
         _uiState.update {
-            it.copy(listOpen = false, loading = true, loadingProgress = 0)
+            it.copy(
+                listOpen = false,
+                selectedLocationId = "",
+                loading = true,
+                loadingProgress = 0,
+            )
         }
         switchJob = viewModelScope.launch {
             val stepMs = MapSwitchDurationMs / SwitchSteps

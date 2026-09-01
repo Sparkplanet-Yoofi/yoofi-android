@@ -32,6 +32,7 @@ internal data class ChatRoomUiState(
     val overlay: ChatRoomOverlay = ChatRoomOverlay.None,
     val mentionPage: Int = 0,
     val volumeMuted: Boolean = false,
+    val backgroundKey: String = "",
 ) {
     val mentionPageCount: Int
         get() = if (cast.isEmpty()) 0 else (cast.size + MentionPageSize - 1) / MentionPageSize
@@ -48,6 +49,7 @@ internal data class ChatRoomUiState(
 internal sealed interface ChatRoomIntent {
     data object OpenCast : ChatRoomIntent
     data object OpenMap : ChatRoomIntent
+    data object OpenItems : ChatRoomIntent
     data object OpenMention : ChatRoomIntent
     data object OpenInspiration : ChatRoomIntent
     data object ContinueStory : ChatRoomIntent
@@ -61,6 +63,15 @@ internal sealed interface ChatRoomIntent {
 
     /** 点灵感条目本体：这句就是玩家要说的，直接发出去。 */
     data class SendInspiration(val text: String) : ChatRoomIntent
+
+    /** 道具页 Use Item 回写到聊天室，不经过草稿。 */
+    data class SendItemMessage(val text: String) : ChatRoomIntent
+
+    /** 地图页点 Go 回写气泡，并换成该坐标的场景底图。 */
+    data class SendMapMessage(
+        val text: String,
+        val backgroundKey: String,
+    ) : ChatRoomIntent
     data object MentionPrevPage : ChatRoomIntent
     data object MentionNextPage : ChatRoomIntent
     data object ToggleVolume : ChatRoomIntent
@@ -98,6 +109,8 @@ internal class ChatRoomViewModel @Inject constructor(
             ChatRoomIntent.OpenCast -> toggle(ChatRoomOverlay.Cast)
             // 由 Screen 拦截跳独立地图页，不进 overlay
             ChatRoomIntent.OpenMap -> Unit
+            // 由 Screen 拦截跳独立道具页，不进 overlay
+            ChatRoomIntent.OpenItems -> Unit
             ChatRoomIntent.OpenMention -> toggle(ChatRoomOverlay.Mention)
             ChatRoomIntent.OpenInspiration -> toggle(ChatRoomOverlay.Inspiration)
             ChatRoomIntent.ContinueStory -> continueStory()
@@ -112,6 +125,9 @@ internal class ChatRoomViewModel @Inject constructor(
                 }
             }
             is ChatRoomIntent.SendInspiration -> send(intent.text)
+            is ChatRoomIntent.SendItemMessage -> send(intent.text)
+            is ChatRoomIntent.SendMapMessage ->
+                send(intent.text, backgroundKey = intent.backgroundKey)
             ChatRoomIntent.MentionPrevPage -> shiftMention(-1)
             ChatRoomIntent.MentionNextPage -> shiftMention(1)
             ChatRoomIntent.ToggleVolume -> {
@@ -149,10 +165,10 @@ internal class ChatRoomViewModel @Inject constructor(
     /**
      * 推进一轮剧情，[body] 非空时先落一条玩家气泡。
      *
-     * 两个入口共用：[continueStory] 传草稿，[ChatRoomIntent.SendInspiration] 直接传灵感原文。
+     * 三个入口共用：[continueStory] 传草稿，灵感 / 道具消息直接传原文。
      * 灵感不先写回草稿再发，是为了避免「写草稿」和「发送」两次状态更新之间闪出一帧带文字的输入框。
      */
-    private fun send(body: String) {
+    private fun send(body: String, backgroundKey: String? = null) {
         val line = body.trim()
         // 先落玩家气泡，再追加本轮剧情；为空时就是纯推进剧情
         val beat = advanceChatStory(storyTurn)
@@ -164,10 +180,12 @@ internal class ChatRoomViewModel @Inject constructor(
                 playerSeq += 1
                 listOf(ChatItem.Player(id = "player-$playerSeq", body = line))
             }
+            val nextBg = backgroundKey?.takeIf { it.isNotBlank() } ?: state.backgroundKey
             state.copy(
                 items = state.items + playerLine + beat,
                 draft = "",
                 overlay = ChatRoomOverlay.None,
+                backgroundKey = nextBg,
             )
         }
         emitScroll(force = line.isNotEmpty())

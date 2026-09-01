@@ -146,7 +146,7 @@ private fun ChipRow(
             iconHeight = 20.dp,
             tint = YoofiChatChipItems,
             showDot = true,
-            onClick = {},
+            onClick = { onIntent(ChatRoomIntent.OpenItems) },
         )
         FooterChip(
             labelRes = R.string.chat_recap,

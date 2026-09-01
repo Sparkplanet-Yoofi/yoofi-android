@@ -19,6 +19,22 @@ class GetGameMapsUseCaseTest {
         first.locations.forEach { mark ->
             assertTrue(mark.x in 0f..1f)
             assertTrue(mark.y in 0f..1f)
+            assertEquals("demo-go", mark.previewKey)
+            assertEquals("demo-scene", mark.sceneKey)
         }
+    }
+}
+
+class FormatMapGoMessageTest {
+
+    @Test
+    fun `有名字带上地点`() {
+        assertEquals("Go to Ilyria.", formatMapGoMessage("Ilyria"))
+    }
+
+    @Test
+    fun `空名字回落到 location`() {
+        assertEquals("Go to location.", formatMapGoMessage(""))
+        assertEquals("Go to location.", formatMapGoMessage("  "))
     }
 }

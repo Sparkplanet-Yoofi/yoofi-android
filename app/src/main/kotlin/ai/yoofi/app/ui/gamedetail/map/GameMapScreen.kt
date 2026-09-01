@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,10 +45,24 @@ private val PageBg = Color(0xFF1C1528)
 internal fun GameMapScreen(
     onBack: () -> Unit,
     onClose: () -> Unit,
+    onGoToLocation: (GameMapGoResult) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GameMapViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    // 每次组合都清掉 Go。不能用 viewModel 当 key：同一 Activity VM 再进不会重跑。
+    LaunchedEffect(Unit) {
+        viewModel.onIntent(GameMapIntent.ShowMap)
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is GameMapSideEffect.GoToChat -> onGoToLocation(
+                    GameMapGoResult(effect.text, effect.backgroundKey),
+                )
+            }
+        }
+    }
     GameMapLayout(
         state = state,
         onIntent = viewModel::onIntent,
@@ -68,6 +83,7 @@ internal fun GameMapLayout(
     BackHandler {
         when {
             state.loading -> onIntent(GameMapIntent.CancelLoading)
+            state.selectedLocationId.isNotEmpty() -> onIntent(GameMapIntent.DismissGo)
             state.listOpen -> onIntent(GameMapIntent.DismissList)
             else -> onBack()
         }
@@ -81,6 +97,10 @@ internal fun GameMapLayout(
         if (current != null) {
             GameMapCanvas(
                 map = current,
+                selectedLocationId = state.selectedLocationId,
+                onSelectLocation = { onIntent(GameMapIntent.SelectLocation(it)) },
+                onDismissGo = { onIntent(GameMapIntent.DismissGo) },
+                onConfirmGo = { onIntent(GameMapIntent.ConfirmGo) },
                 modifier = Modifier.fillMaxSize(),
             )
         }

@@ -1,6 +1,7 @@
 package ai.yoofi.app.ui.chat
 
 import ai.yoofi.app.R
+import ai.yoofi.app.ui.gamedetail.map.GameMapGoResult
 import ai.yoofi.app.ui.ime.ImeOverlayBox
 import ai.yoofi.app.ui.ime.clickableDismissingIme
 import ai.yoofi.app.ui.ime.imeAvoidingPadding
@@ -9,6 +10,7 @@ import ai.yoofi.app.ui.theme.YoofiChatHeaderTop
 import ai.yoofi.app.ui.theme.YoofiChatRadialMid
 import ai.yoofi.app.ui.theme.YoofiGameBg0
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -67,7 +69,7 @@ private val JumpArrowCenterOffset = 7.dp
 
 /**
  * 多人聊天室，对齐 Figma `1826:9178`（Cast `1826:9211`、@ `1826:11556`、灵感 `1826:9937`）。
- * Cast / Map 芯片分别跳独立游戏详情页，不进本页 overlay。
+ * Cast / Map / Items 芯片分别跳独立游戏详情页，不进本页 overlay。
  * 键盘弹起对齐 `1826:10061`：顶栏 [ChatRoomHeader] 留在顶部，列表与 Footer 整体抬到键盘上沿；
  * 背景仍铺满。点空白收键盘。不画 iOS 状态栏 / Home Indicator。
  */
@@ -76,6 +78,11 @@ internal fun ChatRoomScreen(
     onBack: () -> Unit,
     onOpenCast: () -> Unit = {},
     onOpenMap: () -> Unit = {},
+    onOpenItems: () -> Unit = {},
+    pendingItemMessage: String? = null,
+    onPendingItemConsumed: () -> Unit = {},
+    pendingMapGo: GameMapGoResult? = null,
+    onPendingMapConsumed: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ChatRoomViewModel = hiltViewModel(),
 ) {
@@ -91,6 +98,18 @@ internal fun ChatRoomScreen(
         } else {
             onBack()
         }
+    }
+
+    LaunchedEffect(pendingItemMessage) {
+        val text = pendingItemMessage ?: return@LaunchedEffect
+        viewModel.onIntent(ChatRoomIntent.SendItemMessage(text))
+        onPendingItemConsumed()
+    }
+
+    LaunchedEffect(pendingMapGo) {
+        val go = pendingMapGo ?: return@LaunchedEffect
+        viewModel.onIntent(ChatRoomIntent.SendMapMessage(go.message, go.backgroundKey))
+        onPendingMapConsumed()
     }
 
     LaunchedEffect(viewModel) {
@@ -120,6 +139,10 @@ internal fun ChatRoomScreen(
                 onOpenMap()
                 return@ChatRoomLayout
             }
+            if (intent is ChatRoomIntent.OpenItems) {
+                onOpenItems()
+                return@ChatRoomLayout
+            }
             if (intent is ChatRoomIntent.ContinueStory) {
                 followLatest = listState.isScrolledToEnd()
             }
@@ -143,7 +166,7 @@ internal fun ChatRoomLayout(
 
     ImeOverlayBox(modifier = modifier) {
         Image(
-            painter = painterResource(R.drawable.img_chat_bg),
+            painter = painterResource(chatBackgroundRes(state.backgroundKey)),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -301,6 +324,13 @@ private fun ChatRoomScrim(modifier: Modifier = Modifier) {
                 ),
         )
     }
+}
+
+/** 地点 [sceneKey] → 聊天室底图。Demo 用英雄图，和默认房间底区分开。 */
+@DrawableRes
+internal fun chatBackgroundRes(imageKey: String): Int = when (imageKey) {
+    "demo-scene" -> R.drawable.img_home_hero
+    else -> R.drawable.img_chat_bg
 }
 
 @Preview(widthDp = 390, heightDp = 844, showBackground = true, backgroundColor = 0xFF131126)

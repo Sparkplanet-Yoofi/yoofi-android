@@ -1,5 +1,6 @@
 package ai.yoofi.app.ui.chat
 
+import ai.yoofi.app.R
 import ai.yoofi.app.domain.chat.AdvanceChatStoryUseCase
 import ai.yoofi.app.domain.chat.ChatCastMember
 import ai.yoofi.app.domain.chat.ChatEvent
@@ -20,6 +21,42 @@ class ChatRoomViewModelTest {
         val viewModel = viewModel()
         viewModel.onIntent(ChatRoomIntent.OpenMap)
         assertEquals(ChatRoomOverlay.None, viewModel.uiState.value.overlay)
+    }
+
+    @Test
+    fun `OpenItems 不进 overlay`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.OpenItems)
+        assertEquals(ChatRoomOverlay.None, viewModel.uiState.value.overlay)
+    }
+
+    @Test
+    fun `地点场景钥匙解析成非默认聊天底`() {
+        assertEquals(R.drawable.img_home_hero, chatBackgroundRes("demo-scene"))
+        assertEquals(R.drawable.img_chat_bg, chatBackgroundRes(""))
+    }
+
+    @Test
+    fun `地图消息落玩家气泡并换底图`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.SendMapMessage("Go to location.", "demo-scene"))
+        val items = viewModel.uiState.value.items
+        val player = items[items.lastIndex - 1]
+        assertTrue(player is ChatItem.Player)
+        assertEquals("Go to location.", (player as ChatItem.Player).body)
+        assertEquals("demo-scene", viewModel.uiState.value.backgroundKey)
+        assertEquals("beat-0", items.last().id)
+    }
+
+    @Test
+    fun `道具消息直接落玩家气泡并推进剧情`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.SendItemMessage("Used Name."))
+        val items = viewModel.uiState.value.items
+        val player = items[items.lastIndex - 1]
+        assertTrue(player is ChatItem.Player)
+        assertEquals("Used Name.", (player as ChatItem.Player).body)
+        assertEquals("beat-0", items.last().id)
     }
 
     @Test
