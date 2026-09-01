@@ -67,6 +67,7 @@ private val JumpArrowCenterOffset = 7.dp
 
 /**
  * 多人聊天室，对齐 Figma `1826:9178`（Cast `1826:9211`、@ `1826:11556`、灵感 `1826:9937`）。
+ * Cast / Map 芯片分别跳独立游戏详情页，不进本页 overlay。
  * 键盘弹起对齐 `1826:10061`：顶栏 [ChatRoomHeader] 留在顶部，列表与 Footer 整体抬到键盘上沿；
  * 背景仍铺满。点空白收键盘。不画 iOS 状态栏 / Home Indicator。
  */
@@ -74,6 +75,7 @@ private val JumpArrowCenterOffset = 7.dp
 internal fun ChatRoomScreen(
     onBack: () -> Unit,
     onOpenCast: () -> Unit = {},
+    onOpenMap: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ChatRoomViewModel = hiltViewModel(),
 ) {
@@ -112,6 +114,10 @@ internal fun ChatRoomScreen(
         onIntent = { intent ->
             if (intent is ChatRoomIntent.OpenCast) {
                 onOpenCast()
+                return@ChatRoomLayout
+            }
+            if (intent is ChatRoomIntent.OpenMap) {
+                onOpenMap()
                 return@ChatRoomLayout
             }
             if (intent is ChatRoomIntent.ContinueStory) {

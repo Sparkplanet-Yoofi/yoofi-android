@@ -47,6 +47,7 @@ internal data class ChatRoomUiState(
 
 internal sealed interface ChatRoomIntent {
     data object OpenCast : ChatRoomIntent
+    data object OpenMap : ChatRoomIntent
     data object OpenMention : ChatRoomIntent
     data object OpenInspiration : ChatRoomIntent
     data object ContinueStory : ChatRoomIntent
@@ -95,6 +96,8 @@ internal class ChatRoomViewModel @Inject constructor(
                 _uiState.update { it.copy(overlay = ChatRoomOverlay.None) }
             }
             ChatRoomIntent.OpenCast -> toggle(ChatRoomOverlay.Cast)
+            // 由 Screen 拦截跳独立地图页，不进 overlay
+            ChatRoomIntent.OpenMap -> Unit
             ChatRoomIntent.OpenMention -> toggle(ChatRoomOverlay.Mention)
             ChatRoomIntent.OpenInspiration -> toggle(ChatRoomOverlay.Inspiration)
             ChatRoomIntent.ContinueStory -> continueStory()

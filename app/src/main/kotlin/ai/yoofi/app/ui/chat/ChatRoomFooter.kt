@@ -112,6 +112,65 @@ private fun isMentionTrigger(previous: String, next: String): Boolean {
 }
 
 @Composable
+private fun ChipRow(
+    onIntent: (ChatRoomIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        FooterChip(
+            labelRes = R.string.chat_cast,
+            iconRes = R.drawable.img_chat_icon_cast,
+            iconWidth = 20.dp,
+            iconHeight = 22.dp,
+            tint = YoofiChatChipCast,
+            showDot = true,
+            onClick = { onIntent(ChatRoomIntent.OpenCast) },
+        )
+        FooterChip(
+            labelRes = R.string.chat_map,
+            iconRes = R.drawable.img_chat_icon_map,
+            iconWidth = 23.dp,
+            iconHeight = 21.dp,
+            tint = YoofiChatChipMap,
+            showDot = true,
+            onClick = { onIntent(ChatRoomIntent.OpenMap) },
+        )
+        FooterChip(
+            labelRes = R.string.chat_items,
+            iconRes = R.drawable.img_chat_icon_items,
+            iconWidth = 20.dp,
+            iconHeight = 20.dp,
+            tint = YoofiChatChipItems,
+            showDot = true,
+            onClick = {},
+        )
+        FooterChip(
+            labelRes = R.string.chat_recap,
+            iconRes = R.drawable.img_chat_icon_recap,
+            iconWidth = 22.dp,
+            iconHeight = 22.dp,
+            tint = YoofiChatChipRecap,
+            showDot = false,
+            onClick = {},
+        )
+        Spacer(Modifier.weight(1f))
+        Image(
+            painter = painterResource(R.drawable.img_chat_icon_phone),
+            contentDescription = null,
+            modifier = Modifier
+                .size(width = 36.dp, height = 41.dp)
+                .rotate(9.37f)
+                .graphicsLayer { blendMode = BlendMode.Lighten },
+            contentScale = ContentScale.Fit,
+        )
+    }
+}
+
+@Composable
 internal fun ChatRoomFooter(
     state: ChatRoomUiState,
     onIntent: (ChatRoomIntent) -> Unit,
@@ -213,65 +272,6 @@ internal fun ChatRoomFooter(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ChipRow(
-    onIntent: (ChatRoomIntent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        FooterChip(
-            labelRes = R.string.chat_cast,
-            iconRes = R.drawable.img_chat_icon_cast,
-            iconWidth = 20.dp,
-            iconHeight = 22.dp,
-            tint = YoofiChatChipCast,
-            showDot = true,
-            onClick = { onIntent(ChatRoomIntent.OpenCast) },
-        )
-        FooterChip(
-            labelRes = R.string.chat_map,
-            iconRes = R.drawable.img_chat_icon_map,
-            iconWidth = 23.dp,
-            iconHeight = 21.dp,
-            tint = YoofiChatChipMap,
-            showDot = true,
-            onClick = {},
-        )
-        FooterChip(
-            labelRes = R.string.chat_items,
-            iconRes = R.drawable.img_chat_icon_items,
-            iconWidth = 20.dp,
-            iconHeight = 20.dp,
-            tint = YoofiChatChipItems,
-            showDot = true,
-            onClick = {},
-        )
-        FooterChip(
-            labelRes = R.string.chat_recap,
-            iconRes = R.drawable.img_chat_icon_recap,
-            iconWidth = 22.dp,
-            iconHeight = 22.dp,
-            tint = YoofiChatChipRecap,
-            showDot = false,
-            onClick = {},
-        )
-        Spacer(Modifier.weight(1f))
-        Image(
-            painter = painterResource(R.drawable.img_chat_icon_phone),
-            contentDescription = null,
-            modifier = Modifier
-                .size(width = 36.dp, height = 41.dp)
-                .rotate(9.37f)
-                .graphicsLayer { blendMode = BlendMode.Lighten },
-            contentScale = ContentScale.Fit,
-        )
     }
 }
 

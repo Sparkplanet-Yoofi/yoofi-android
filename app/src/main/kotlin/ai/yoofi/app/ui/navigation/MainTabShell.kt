@@ -4,6 +4,7 @@ import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.gamedetail.cast.GameCastScreen
+import ai.yoofi.app.ui.gamedetail.map.GameMapScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.auth.ProfileEditorEntry
 import ai.yoofi.app.ui.auth.ProfileSetupScreen
@@ -58,6 +59,7 @@ internal fun MainTabShell(
     var feedbackOpen by remember { mutableStateOf(false) }
     var previewProfileOpen by remember { mutableStateOf(false) }
     var gameCastOpen by remember { mutableStateOf(false) }
+    var gameMapOpen by remember { mutableStateOf(false) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -91,7 +93,8 @@ internal fun MainTabShell(
                 !blockedUsersOpen &&
                 !feedbackOpen &&
                 !previewProfileOpen &&
-                !gameCastOpen
+                !gameCastOpen &&
+                !gameMapOpen
             ) {
                 YoofiBottomBar(
                     selected = tab,
@@ -129,9 +132,11 @@ internal fun MainTabShell(
                 ChatRoomScreen(
                     onBack = {
                         gameCastOpen = false
+                        gameMapOpen = false
                         chatOpen = false
                     },
                     onOpenCast = { gameCastOpen = true },
+                    onOpenMap = { gameMapOpen = true },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -139,6 +144,13 @@ internal fun MainTabShell(
                 GameCastScreen(
                     onBack = { gameCastOpen = false },
                     onClose = { gameCastOpen = false },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (gameMapOpen) {
+                GameMapScreen(
+                    onBack = { gameMapOpen = false },
+                    onClose = { gameMapOpen = false },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

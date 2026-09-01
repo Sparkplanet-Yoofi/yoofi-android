@@ -4,7 +4,7 @@
 > **维护纪律**：每个需求收尾花 5 分钟更新踩坑与技术债。写得及时比写得全更重要。
 > 过期的禁区清单比没有清单更危险——发现失效条目请立即删除或更正。
 >
-> 最近更新：2026-08-31
+> 最近更新：2026-09-01
 
 ---
 
@@ -180,10 +180,14 @@
 
 12. **聊天室从 World Played 封面进全屏 overlay**：`MainTabShell` 打开 `ChatRoomScreen`
     并藏底栏，不要把聊天室嵌进 World 页。宽屏仍 `fillMaxWidth` + 左右 20，
-    不要把 Figma 350 锁死。Map / Items / Recap 尚无独立画板，只留芯片不造假页。
+    不要把 Figma 350 锁死。Items / Recap 尚无独立画板，只留芯片不造假页。
     聊天室 Cast 芯片跳独立 `ui.gamedetail.cast` + `GameCastViewModel`，对齐
     `2304:23753`，不要塞进 ChatRoomViewModel，也不要拆掉翻牌 overlay 代码。
     人物接口未定，四张金卡 + 两个空槽走 `GetGameCastCardsUseCase`。
+    聊天室 Map 芯片跳独立 `ui.gamedetail.map` + `GameMapViewModel`，对齐
+    `2453:27236`（列表 `2453:27362`、切换 Dialog `2304:24255`）。用户给的
+    `2252:18315` 是超大底图矩形，不是手机画板。底图可拖、Location 用 0..1
+    图幅坐标打点；地图列表走 `GetGameMapsUseCase`，接接口只改 UseCase。
 
 13. **选 @ / 灵感回填后再 `requestFocus`，光标会钉在开头**：
     `BasicTextField` 在 `onFocusChanged` 之后把选区打回 0，再经 `onValueChange`

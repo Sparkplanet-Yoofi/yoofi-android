@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma `2304:21203` Navigation / Flag，禁止手绘 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <path
+        android:pathData="M2.667,14V10.458M2.667,10.458C6.545,7.425 9.455,13.491 13.333,10.458V2.876C9.455,5.909 6.545,-0.157 2.667,2.876V10.458Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.333"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -16,6 +16,13 @@ import org.junit.Test
 class ChatRoomViewModelTest {
 
     @Test
+    fun `OpenMap 不进 overlay`() {
+        val viewModel = viewModel()
+        viewModel.onIntent(ChatRoomIntent.OpenMap)
+        assertEquals(ChatRoomOverlay.None, viewModel.uiState.value.overlay)
+    }
+
+    @Test
     fun `打开 Cast 再关闭回到无弹层`() {
         val viewModel = viewModel()
         viewModel.onIntent(ChatRoomIntent.OpenCast)
