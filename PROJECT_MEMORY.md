@@ -184,6 +184,10 @@
     聊天室 Cast 芯片跳独立 `ui.gamedetail.cast` + `GameCastViewModel`，对齐
     `2304:23753`，不要塞进 ChatRoomViewModel，也不要拆掉翻牌 overlay 代码。
     人物接口未定，四张金卡 + 两个空槽走 `GetGameCastCardsUseCase`。
+    点金卡进独立 `ui.gamedetail.character` + `GameCastCharacterViewModel`，对齐
+    `2409:27067`。空槽不跳。详情走 `GetGameCastCharacterUseCase`，接接口只改 UseCase。
+    关闭回人物页；Continue Game 关 Cast 回聊天室。稿里隐藏的 Stories / Memories /
+    Gallery 与右侧更多菜单不要画出来。
     聊天室 Map 芯片跳独立 `ui.gamedetail.map` + `GameMapViewModel`，对齐
     `2453:27236`（列表 `2453:27362`、切换 Dialog `2304:24255`）。用户给的
     `2252:18315` 是超大底图矩形，不是手机画板。底图可拖、Location 用 0..1

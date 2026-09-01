@@ -56,12 +56,14 @@ private val CardHeight = 240.dp
 
 /**
  * 游戏详情人物页，对齐 Figma `2304:23753`。
- * 聊天室 Cast 芯片跳这里；返回 / 关闭都回到聊天室，不改翻牌 overlay。
+ * 聊天室 Cast 芯片跳这里；金卡再进角色详情 `2409:27067`。
+ * 返回 / 关闭都回到聊天室，不改翻牌 overlay。
  */
 @Composable
 internal fun GameCastScreen(
     onBack: () -> Unit,
     onClose: () -> Unit,
+    onOpenCharacter: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: GameCastViewModel = hiltViewModel(),
 ) {
@@ -70,6 +72,7 @@ internal fun GameCastScreen(
         cards = state.cards,
         onBack = onBack,
         onClose = onClose,
+        onOpenCharacter = onOpenCharacter,
         modifier = modifier,
     )
 }
@@ -79,6 +82,7 @@ internal fun GameCastLayout(
     cards: List<GameCastCard>,
     onBack: () -> Unit,
     onClose: () -> Unit,
+    onOpenCharacter: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -107,7 +111,10 @@ internal fun GameCastLayout(
             contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
         ) {
             items(cards, key = { it.id }) { card ->
-                GameCastCardItem(card = card)
+                GameCastCardItem(
+                    card = card,
+                    onClick = { onOpenCharacter(card.id) },
+                )
             }
         }
     }
@@ -151,7 +158,10 @@ private fun GameCastTopBar(
 }
 
 @Composable
-private fun GameCastCardItem(card: GameCastCard) {
+private fun GameCastCardItem(
+    card: GameCastCard,
+    onClick: () -> Unit,
+) {
     val portraitKey = card.portraitKey
     val name = card.name
     val role = card.role
@@ -174,7 +184,8 @@ private fun GameCastCardItem(card: GameCastCard) {
             .clip(CardShape)
             .background(
                 Brush.linearGradient(listOf(CardGoldFrom, CardGoldTo)),
-            ),
+            )
+            .clickable(role = Role.Button, onClick = onClick),
     ) {
         Image(
             painter = painterResource(castPortraitRes(portraitKey)),

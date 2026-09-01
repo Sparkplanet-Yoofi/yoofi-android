@@ -4,6 +4,7 @@ import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
 import ai.yoofi.app.ui.gamedetail.cast.GameCastScreen
+import ai.yoofi.app.ui.gamedetail.character.GameCastCharacterScreen
 import ai.yoofi.app.ui.gamedetail.map.GameMapScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.auth.ProfileEditorEntry
@@ -60,6 +61,7 @@ internal fun MainTabShell(
     var previewProfileOpen by remember { mutableStateOf(false) }
     var gameCastOpen by remember { mutableStateOf(false) }
     var gameMapOpen by remember { mutableStateOf(false) }
+    var castCharacterId by remember { mutableStateOf<String?>(null) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -94,7 +96,8 @@ internal fun MainTabShell(
                 !feedbackOpen &&
                 !previewProfileOpen &&
                 !gameCastOpen &&
-                !gameMapOpen
+                !gameMapOpen &&
+                castCharacterId == null
             ) {
                 YoofiBottomBar(
                     selected = tab,
@@ -131,6 +134,7 @@ internal fun MainTabShell(
             if (chatOpen) {
                 ChatRoomScreen(
                     onBack = {
+                        castCharacterId = null
                         gameCastOpen = false
                         gameMapOpen = false
                         chatOpen = false
@@ -142,8 +146,26 @@ internal fun MainTabShell(
             }
             if (gameCastOpen) {
                 GameCastScreen(
-                    onBack = { gameCastOpen = false },
-                    onClose = { gameCastOpen = false },
+                    onBack = {
+                        castCharacterId = null
+                        gameCastOpen = false
+                    },
+                    onClose = {
+                        castCharacterId = null
+                        gameCastOpen = false
+                    },
+                    onOpenCharacter = { castCharacterId = it },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            castCharacterId?.let { characterId ->
+                GameCastCharacterScreen(
+                    characterId = characterId,
+                    onClose = { castCharacterId = null },
+                    onContinueGame = {
+                        castCharacterId = null
+                        gameCastOpen = false
+                    },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

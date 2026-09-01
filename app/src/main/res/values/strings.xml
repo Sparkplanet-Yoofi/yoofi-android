@@ -143,6 +143,10 @@
     <string name="detail_cast_see_all">See all</string>
     <string name="cast_role_me">Me</string>
     <string name="cast_role_player">Player Role</string>
+    <string name="character_tab_all">All</string>
+    <string name="character_tab_creations">My Creations</string>
+    <string name="character_tab_collections">Collections</string>
+    <string name="cd_character_favorite">Favorite</string>
     <string name="detail_interaction_area">Interaction Area</string>
     <string name="detail_comment_hint">Share your thoughts and join the discussion</string>
     <string name="detail_comment_author">Author</string>
