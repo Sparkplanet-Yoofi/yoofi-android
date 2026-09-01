@@ -19,6 +19,7 @@ import ai.yoofi.app.domain.block.UnblockUserUseCase
 import ai.yoofi.app.domain.feedback.SubmitFeedbackUseCase
 import ai.yoofi.app.domain.auth.UserSessionStore
 import ai.yoofi.app.domain.auth.VerifyEmailCodeUseCase
+import ai.yoofi.app.domain.gamedetail.GetGameCastCardsUseCase
 import ai.yoofi.app.domain.profile.GetPreviewPlayedWorksUseCase
 import ai.yoofi.app.domain.profile.MarkProfileCompletedUseCase
 import ai.yoofi.app.domain.profile.ResolveMineProfilePresenceUseCase
@@ -113,4 +114,7 @@ object AuthProvideModule {
     @Provides
     fun provideGetPreviewPlayedWorksUseCase(): GetPreviewPlayedWorksUseCase =
         GetPreviewPlayedWorksUseCase()
+
+    @Provides
+    fun provideGetGameCastCardsUseCase(): GetGameCastCardsUseCase = GetGameCastCardsUseCase()
 }

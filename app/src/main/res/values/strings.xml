@@ -137,6 +137,8 @@
     <string name="detail_following">Following</string>
     <string name="detail_cast">Cast</string>
     <string name="detail_cast_see_all">See all</string>
+    <string name="cast_role_me">Me</string>
+    <string name="cast_role_player">Player Role</string>
     <string name="detail_interaction_area">Interaction Area</string>
     <string name="detail_comment_hint">Share your thoughts and join the discussion</string>
     <string name="detail_comment_author">Author</string>

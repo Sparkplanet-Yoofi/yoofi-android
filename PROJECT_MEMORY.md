@@ -181,6 +181,9 @@
 12. **聊天室从 World Played 封面进全屏 overlay**：`MainTabShell` 打开 `ChatRoomScreen`
     并藏底栏，不要把聊天室嵌进 World 页。宽屏仍 `fillMaxWidth` + 左右 20，
     不要把 Figma 350 锁死。Map / Items / Recap 尚无独立画板，只留芯片不造假页。
+    聊天室 Cast 芯片跳独立 `ui.gamedetail.cast` + `GameCastViewModel`，对齐
+    `2304:23753`，不要塞进 ChatRoomViewModel，也不要拆掉翻牌 overlay 代码。
+    人物接口未定，四张金卡 + 两个空槽走 `GetGameCastCardsUseCase`。
 
 13. **选 @ / 灵感回填后再 `requestFocus`，光标会钉在开头**：
     `BasicTextField` 在 `onFocusChanged` 之后把选区打回 0，再经 `onValueChange`

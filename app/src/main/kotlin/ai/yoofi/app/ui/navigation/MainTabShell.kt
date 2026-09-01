@@ -3,6 +3,7 @@ package ai.yoofi.app.ui.navigation
 import ai.yoofi.app.ui.chat.ChatRoomScreen
 import ai.yoofi.app.ui.create.CreateScreen
 import ai.yoofi.app.ui.gamedetail.GameDetailScreen
+import ai.yoofi.app.ui.gamedetail.cast.GameCastScreen
 import ai.yoofi.app.ui.home.HomeExploreScreen
 import ai.yoofi.app.ui.auth.ProfileEditorEntry
 import ai.yoofi.app.ui.auth.ProfileSetupScreen
@@ -56,6 +57,7 @@ internal fun MainTabShell(
     var blockedUsersOpen by remember { mutableStateOf(false) }
     var feedbackOpen by remember { mutableStateOf(false) }
     var previewProfileOpen by remember { mutableStateOf(false) }
+    var gameCastOpen by remember { mutableStateOf(false) }
     val backdropLayer = rememberContentBackdropLayer()
     ContentBackdropProvider(backdropLayer) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -88,7 +90,8 @@ internal fun MainTabShell(
                 !linkedAccountsOpen &&
                 !blockedUsersOpen &&
                 !feedbackOpen &&
-                !previewProfileOpen
+                !previewProfileOpen &&
+                !gameCastOpen
             ) {
                 YoofiBottomBar(
                     selected = tab,
@@ -124,7 +127,18 @@ internal fun MainTabShell(
             }
             if (chatOpen) {
                 ChatRoomScreen(
-                    onBack = { chatOpen = false },
+                    onBack = {
+                        gameCastOpen = false
+                        chatOpen = false
+                    },
+                    onOpenCast = { gameCastOpen = true },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            if (gameCastOpen) {
+                GameCastScreen(
+                    onBack = { gameCastOpen = false },
+                    onClose = { gameCastOpen = false },
                     modifier = Modifier.fillMaxSize(),
                 )
             }

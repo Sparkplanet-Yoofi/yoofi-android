@@ -73,6 +73,7 @@ private val JumpArrowCenterOffset = 7.dp
 @Composable
 internal fun ChatRoomScreen(
     onBack: () -> Unit,
+    onOpenCast: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ChatRoomViewModel = hiltViewModel(),
 ) {
@@ -109,6 +110,10 @@ internal fun ChatRoomScreen(
         state = state,
         listState = listState,
         onIntent = { intent ->
+            if (intent is ChatRoomIntent.OpenCast) {
+                onOpenCast()
+                return@ChatRoomLayout
+            }
             if (intent is ChatRoomIntent.ContinueStory) {
                 followLatest = listState.isScrolledToEnd()
             }
