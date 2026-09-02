@@ -1,6 +1,7 @@
 package ai.yoofi.app.ui.gamedetail.item
 
 import ai.yoofi.app.R
+import ai.yoofi.app.core.item.preview.ItemPreviewContent
 import ai.yoofi.app.core.item.preview.ItemPreviewHost
 import ai.yoofi.app.core.item.preview.ItemPreviewHostRenderer
 import ai.yoofi.app.data.item.preview.itemArtRes
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +45,7 @@ private val SheetFill = Color(0xCC23212B)
 private val SheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 private val ThumbShape = RoundedCornerShape(8.dp)
 private val Badge3dFill = Color(0x99484848)
+private val PreviewCloseFill = Color(0x4DFFFFFF)
 private val GeneralFill = Color(0x4D5C95FF)
 private val GeneralText = Color(0xFF8FC0FF)
 private val PillShape = RoundedCornerShape(100.dp)
@@ -213,12 +216,13 @@ private fun GameItemUsageBlock(
 }
 
 /**
- * 道具大图预览：80% 黑遮罩 + 白色蒙层宿主，关闭钮对齐 `2304:23749`。
- * 白底 `2464:27742` 留给日后 3D 渲染。
+ * 道具大图预览：80% 黑遮罩 + 卡面宿主，关闭钮对齐 `2304:23749`。
+ * 白底 `2464:27742` 已交给渲染器自己画——3D 模式下白底要跟着卡面一起转，
+ * 留在这里的话卡面转了白底不转会露馅。
  */
 @Composable
 internal fun GameItemPreviewOverlay(
-    imageKey: String,
+    content: ItemPreviewContent,
     renderer: ItemPreviewHostRenderer,
     onClose: () -> Unit,
 ) {
@@ -230,23 +234,31 @@ internal fun GameItemPreviewOverlay(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(width = 300.dp, height = 450.dp)
-                .background(Color.White),
+                .size(width = 300.dp, height = 450.dp),
         ) {
             ItemPreviewHost(
-                imageKey = imageKey,
+                content = content,
                 renderer = renderer,
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        Image(
-            painter = painterResource(R.drawable.ic_item_preview_close),
-            contentDescription = stringResource(R.string.cd_item_preview_close),
+        // 关闭钮：半透明圆底 + Close_MD 白叉。
+        // 原先直接铺 ic_item_preview_close.png，那张图导错了图层（紫底下箭头，是「收起」不是「关闭」）。
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 148.dp)
                 .size(36.dp)
+                .clip(CircleShape)
+                .background(PreviewCloseFill)
                 .clickable(role = Role.Button, onClick = onClose),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_cast_close),
+                contentDescription = stringResource(R.string.cd_item_preview_close),
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }

@@ -82,10 +82,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Filament（SceneView 传递引入）为四个 ABI 各带一份 .so，全打进去要多 10MB。
+        // 上架只保留两个 ARM ABI：x86/x86_64 在真实用户设备上占比可忽略。
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     buildTypes {
         debug {
+            // 开发机若用 x86_64 模拟器，缺这一档会在加载 libfilament-jni.so 时崩，
+            // 只补给 debug，不影响上架包体
+            ndk {
+                abiFilters += "x86_64"
+            }
             buildConfigField(
                 "String",
                 "BUILD_STAGE",
@@ -112,6 +123,25 @@ android {
             buildConfigField("String", "API_ENV_OVERRIDE", "\"${apiEnvOverride()}\"")
         }
     }
+    // SceneView 的 AAR 自带约 6MB assets，但按我们的用法大部分是死重量：
+    //   neutral_skybox.ktx —— 天空盒由 createEnvironment 用纯色程序化生成（透明时 alpha=0），
+    //                         这个文件没有任何代码路径会去读它
+    //   view_* / video_* / image_texture —— 分别服务 ViewNode / VideoNode / ImageNode，
+    //                         道具预览只用 ModelNode（材质随 glTF 走），永远不会触发它们的 lazy 加载
+    // 保留 neutral_ibl.ktx：createEnvironment 必读，PBR 的环境光全靠它。
+    // 新增其他 node 类型前先回来核对这份清单，否则会在运行时报找不到 asset。
+    androidResources {
+        ignoreAssetsPatterns += listOf(
+            "neutral_skybox.ktx",
+            "image_texture.filamat",
+            "video_texture.filamat",
+            "video_texture_chroma_key.filamat",
+            "view_renderable.filamat",
+            "view_texture_lit.filamat",
+            "view_texture_unlit.filamat",
+        )
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -149,6 +179,7 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.android.image.cropper)
+    implementation(libs.sceneview)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)

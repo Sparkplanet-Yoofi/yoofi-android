@@ -36,6 +36,19 @@ kotlinxSerializationJson = "1.9.0"
 # （JVM 字节码无此机制），但 yoofi-shared 的 iOS 目标会直接编译失败。
 # 两仓库版本必须严格一致，否则 app 依赖 shared 后会解析到高版本，与 klib 编译期版本错配。
 ktor = "3.3.3"
+# 道具 3D 实时渲染：SceneView（Google Filament 的 Compose 封装）。
+#
+# ⚠️ 锁死在 3.6.0，升级前先读 .jack/Yoofi3D.md。
+# 3.6.2 起改用 Kotlin 2.3.20 编译，4.x 全系是 2.3.20 / 2.4.10，而本工程的编译器是
+# AGP 9.0.1 内置的 Kotlin 2.2.10，读不了更高版本编译出的 metadata（报
+# "compiled with an incompatible version of Kotlin"）。3.6.0 是最后一个用
+# Kotlin 2.1.21 编译、且 compose-bom（2025.06.00）不高于本工程的版本，minSdk 恰好也是 24。
+# 想上 4.x 必须先把 Kotlin 抬到 2.4 —— 那要连 AGP、compose-bom、yoofi-shared 一起动。
+#
+# 传递引入 filament-android 1.70.0，含 .so（arm64 2.7MB / armv7 2.2MB），
+# 因此 defaultConfig 必须配 abiFilters，否则四个 ABI 全打进包。
+# 仅允许 data.item.preview 适配层 import io.github.sceneview；业务禁止直连。
+sceneview = "3.6.0"
 # 架构守卫（兼容性验证用）
 dependencyAnalysis = "3.18.0"
 moduleGraphAssert = "2.9.1"
@@ -78,6 +91,8 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
 # 仅允许 data.image.crop.canhub 适配层 import；业务禁止直连
 android-image-cropper = { group = "com.vanniktech", name = "android-image-cropper", version.ref = "androidImageCropper" }
+# 仅允许 data.item.preview 适配层 import；业务禁止直连
+sceneview = { group = "io.github.sceneview", name = "sceneview", version.ref = "sceneview" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]

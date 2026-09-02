@@ -1,6 +1,7 @@
 package ai.yoofi.app.ui.gamedetail.item
 
 import ai.yoofi.app.R
+import ai.yoofi.app.core.item.preview.ItemPreviewContent
 import ai.yoofi.app.core.item.preview.ItemPreviewHostRenderer
 import ai.yoofi.app.data.item.preview.itemArtRes
 import ai.yoofi.app.di.itemPreviewHostRenderer
@@ -163,7 +164,11 @@ internal fun GameItemLayout(
         }
         if (state.previewOpen && selected != null) {
             GameItemPreviewOverlay(
-                imageKey = selected.imageKey,
+                content = ItemPreviewContent(
+                    imageKey = selected.imageKey,
+                    name = selected.name,
+                    description = selected.cardDescription,
+                ),
                 renderer = previewRenderer,
                 onClose = { onIntent(GameItemIntent.ClosePreview) },
             )
@@ -316,7 +321,7 @@ private fun GameItemListPreview() {
     val renderer = remember {
         object : ItemPreviewHostRenderer {
             @Composable
-            override fun Render(imageKey: String, modifier: Modifier) = Unit
+            override fun Render(content: ItemPreviewContent, modifier: Modifier) = Unit
         }
     }
     YoofiAndroidTheme(darkTheme = true, dynamicColor = false) {

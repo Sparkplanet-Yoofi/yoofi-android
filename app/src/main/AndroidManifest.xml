@@ -7,6 +7,15 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <!--
+      SceneView 的 AAR 把 OpenGL ES 3.0 声明为 required=true，合并进来会让 Play
+      直接过滤掉不支持的设备。道具 3D 预览只是弹窗里的增强，不值得为它砍掉整个 app 的
+      设备覆盖，因此改判为可选，由 Item3dCapability 在运行时探测并降级到静态卡面。
+    -->
+    <uses-feature
+        android:glEsVersion="0x00030000"
+        android:required="false"
+        tools:replace="android:required" />
 
     <queries>
         <intent>
